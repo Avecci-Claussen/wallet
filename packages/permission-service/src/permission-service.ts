@@ -41,6 +41,14 @@ export class PermissionService {
         this.storageKey = config.storageKey
       }
 
+      if (config.autoSync !== undefined) {
+        this.autoSync = config.autoSync
+      }
+
+      if (config.internalRequestOrigin) {
+        this.internalRequestOrigin = config.internalRequestOrigin
+      }
+
       if (!this.storage) {
         throw new Error('PermissionService: Storage adapter is required')
       }

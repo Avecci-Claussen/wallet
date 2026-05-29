@@ -69,6 +69,45 @@ describe('PermissionService', () => {
       expect(site).toBeDefined()
       expect(site?.name).toBe('Example')
     })
+
+    it('should respect autoSync config', async () => {
+      const storage = createMockStorage()
+      const newService = new PermissionService()
+      await newService.init({
+        storage: storage as any,
+        autoSync: true,
+      })
+
+      await newService.addConnectedSite(
+        'https://autosync.com',
+        'Auto Sync',
+        'icon.png',
+        ChainType.BITCOIN_MAINNET
+      )
+
+      expect(storage.set).toHaveBeenCalledWith(
+        'permission',
+        expect.objectContaining({
+          dumpCache: expect.arrayContaining([
+            expect.objectContaining({
+              k: 'https://autosync.com',
+            }),
+          ]),
+        })
+      )
+    })
+
+    it('should respect internalRequestOrigin config', async () => {
+      const newService = new PermissionService()
+      await newService.init({
+        storage: createMockStorage() as any,
+        internalRequestOrigin: 'app://internal',
+      })
+
+      expect(newService.isInternalOrigin('app://internal')).toBe(true)
+      expect(newService.hasPermission('app://internal')).toBe(true)
+      expect(newService.isInternalOrigin('https://unisat.io')).toBe(false)
+    })
   })
 
   describe('addConnectedSite', () => {
