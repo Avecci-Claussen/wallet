@@ -187,9 +187,9 @@ export function useFetchBalanceCallback() {
   const dispatch = useAppDispatch()
   const wallet = useWallet()
   const currentAccount = useCurrentAccount()
-  const balance = useAccountBalance()
+  const { address } = currentAccount
   return useCallback(async () => {
-    if (!currentAccount.address) return
+    if (!address) return
     // const cachedBalance = await wallet.getAddressCacheBalance(currentAccount.address);
     // const _accountBalance = await wallet.getAddressBalance(currentAccount.address);
     // dispatch(
@@ -207,19 +207,18 @@ export function useFetchBalanceCallback() {
     //   dispatch(accountActions.expireHistory());
     // }
 
-    const summary = await wallet.getAddressSummary(currentAccount.address)
-    summary.address = currentAccount.address
-    dispatch(accountActions['setAddressSummary']!(summary))
+    const summary = await wallet.getAddressSummary(address)
+    dispatch(accountActions['setAddressSummary']!({ ...summary, address }))
 
-    const balanceV2 = await wallet.getAddressBalanceV2(currentAccount.address)
+    const balanceV2 = await wallet.getAddressBalanceV2(address)
     dispatch(
       accountActions['setBalanceV2']!({
-        address: currentAccount.address,
+        address,
         balance: balanceV2,
         chainType: balanceV2.chainType,
       })
     )
-  }, [dispatch, wallet, currentAccount, balance])
+  }, [dispatch, wallet, address])
 }
 
 export function useReloadAccounts() {
