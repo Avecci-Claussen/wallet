@@ -1,5 +1,11 @@
 # @unisat/wallet-state
 
+## 1.2.3
+
+### Patch Changes
+
+- Stabilize account balance refreshes by using the current account address as the hook dependency.
+
 ## 1.2.1
 
 ### Minor Changes

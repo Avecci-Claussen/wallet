@@ -1,5 +1,13 @@
 # @unisat/wallet-background
 
+## 3.0.2
+
+### Patch Changes
+
+- Release with the latest permission service config initialization fixes.
+- Updated dependencies
+  - @unisat/permission-service@1.1.2
+
 ## 3.0.0
 
 ### Minor Changes

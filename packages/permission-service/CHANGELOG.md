@@ -1,5 +1,11 @@
 # @unisat/permission-service
 
+## 1.1.2
+
+### Patch Changes
+
+- Respect `autoSync` and `internalRequestOrigin` options when initializing `PermissionService`.
+
 ## 1.1.1
 
 ### Patch Changes
