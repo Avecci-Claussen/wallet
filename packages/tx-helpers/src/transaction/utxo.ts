@@ -53,6 +53,29 @@ function getAddedVirtualSize(addressType: AddressType) {
   throw new WalletError(ErrorCodes.UNKNOWN)
 }
 
+function getOutputVirtualSize(addressType: AddressType) {
+  if (addressType === AddressType.P2WPKH || addressType === AddressType.M44_P2WPKH) {
+    return 31
+  } else if (addressType === AddressType.P2TR || addressType === AddressType.M44_P2TR) {
+    return 43
+  } else if (addressType === AddressType.P2PKH) {
+    return 34
+  } else if (addressType === AddressType.P2SH_P2WPKH) {
+    return 32
+  }
+  throw new WalletError(ErrorCodes.UNKNOWN)
+}
+
+function hasWitness(addressType: AddressType) {
+  return (
+    addressType === AddressType.P2WPKH ||
+    addressType === AddressType.M44_P2WPKH ||
+    addressType === AddressType.P2TR ||
+    addressType === AddressType.M44_P2TR ||
+    addressType === AddressType.P2SH_P2WPKH
+  )
+}
+
 export function getUtxoDust(addressType: AddressType) {
   if (addressType === AddressType.P2WPKH || addressType === AddressType.M44_P2WPKH) {
     return 294
@@ -77,6 +100,8 @@ export const utxoHelper = {
   hasAnyAssets,
   selectBtcUtxos,
   getAddedVirtualSize,
+  getOutputVirtualSize,
+  hasWitness,
   getUtxoDust,
   getAddressUtxoDust,
 }

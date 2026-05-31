@@ -1,7 +1,7 @@
 import { ErrorCodes, UnspentOutput } from '@unisat/wallet-shared'
 import { AddressType, NetworkType } from '@unisat/wallet-types'
-import { beforeEach, describe, expect, it } from 'vitest'
-import { LocalWallet, sendBTC } from '../src'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { LocalWallet, sendAllBTC, sendBTC, Transaction } from '../src'
 import { dummySendAllBTC, dummySendBTC, expectFeeRate, genDummyUtxo, genDummyUtxos } from './utils'
 
 describe('sendBTC', () => {
@@ -46,6 +46,25 @@ describe('sendBTC', () => {
         expect(ret.outputCount).eq(1)
         expectFeeRate(addressType, ret.feeRate, 1)
         expect(ret.psbt.txOutputs[0].address).eq(toWallet.address)
+      })
+
+      it('estimates send-all fee without signing a dummy PSBT', async function () {
+        const calNetworkFeeSpy = vi.spyOn(Transaction.prototype, 'calNetworkFee')
+        const ret = await sendAllBTC({
+          btcUtxos: genDummyUtxos(fromWallet, [100000000, 100000000]),
+          toAddress: toWallet.address,
+          networkType: fromWallet.networkType,
+          feeRate: 1,
+        })
+
+        expect(calNetworkFeeSpy).not.toHaveBeenCalled()
+
+        await fromWallet.signPsbt(ret.psbt, { autoFinalized: true, toSignInputs: ret.toSignInputs })
+        const tx = ret.psbt.extractTransaction(true)
+        expect(ret.psbt.getFee()).gte(tx.virtualSize())
+        expect(ret.psbt.getFee() - tx.virtualSize()).lte(4)
+
+        calNetworkFeeSpy.mockRestore()
       })
 
       it('sets RBF sequence by default and preserves final sequence when disabled', async function () {
@@ -238,6 +257,33 @@ describe('sendBTC', () => {
         expectFeeRate(addressType, ret1.feeRate, 1)
         expect(data1).eq('6a0952554e455f54455354090083ed9fceff016401')
       })
+    })
+  })
+
+  describe('sendAllBTC performance', function () {
+    it('builds a 500-input send-all PSBT within 3 seconds', async function () {
+      const fromWallet = LocalWallet.fromRandom(AddressType.P2WPKH, NetworkType.MAINNET)
+      const toWallet = LocalWallet.fromRandom(AddressType.P2WPKH, NetworkType.MAINNET)
+      const btcUtxos = genDummyUtxos(fromWallet, Array(500).fill(100000))
+
+      const start = performance.now()
+      const ret = await sendAllBTC({
+        btcUtxos,
+        toAddress: toWallet.address,
+        networkType: fromWallet.networkType,
+        feeRate: 1,
+      })
+      const duration = performance.now() - start
+
+      expect(ret.psbt.txInputs.length).eq(500)
+      expect(ret.psbt.txOutputs.length).eq(1)
+      expect(duration).lt(3000)
+
+      await fromWallet.signPsbt(ret.psbt, { autoFinalized: true, toSignInputs: ret.toSignInputs })
+      const tx = ret.psbt.extractTransaction(true)
+      const actualFeeRate = ret.psbt.getFee() / tx.virtualSize()
+      expect(actualFeeRate).gte(1)
+      expect(actualFeeRate).lt(1.01)
     })
   })
 

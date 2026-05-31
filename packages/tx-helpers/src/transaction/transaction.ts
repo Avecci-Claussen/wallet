@@ -6,6 +6,7 @@ import { utxoHelper } from './utxo'
 import {
   addressToScriptPk,
   bitcoin,
+  decodeAddress,
   toPsbtNetwork,
   toXOnly,
   UTXO_DUST,
@@ -192,6 +193,18 @@ export class Transaction {
     const txSize = psbt.extractTransaction(true).virtualSize()
     const fee = Math.ceil(txSize * this.feeRate)
     return fee
+  }
+
+  calSendAllNetworkFee(toAddress: string) {
+    const outputAddressType = decodeAddress(toAddress).addressType
+    const hasWitnessInput = this.inputs.some(v => utxoHelper.hasWitness(v.utxo.addressType))
+    const inputSize = this.inputs.reduce(
+      (size, input) => size + utxoHelper.getAddedVirtualSize(input.utxo.addressType),
+      0
+    )
+    const outputSize = utxoHelper.getOutputVirtualSize(outputAddressType)
+    const txOverhead = hasWitnessInput ? 11 : 10
+    return Math.ceil((txOverhead + inputSize + outputSize) * this.feeRate)
   }
 
   addOutput(address: string, value: number) {

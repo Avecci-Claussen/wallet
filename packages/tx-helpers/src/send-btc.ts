@@ -87,7 +87,7 @@ export async function sendAllBTC({
     toSignInputs.push({ index, publicKey: v.pubkey })
   })
 
-  const fee = await tx.calNetworkFee()
+  const fee = tx.calSendAllNetworkFee(toAddress)
   const unspent = tx.getTotalInput() - fee
   if (unspent < UTXO_DUST) {
     throw new WalletError(ErrorCodes.INSUFFICIENT_BTC_UTXO)

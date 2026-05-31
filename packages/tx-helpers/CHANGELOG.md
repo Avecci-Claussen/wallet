@@ -5,6 +5,7 @@
 ### Patch Changes
 
 - Fix RBF input sequence handling when building PSBT inputs.
+- Optimize `sendAllBTC` fee calculation to avoid signing a dummy PSBT.
 
 ## 1.2.0
 
