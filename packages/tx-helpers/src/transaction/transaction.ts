@@ -17,6 +17,7 @@ interface TxInput {
     hash: string
     index: number
     witnessUtxo?: { value: number; script: Buffer }
+    sequence?: number
     tapInternalKey?: Buffer
     nonWitnessUtxo?: Buffer
   }
@@ -255,10 +256,8 @@ export class Transaction {
           psbt.__CACHE.__UNSAFE_SIGN_NONSEGWIT = true
         }
       }
-      psbt.data.addInput(v.data)
-      if (this.enableRBF) {
-        psbt.setInputSequence(index, 0xfffffffd)
-      }
+      const inputData = this.enableRBF ? { ...v.data, sequence: 0xfffffffd } : v.data
+      psbt.data.addInput(inputData)
     })
     this.outputs.forEach(v => {
       if (v.address) {

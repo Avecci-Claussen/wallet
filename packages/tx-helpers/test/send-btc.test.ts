@@ -1,7 +1,7 @@
 import { ErrorCodes, UnspentOutput } from '@unisat/wallet-shared'
 import { AddressType, NetworkType } from '@unisat/wallet-types'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { LocalWallet } from '../src'
+import { LocalWallet, sendBTC } from '../src'
 import { dummySendAllBTC, dummySendBTC, expectFeeRate, genDummyUtxo, genDummyUtxos } from './utils'
 
 describe('sendBTC', () => {
@@ -46,6 +46,27 @@ describe('sendBTC', () => {
         expect(ret.outputCount).eq(1)
         expectFeeRate(addressType, ret.feeRate, 1)
         expect(ret.psbt.txOutputs[0].address).eq(toWallet.address)
+      })
+
+      it('sets RBF sequence by default and preserves final sequence when disabled', async function () {
+        const rbfRet = await sendBTC({
+          btcUtxos: [genDummyUtxo(fromWallet, 100000000)],
+          tos: [{ address: toWallet.address, satoshis: 1000 }],
+          networkType: fromWallet.networkType,
+          changeAddress: fromWallet.address,
+          feeRate: 1,
+        })
+        expect(rbfRet.psbt.txInputs[0].sequence).eq(0xfffffffd)
+
+        const nonRbfRet = await sendBTC({
+          btcUtxos: [genDummyUtxo(fromWallet, 100000000)],
+          tos: [{ address: toWallet.address, satoshis: 1000 }],
+          networkType: fromWallet.networkType,
+          changeAddress: fromWallet.address,
+          feeRate: 1,
+          enableRBF: false,
+        })
+        expect(nonRbfRet.psbt.txInputs[0].sequence).eq(0xffffffff)
       })
     })
 

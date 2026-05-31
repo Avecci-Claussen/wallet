@@ -1,5 +1,11 @@
 # @unisat/tx-helpers
 
+## 1.2.1
+
+### Patch Changes
+
+- Fix RBF input sequence handling when building PSBT inputs.
+
 ## 1.2.0
 
 ### Minor Changes
