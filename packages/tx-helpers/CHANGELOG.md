@@ -1,5 +1,11 @@
 # @unisat/tx-helpers
 
+## 1.2.2
+
+### Patch Changes
+
+- Optimize `sendRunes` fee calculation for transactions with many rune inputs.
+
 ## 1.2.1
 
 ### Patch Changes

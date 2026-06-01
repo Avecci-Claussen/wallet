@@ -203,8 +203,36 @@ export class Transaction {
       0
     )
     const outputSize = utxoHelper.getOutputVirtualSize(outputAddressType)
-    const txOverhead = hasWitnessInput ? 11 : 10
+    const txOverhead =
+      8 +
+      utxoHelper.getVarIntSize(this.inputs.length) +
+      utxoHelper.getVarIntSize(1) +
+      (hasWitnessInput ? 0.5 : 0)
     return Math.ceil((txOverhead + inputSize + outputSize) * this.feeRate)
+  }
+
+  calNetworkFeeByEstimate() {
+    const hasWitnessInput = this.inputs.some(v => utxoHelper.hasWitness(v.utxo.addressType))
+    const inputSize = this.inputs.reduce(
+      (size, input) => size + utxoHelper.getAddedVirtualSize(input.utxo.addressType),
+      0
+    )
+    const outputSize = this.outputs.reduce((size, output) => {
+      if (output.address) {
+        return size + utxoHelper.getOutputVirtualSize(decodeAddress(output.address).addressType)
+      } else if (output.script) {
+        return size + utxoHelper.getScriptOutputVirtualSize(output.script)
+      }
+      return size
+    }, 0)
+    const txOverhead =
+      8 +
+      utxoHelper.getVarIntSize(this.inputs.length) +
+      utxoHelper.getVarIntSize(this.outputs.length) +
+      (hasWitnessInput ? 0.5 : 0)
+    return Math.ceil(
+      (txOverhead + inputSize + outputSize) * this.feeRate
+    )
   }
 
   addOutput(address: string, value: number) {
@@ -366,7 +394,7 @@ export class Transaction {
       this.addInput(dummyBtcUtxo)
       this.addChangeOutput(0)
 
-      const networkFee = await this.calNetworkFee()
+      const networkFee = forceAsFee ? this.calNetworkFeeByEstimate() : await this.calNetworkFee()
       const dummyBtcUtxoSize = utxoHelper.getAddedVirtualSize(dummyBtcUtxo.addressType)
       this._cacheNetworkFee = networkFee - dummyBtcUtxoSize * this.feeRate
 

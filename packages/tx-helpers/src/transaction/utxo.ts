@@ -66,6 +66,21 @@ function getOutputVirtualSize(addressType: AddressType) {
   throw new WalletError(ErrorCodes.UNKNOWN)
 }
 
+function getScriptOutputVirtualSize(script: Buffer) {
+  return 8 + getVarIntSize(script.length) + script.length
+}
+
+function getVarIntSize(value: number) {
+  if (value < 0xfd) {
+    return 1
+  } else if (value <= 0xffff) {
+    return 3
+  } else if (value <= 0xffffffff) {
+    return 5
+  }
+  return 9
+}
+
 function hasWitness(addressType: AddressType) {
   return (
     addressType === AddressType.P2WPKH ||
@@ -101,6 +116,8 @@ export const utxoHelper = {
   selectBtcUtxos,
   getAddedVirtualSize,
   getOutputVirtualSize,
+  getScriptOutputVirtualSize,
+  getVarIntSize,
   hasWitness,
   getUtxoDust,
   getAddressUtxoDust,
