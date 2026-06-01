@@ -1,6 +1,6 @@
 # @unisat/tx-helpers
 
-## 1.2.2
+## 1.2.3
 
 ### Patch Changes
 
