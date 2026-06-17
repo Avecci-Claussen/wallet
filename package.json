@@ -13,9 +13,7 @@
     "clean": "pnpm -r clean",
     "typecheck": "pnpm -r typecheck",
     "dev": "pnpm -r dev",
-    "affected:packages": "node scripts/affected-packages.js",
-    "mobile:doctor": "./apps/unisat-wallet-mobile/scripts/doctor.sh",
-    "mobile:bootstrap": "./scripts/bootstrap-mobile.sh"
+    "affected:packages": "node scripts/affected-packages.js"
   },
   "keywords": [
     "bitcoin",
@@ -53,9 +51,6 @@
     "pnpm": ">=8 <9"
   },
   "packageManager": "pnpm@8.6.0",
-  "dependencies": {
-    "@craftzdog/react-native-buffer": "^6.0.5"
-  },
   "pnpm": {
     "overrides": {
       "react-redux": "^8.0.5"
@@ -63,12 +58,7 @@
     "patchedDependencies": {
       "bitcore-lib@10.0.0": "patches/bitcore-lib@10.0.0.patch",
       "tiny-secp256k1@2.2.3": "patches/tiny-secp256k1@2.2.3.patch",
-      "metro-resolver@0.80.12": "patches/metro-resolver@0.80.12.patch",
-      "bitcoinjs-lib@6.1.6": "patches/bitcoinjs-lib@6.1.6.patch",
-      "react-native-svg-transformer@1.5.0": "patches/react-native-svg-transformer@1.5.0.patch",
-      "@dreson4/react-native-quick-bip39@0.0.6": "patches/@dreson4__react-native-quick-bip39@0.0.6.patch",
-      "asyncstorage-down@4.2.0": "patches/asyncstorage-down@4.2.0.patch",
-      "expo-modules-core@1.12.26": "patches/expo-modules-core@1.12.26.patch"
+      "bitcoinjs-lib@6.1.6": "patches/bitcoinjs-lib@6.1.6.patch"
     }
   }
 }
