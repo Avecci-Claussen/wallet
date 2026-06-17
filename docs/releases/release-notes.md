@@ -1,5 +1,32 @@
 # UniSat Wallet Release Notes
 
+## v1.7.17
+
+### New Features
+
+- Redesigned the wallet action shortcuts for a cleaner and more consistent home screen experience.
+- Redesigned the fee rate selector to improve readability and selection clarity.
+- Standardized token balance card layouts across BRC-20, Runes, CAT20, and Alkanes assets.
+- Added a shared transfer amount card across BTC, BRC-20, Runes, CAT20, Alkanes, and Babylon send flows.
+
+### Improvements
+
+- Updated asset filter tabs with a pill-style design and more consistent spacing.
+- Improved recipient address input layout alignment.
+- Added truncation and tooltips for long asset names to prevent layout overflow.
+- Kept BRC-20 self-issuance tags aligned beside token names.
+- Improved token balance price rendering and asset card spacing.
+- Respected the configured wallet API endpoint during wallet initialization and restore flows.
+- Removed legacy mobile workspace dependencies and related patches from the extension workspace.
+
+### Bug Fixes
+
+- Added fallback handling for invalid chain types.
+- Stabilized account balance refresh behavior.
+- Fixed permission service initialization so `autoSync` and `internalRequestOrigin` options are respected.
+- Fixed RBF sequence handling when building PSBT inputs.
+- Optimized BTC and Runes fee calculation paths, especially for transactions with many inputs.
+
 ## v1.7.16
 
 ### New Features
