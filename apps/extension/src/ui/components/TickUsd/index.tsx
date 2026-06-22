@@ -15,8 +15,9 @@ function PriceChangePercent({ change, size }: { change: number; size?: Sizes }) 
 
   const changePercent = ((change || 0) * 100).toFixed(2);
   const color = change < 0 ? 'value_down_color' : 'value_up_color';
+  const prefix = change > 0 ? '+' : '';
 
-  return <Text text={`${changePercent}%`} color={color} size={size} />;
+  return <Text text={`${prefix}${changePercent}%`} color={color} size={size} />;
 }
 
 export function TickPriceChange(props: { price: TickPriceItem | undefined; color?: ColorTypes; size?: Sizes }) {

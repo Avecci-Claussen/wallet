@@ -6,8 +6,8 @@ import { Column } from '../Column';
 import { Row } from '../Row';
 import Tag from '../Tag';
 import { Text } from '../Text';
+import { getTokenBalanceCardStyle, TokenBalanceCardLayout } from '../TokenBalanceCardLayout';
 import { TokenBalanceIcon } from '../TokenBalanceIcon';
-import { TokenBalancePrice } from '../TokenBalancePrice';
 
 export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
   const {
@@ -27,38 +27,33 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
     t
   } = useBRC20BalanceCardLogic(props);
 
+  const adaptiveHeight = Boolean(tag || selfMint || hasOutWalletBalance);
+
   return (
     <Card
-      style={{
-        backgroundColor: '#1E1F24',
-        borderColor: 'rgba(255,255,255,0.1)',
-        borderRadius: 12
-      }}
       fullX
       onClick={() => {
         onClick && onClick();
-      }}>
+      }}
+      style={getTokenBalanceCardStyle(adaptiveHeight)}>
       <Column full py="zero" gap="zero">
-        <Row fullY justifyBetween justifyCenter>
-          <Column onClick={onClick}>
-            <TokenBalanceIcon iconInfo={iconInfo} />
-          </Column>
-
-          <Column justifyCenter style={{ marginRight: 'auto' }} gap="zero" fullX>
-            <Row justifyBetween itemsCenter fullY gap="zero">
-              <BRC20Ticker tick={ticker} displayName={displayName} />
-              <Text text={totalBalance} size="xs" digital />
-            </Row>
-            {(tag || selfMint) && (
+        <TokenBalanceCardLayout
+          icon={<TokenBalanceIcon iconInfo={iconInfo} />}
+          onIconClick={onClick}
+          title={<BRC20Ticker tick={ticker} displayName={displayName} />}
+          titleExtra={
+            tag || selfMint ? (
               <Row>
                 {tag && <Tag type={tag} />}
                 {selfMint && <Tag type="self-issuance" small />}
               </Row>
-            )}
-          </Column>
-        </Row>
-
-        <TokenBalancePrice showPrice={showPrice} price={price} balance={totalBalance} />
+            ) : null
+          }
+          quantity={<Text text={totalBalance} size="xs" digital />}
+          showPrice={showPrice}
+          price={price}
+          balance={totalBalance}
+        />
 
         {hasOutWalletBalance ? (
           <Column>

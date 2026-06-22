@@ -83,7 +83,7 @@ export function CAT20List(props: { version: CAT_VERSION }) {
 
   return (
     <Column>
-      <Row style={{ flexWrap: 'wrap' }} gap="sm">
+      <Row style={{ flexWrap: 'wrap' }} gap="md">
         {tokens.map((data) => (
           <CAT20BalanceCard
             key={data.tokenId}

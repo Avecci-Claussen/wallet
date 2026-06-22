@@ -91,7 +91,7 @@ export function InfiniteList<T>({
               key={`row-${rowIndex}`}
               style={{
                 width: '100%',
-                marginBottom: '12px',
+                marginBottom: '8px',
                 display: 'grid',
                 gridTemplateColumns: `repeat(${numColumns}, 1fr)`,
                 gap: '8px'

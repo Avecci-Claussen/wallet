@@ -8,12 +8,12 @@ export function TokenBalancePrice({ showPrice, price, balance }: { showPrice: bo
   }
 
   return (
-    <Row justifyBetween mt={'xs'}>
-      <Row>
+    <Row justifyBetween itemsCenter>
+      <Row gap="xs">
         {price && price.curPrice > 0 ? (
           <TickPriceChange price={price} />
         ) : (
-          <Text text="$- " color="textDim" size="xs" />
+          <Text text="$-" color="textDim" size="xs" />
         )}
       </Row>
       <Row>
