@@ -51,7 +51,22 @@ const titleRowStyle: CSSProperties = {
 const titleCellStyle: CSSProperties = {
   minWidth: 0,
   maxWidth: '100%',
-  overflow: 'hidden'
+  overflow: 'hidden',
+  display: 'flex',
+  alignItems: 'center',
+  gap: CONTENT_GAP,
+  flexWrap: 'nowrap',
+  justifyContent: 'flex-start'
+};
+
+const titleNameStyle: CSSProperties = {
+  minWidth: 0,
+  overflow: 'hidden',
+  flex: '0 1 auto'
+};
+
+const titleExtraStyle: CSSProperties = {
+  flexShrink: 0
 };
 
 const quantityCellStyle: CSSProperties = {
@@ -89,8 +104,8 @@ export function TokenBalanceCardLayout({
       <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden' }}>
         <div style={titleRowStyle}>
           <div style={titleCellStyle}>
-            {title}
-            {titleExtra}
+            <div style={titleNameStyle}>{title}</div>
+            {titleExtra ? <div style={titleExtraStyle}>{titleExtra}</div> : null}
           </div>
           <div style={quantityCellStyle}>{quantity}</div>
         </div>

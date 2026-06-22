@@ -27,7 +27,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
     t
   } = useBRC20BalanceCardLogic(props);
 
-  const adaptiveHeight = Boolean(tag || selfMint || hasOutWalletBalance);
+  const adaptiveHeight = Boolean(hasOutWalletBalance);
 
   return (
     <Card
@@ -43,7 +43,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
           title={<BRC20Ticker tick={ticker} displayName={displayName} truncate />}
           titleExtra={
             tag || selfMint ? (
-              <Row>
+              <Row gap="sm" itemsCenter>
                 {tag && <Tag type={tag} />}
                 {selfMint && <Tag type="self-issuance" small />}
               </Row>
