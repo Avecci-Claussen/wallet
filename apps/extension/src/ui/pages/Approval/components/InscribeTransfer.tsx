@@ -235,7 +235,7 @@ function Step1(params: BRC20InscribeTransferParams) {
               <FeeRateBar />
             </Column>
 
-            <Column>
+            <Column mt="lg">
               <RBFBar value={enableRBF} onChange={setEnableRBF} />
             </Column>
           </Column>
