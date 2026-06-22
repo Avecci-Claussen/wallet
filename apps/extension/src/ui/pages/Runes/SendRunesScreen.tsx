@@ -1,9 +1,8 @@
-import { Button, Column, Content, Header, Input, Layout, Row, Text } from '@/ui/components';
+import { Button, Column, Content, Header, Input, Layout, Row, Text, TransferAmountCard, TransferAmountSection } from '@/ui/components';
 import { FeeRateBar } from '@/ui/components/FeeRateBar';
 import { OutputValueBar } from '@/ui/components/OutputValueBar';
 import { RBFBar } from '@/ui/components/RBFBar';
 import { TickUsdWithoutPrice, TokenType } from '@/ui/components/TickUsd';
-import { colors } from '@/ui/theme/colors';
 import { showLongNumber } from '@/ui/utils';
 import { useSendRunesScreenLogic } from '@unisat/wallet-state';
 
@@ -66,28 +65,20 @@ export default function SendRunesScreen() {
           </Column>
 
           <Column mt="lg">
-            <Row justifyBetween>
-              <Text text={t('balance')} preset="regular" />
-              <TickUsdWithoutPrice tick={runeInfo.spacedRune} balance={inputAmount} type={TokenType.RUNES} />
-              <Row
-                itemsCenter
-                onClick={() => {
+            <TransferAmountSection>
+              <TransferAmountCard
+                amount={inputAmount.toString()}
+                onAmountChange={setInputAmount}
+                showMax
+                onMaxClick={() => {
                   setInputAmount(availableBalanceStr);
-                }}>
-                <Text text={t('max')} preset="sub" style={{ color: colors.white_muted }} />
-                <Text text={`${showLongNumber(availableBalanceStr)} ${runeInfo.symbol}`} preset="bold" size="sm" wrap />
-              </Row>
-            </Row>
-            <Input
-              preset="amount"
-              placeholder={t('amount')}
-              value={inputAmount.toString()}
-              onAmountInputChange={(amount) => {
-                setInputAmount(amount);
-              }}
-              runesDecimal={runeInfo.divisibility}
-              data-testid="send-runes-amount-input"
-            />
+                }}
+                availableAmount={showLongNumber(availableBalanceStr)}
+                unit={runeInfo.symbol}
+                runesDecimal={runeInfo.divisibility}
+                inputTestId="send-runes-amount-input"
+              />
+            </TransferAmountSection>
           </Column>
 
           {toInfo.address ? (

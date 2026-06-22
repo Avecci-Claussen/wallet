@@ -1,9 +1,8 @@
-import { Button, Column, Content, Header, Input, Layout, Loading, Row, Text } from '@/ui/components';
+import { Button, Column, Content, Header, Input, Layout, Loading, Row, Text, TransferAmountCard, TransferAmountSection } from '@/ui/components';
 import { BRC20Ticker } from '@/ui/components/BRC20Ticker';
 import { FeeRateBar } from '@/ui/components/FeeRateBar';
 import { MergeBTCPopover } from '@/ui/components/MergeBTCPopover';
 import { TickUsdWithoutPrice, TokenType } from '@/ui/components/TickUsd';
-import { colors } from '@/ui/theme/colors';
 import { showLongNumber } from '@/ui/utils';
 import { bnUtils } from '@unisat/base-utils';
 import { SendCAT20ScreenStep, useSendCAT20ScreenLogic } from '@unisat/wallet-state';
@@ -112,33 +111,19 @@ export default function SendCAT20Screen() {
           </Column>
 
           <Column mt="lg">
-            <Row justifyBetween>
-              <Text text={t('balance')} preset="regular" />
-              <TickUsdWithoutPrice tick={cat20Info.tokenId} balance={inputAmount} type={TokenType.CAT20} />
-              <Row
-                itemsCenter
-                onClick={() => {
+            <TransferAmountSection>
+              <TransferAmountCard
+                amount={inputAmount.toString()}
+                onAmountChange={setInputAmount}
+                showMax
+                onMaxClick={() => {
                   setInputAmount(bnUtils.toDecimalAmount(availableTokenAmount, cat20Balance.decimals));
-                }}>
-                <Text text={t('max')} preset="sub" style={{ color: colors.white_muted }} />
-                <Text
-                  text={`${showLongNumber(bnUtils.toDecimalAmount(availableTokenAmount, cat20Balance.decimals))}`}
-                  preset="bold"
-                  size="sm"
-                  wrap
-                />
-                <BRC20Ticker tick={cat20Info.symbol} preset="sm" />
-              </Row>
-            </Row>
-            <Input
-              preset="amount"
-              placeholder={t('amount')}
-              value={inputAmount.toString()}
-              runesDecimal={cat20Balance.decimals}
-              onAmountInputChange={(amount) => {
-                setInputAmount(amount);
-              }}
-            />
+                }}
+                availableAmount={showLongNumber(bnUtils.toDecimalAmount(availableTokenAmount, cat20Balance.decimals))}
+                unit={cat20Info.symbol}
+                runesDecimal={cat20Balance.decimals}
+              />
+            </TransferAmountSection>
 
             {shouldShowMerge && (
               <Column style={{ borderWidth: 1, borderRadius: 10, borderColor: 'rgba(255,255,255,0.3)' }}>

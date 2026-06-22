@@ -1,8 +1,7 @@
-import { Button, Column, Content, Header, Input, Layout, Row, Text } from '@/ui/components';
+import { Button, Column, Content, Header, Input, Layout, Row, Text, TransferAmountCard, TransferAmountSection } from '@/ui/components';
 import { FeeRateBar } from '@/ui/components/FeeRateBar';
 import { RBFBar } from '@/ui/components/RBFBar';
 import { TickUsdWithoutPrice, TokenType } from '@/ui/components/TickUsd';
-import { colors } from '@/ui/theme/colors';
 import { showLongNumber } from '@/ui/utils';
 import { SendAlkanesScreenStep, useSendAlkanesScreenLogic } from '@unisat/wallet-state';
 
@@ -79,32 +78,19 @@ export default function SendAlkanesScreen() {
           </Column>
 
           <Column mt="lg">
-            <Row justifyBetween>
-              <Text text={t('balance')} preset="regular" />
-              <TickUsdWithoutPrice tick={tokenBalance.name} balance={inputAmount} type={TokenType.RUNES} />
-              <Row
-                itemsCenter
-                onClick={() => {
+            <TransferAmountSection>
+              <TransferAmountCard
+                amount={inputAmount.toString()}
+                onAmountChange={setInputAmount}
+                showMax
+                onMaxClick={() => {
                   setInputAmount(availableBalanceStr);
-                }}>
-                <Text text={t('max')} preset="sub" style={{ color: colors.white_muted }} />
-                <Text
-                  text={`${showLongNumber(availableBalanceStr)} ${tokenInfo.symbol}`}
-                  preset="bold"
-                  size="sm"
-                  wrap
-                />
-              </Row>
-            </Row>
-            <Input
-              preset="amount"
-              placeholder={t('amount')}
-              value={inputAmount.toString()}
-              onAmountInputChange={(amount) => {
-                setInputAmount(amount);
-              }}
-              runesDecimal={tokenBalance.divisibility}
-            />
+                }}
+                availableAmount={showLongNumber(availableBalanceStr)}
+                unit={tokenInfo.symbol}
+                runesDecimal={tokenBalance.divisibility}
+              />
+            </TransferAmountSection>
           </Column>
 
           <Column mt="lg">
