@@ -36,64 +36,62 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
         onClick && onClick();
       }}
       style={getTokenBalanceCardStyle(adaptiveHeight)}>
-      <Column full py="zero" gap="zero">
-        <TokenBalanceCardLayout
-          icon={<TokenBalanceIcon iconInfo={iconInfo} />}
-          onIconClick={onClick}
-          title={<BRC20Ticker tick={ticker} displayName={displayName} truncate />}
-          titleExtra={
-            tag || selfMint ? (
-              <Row gap="sm" itemsCenter>
-                {tag && <Tag type={tag} />}
-                {selfMint && <Tag type="self-issuance" small />}
-              </Row>
-            ) : null
-          }
-          quantity={<Text text={totalBalance} size="xs" digital />}
-          showPrice={showPrice}
-          price={price}
-          balance={totalBalance}
-        />
+      <TokenBalanceCardLayout
+        icon={<TokenBalanceIcon iconInfo={iconInfo} />}
+        onIconClick={onClick}
+        title={<BRC20Ticker tick={ticker} displayName={displayName} truncate />}
+        titleExtra={
+          tag || selfMint ? (
+            <Row gap="sm" itemsCenter>
+              {tag && <Tag type={tag} />}
+              {selfMint && <Tag type="self-issuance" small />}
+            </Row>
+          ) : null
+        }
+        quantity={<Text text={totalBalance} size="xs" digital />}
+        showPrice={showPrice}
+        price={price}
+        balance={totalBalance}
+      />
 
-        {hasOutWalletBalance ? (
-          <Column>
-            <Row style={{ borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }} mt="sm" />
+      {hasOutWalletBalance ? (
+        <Column fullX gap="zero">
+          <Row style={{ borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }} mt="sm" />
+          <Row fullY justifyBetween justifyCenter>
+            <Column fullY justifyCenter>
+              <Text text={t('brc20_in_wallet')} color="textDim" size="xs" />
+            </Column>
+
+            <Row itemsCenter fullY gap="zero">
+              <Text text={inWalletBalance} size="xs" digital />
+            </Row>
+          </Row>
+
+          {onSwapBalance && onSwapBalance !== '0' ? (
             <Row fullY justifyBetween justifyCenter>
               <Column fullY justifyCenter>
-                <Text text={t('brc20_in_wallet')} color="textDim" size="xs" />
+                <Text text={t('brc20_on_swap')} color="textDim" size="xs" />
               </Column>
 
               <Row itemsCenter fullY gap="zero">
-                <Text text={inWalletBalance} size="xs" digital />
+                <Text text={onSwapBalance} size="xs" digital />
               </Row>
             </Row>
+          ) : null}
 
-            {onSwapBalance && onSwapBalance !== '0' ? (
-              <Row fullY justifyBetween justifyCenter>
-                <Column fullY justifyCenter>
-                  <Text text={t('brc20_on_swap')} color="textDim" size="xs" />
-                </Column>
+          {onProgBalance && onProgBalance !== '0' ? (
+            <Row fullY justifyBetween justifyCenter>
+              <Column fullY justifyCenter>
+                <Text text={t('brc20_on_prog')} color="textDim" size="xs" />
+              </Column>
 
-                <Row itemsCenter fullY gap="zero">
-                  <Text text={onSwapBalance} size="xs" digital />
-                </Row>
+              <Row itemsCenter fullY gap="zero">
+                <Text text={onProgBalance} size="xs" digital />
               </Row>
-            ) : null}
-
-            {onProgBalance && onProgBalance !== '0' ? (
-              <Row fullY justifyBetween justifyCenter>
-                <Column fullY justifyCenter>
-                  <Text text={t('brc20_on_prog')} color="textDim" size="xs" />
-                </Column>
-
-                <Row itemsCenter fullY gap="zero">
-                  <Text text={onProgBalance} size="xs" digital />
-                </Row>
-              </Row>
-            ) : null}
-          </Column>
-        ) : null}
-      </Column>
+            </Row>
+          ) : null}
+        </Column>
+      ) : null}
     </Card>
   );
 }

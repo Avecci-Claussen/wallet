@@ -27,7 +27,8 @@ export function getTokenBalanceCardStyle(adaptive = false): CSSProperties {
   return {
     ...tokenBalanceCardStyle,
     minHeight: TOKEN_BALANCE_CARD_HEIGHT,
-    height: adaptive ? 'auto' : TOKEN_BALANCE_CARD_HEIGHT
+    height: adaptive ? 'auto' : TOKEN_BALANCE_CARD_HEIGHT,
+    justifyContent: adaptive ? 'flex-start' : 'center'
   };
 }
 
