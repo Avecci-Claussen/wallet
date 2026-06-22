@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Icon, Row, Text } from '@/ui/components';
 import { getAddressType, isValidAddress } from '@/ui/utils/bitcoin-utils';
@@ -42,6 +42,24 @@ export const AddressInput = (props: InputProps) => {
   const [inputVal, setInputVal] = useState(addressInputData.domain || addressInputData.address || '');
   const [searching, setSearching] = useState(false);
   const [addressTip, setAddressTip] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isWrapped, setIsWrapped] = useState(false);
+
+  const syncTextareaHeight = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) {
+      return;
+    }
+
+    el.style.height = '22px';
+    const nextHeight = Math.max(22, el.scrollHeight);
+    el.style.height = `${nextHeight}px`;
+    setIsWrapped(nextHeight > 24);
+  }, []);
+
+  useEffect(() => {
+    syncTextareaHeight();
+  }, [inputVal, syncTextareaHeight]);
 
   const wallet = useWallet();
   const chain = useChain();
@@ -178,11 +196,10 @@ export const AddressInput = (props: InputProps) => {
     }
   };
 
-  const isMultiline = Boolean(inputVal && inputVal.length > 50);
   const addressFieldStyle = Object.assign({}, $baseTextareaStyle, {
     padding: 0,
     margin: 0,
-    minHeight: 'unset',
+    minHeight: 22,
     lineHeight: '22px',
     alignSelf: 'center',
     flex: 'none',
@@ -209,35 +226,29 @@ export const AddressInput = (props: InputProps) => {
         <div
           style={{
             minHeight: 56,
-            height: isMultiline ? 'auto' : 56,
             display: 'flex',
-            alignItems: isMultiline ? 'flex-start' : 'center',
+            alignItems: isWrapped ? 'flex-start' : 'center',
             width: '100%',
-            paddingTop: isMultiline ? 8 : 0,
-            paddingBottom: isMultiline ? 8 : 0,
+            paddingTop: isWrapped ? 8 : 0,
+            paddingBottom: isWrapped ? 8 : 0,
             boxSizing: 'border-box'
           }}>
-          {isMultiline ? (
-            <textarea
-              placeholder={inputAddressPlaceholder}
-              style={{ ...addressFieldStyle, height: 44 }}
-              onChange={handleInputAddress}
-              onBlur={onAddressBlur}
-              value={inputVal}
-              rows={2}
-              {...rest}
-            />
-          ) : (
-            <input
-              type="text"
-              placeholder={inputAddressPlaceholder}
-              style={{ ...addressFieldStyle, height: 22 }}
-              onChange={handleInputAddress}
-              onBlur={onAddressBlur}
-              value={inputVal}
-              {...rest}
-            />
-          )}
+          <textarea
+            ref={textareaRef}
+            placeholder={inputAddressPlaceholder}
+            style={addressFieldStyle}
+            onChange={(e) => {
+              handleInputAddress(e);
+              requestAnimationFrame(syncTextareaHeight);
+            }}
+            onBlur={onAddressBlur}
+            value={inputVal}
+            rows={1}
+            autoCorrect="off"
+            autoComplete="off"
+            {...rest}
+            spellCheck={false}
+          />
         </div>
 
         {searching && (
@@ -299,6 +310,7 @@ export const AddressInput = (props: InputProps) => {
             }
 
             setShowContactsModal(false);
+            requestAnimationFrame(syncTextareaHeight);
           }}
           selectedNetworkFilter={networkType}
         />
