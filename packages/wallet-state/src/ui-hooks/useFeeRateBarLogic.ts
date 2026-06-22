@@ -149,7 +149,6 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
   const updateFeeRateBar = useUpdateFeeRateBar()
   const feeRateInputVal = feeRateBarState.feeRateInputVal
   const feeOptionIndex = feeRateBarState.feeOptionIndex
-  const showCustomInput = feeRateBarState.showCustomInput
   const feeRate = feeRateBarState.feeRate
   const { t, isSpecialLocale } = useI18n()
   const chain = useChain()
@@ -303,18 +302,20 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
           return
         }
       }
-      if (index !== FeeRateType.CUSTOM && selectedOption) {
-        // When clicking on SLOW/AVG/FAST, show input and fill with the corresponding value
+
+      const showInput =
+        index === FeeRateType.CUSTOM || (supportLowFeeMode && index === FeeRateType.SLOW)
+
+      if (index === FeeRateType.CUSTOM) {
         updateFeeRateBar({
           feeOptionIndex: index,
-          showCustomInput: true,
-          feeRateInputVal: selectedOption.feeRate.toString(),
+          showCustomInput: showInput,
         })
-      } else if (index === FeeRateType.CUSTOM) {
-        // When clicking on CUSTOM, show input with current custom value or empty
+      } else if (selectedOption) {
         updateFeeRateBar({
           feeOptionIndex: index,
-          showCustomInput: true,
+          showCustomInput: showInput,
+          feeRateInputVal: selectedOption.feeRate.toString(),
         })
       }
     },
@@ -335,6 +336,19 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
     return false
   }, [feeOptionIndex, supportLowFeeMode])
 
+  const resolvedShowCustomInput = useMemo(() => {
+    if (readonly) {
+      return false
+    }
+    if (feeOptionIndex === FeeRateType.CUSTOM) {
+      return true
+    }
+    if (supportLowFeeMode && feeOptionIndex === FeeRateType.SLOW) {
+      return true
+    }
+    return false
+  }, [readonly, feeOptionIndex, supportLowFeeMode])
+
   return {
     feeOptions: resolvedFeeOptions,
     feeOptionsLoading: !hasLoadedFeeOptions,
@@ -346,7 +360,7 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
     fontSize,
     isSpecialLocale,
     toggleLowFeeRate,
-    showCustomInput: readonly ? false : showCustomInput,
+    showCustomInput: resolvedShowCustomInput,
     toggleCustomInput,
     supportLowFeeMode,
     showLowFeeModeTipsPopover,

@@ -64,7 +64,6 @@ export function FeeRateBar({ readonly }: { readonly?: boolean }) {
     adjustFeeRateInput,
     toggleLowFeeRate,
     showCustomInput,
-    toggleCustomInput,
     supportLowFeeMode,
     isSub1FeeOptionOn,
     showLowFeeModeTipsPopover,
@@ -100,9 +99,6 @@ export function FeeRateBar({ readonly }: { readonly?: boolean }) {
                   return;
                 }
                 setFeeOptionIndex(index);
-                if (index === feeOptionIndex && !isCustom) {
-                  toggleCustomInput(!showCustomInput);
-                }
               }}
               style={{
                 ...getCardStyle(selected),

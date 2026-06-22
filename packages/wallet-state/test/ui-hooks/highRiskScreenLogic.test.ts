@@ -77,8 +77,8 @@ describe('high-risk screen logic effects', () => {
       expect(result.current.feeOptions.length).toBeGreaterThan(0)
     })
 
-    act(() => {
-      result.current.toggleCustomInput(true)
+    await act(async () => {
+      await result.current.setFeeOptionIndex(3)
     })
 
     await waitFor(() => {
