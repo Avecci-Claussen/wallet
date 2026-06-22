@@ -52,15 +52,17 @@ export function BalanceCard() {
         <Image src={backgroundImage} size={64} style={{ position: 'absolute', top: 0, right: 0 }} />
         <Row itemsCenter>
           <Text size="sm" text={t('total_balance')} style={{ color: 'rgba(0,0,0,0.55)' }} />
-          <Row
-            style={{ padding: 6, margin: -6 }}
-            onClick={(event) => {
-              stopCardToggle(event);
-              handleHiddenToggle();
-            }}>
-            <Icon color={'black_muted'} icon={isBalanceHidden ? 'balance-eyes-closed' : 'balance-eyes'} size={20} />
+          <Row itemsCenter gap="sm">
+            <Row
+              style={{ padding: 6, margin: -6 }}
+              onClick={(event) => {
+                stopCardToggle(event);
+                handleHiddenToggle();
+              }}>
+              <Icon color={'black_muted'} icon={isBalanceHidden ? 'balance-eyes-closed' : 'balance-eyes'} size={20} />
+            </Row>
+            <RefreshButton onClick={refreshBalance as any} hideText />
           </Row>
-          <RefreshButton onClick={refreshBalance as any} hideText />
         </Row>
 
         <Row itemsCenter>
