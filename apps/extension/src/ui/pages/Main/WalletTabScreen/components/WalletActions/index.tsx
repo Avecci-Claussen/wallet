@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Row } from '@/ui/components';
+import { Column, Row } from '@/ui/components';
 import { Button, ButtonProps } from '@/ui/components/Button';
 import { BuyBTCModal } from '@/ui/pages/BuyBTC/BuyBTCModal';
 import { TypeChain } from '@unisat/wallet-shared';
@@ -32,11 +32,27 @@ type WalletActionItem = {
 };
 
 const MAX_PRIMARY_ACTIONS = 4;
-const ACTION_BUTTON_SIZE = 64;
+const ACTION_BUTTON_HEIGHT = 60;
+const ACTION_BUTTON_GAP = 12;
+const ACTION_ICON_TEXT_GAP = 6;
 const actionButtonStyle = {
-  minWidth: ACTION_BUTTON_SIZE,
-  minHeight: ACTION_BUTTON_SIZE,
-  width: ACTION_BUTTON_SIZE
+  flex: 1,
+  minWidth: 0,
+  minHeight: ACTION_BUTTON_HEIGHT,
+  height: ACTION_BUTTON_HEIGHT,
+  borderRadius: 12,
+  gap: ACTION_ICON_TEXT_GAP - 4,
+  backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  borderWidth: 1,
+  borderStyle: 'solid',
+  borderColor: 'rgba(255, 255, 255, 0.1)',
+  boxSizing: 'border-box' as const,
+  marginLeft: 0,
+  marginRight: 0
+};
+const actionRowStyle = {
+  width: '100%',
+  gap: ACTION_BUTTON_GAP
 };
 const actionButtonTextStyle = {
   fontSize: 10,
@@ -163,6 +179,7 @@ export const WalletActions = ({ chain }: WalletActionsProps) => {
       icon={action.icon}
       onClick={action.onClick}
       disabled={action.disabled}
+      full
       style={actionButtonStyle}
       textStyle={actionButtonTextStyle}
       max2Lines
@@ -172,38 +189,41 @@ export const WalletActions = ({ chain }: WalletActionsProps) => {
 
   return (
     <>
-      <Row justifyCenter mt="md" style={{ flexWrap: 'wrap' }}>
-        {primaryActions.map((action) => renderActionButton(action, 'primary'))}
-        {overflowActions.length > 0 && (
-          <Button
-            text={t('more')}
-            preset={showOverflowActions ? 'homeGold' : 'home'}
-            icon="more"
-            onClick={() => setShowOverflowActions((prev) => !prev)}
-            style={actionButtonStyle}
-            textStyle={actionButtonTextStyle}
-            max2Lines
-            data-testid="more-button"
-          />
-        )}
-      </Row>
-
-      {showOverflowActions && overflowActions.length > 0 && (
-        <Row justifyCenter mt="md" style={{ flexWrap: 'wrap' }}>
-          {/* add empty action place to align the overflow button to the right*/}
-          {MAX_PRIMARY_ACTIONS - overflowActions.length > 0 && (
-            <Button preset="homeGold" style={{ ...actionButtonStyle, opacity: 0 }}></Button>
+      <Column fullX mt="md" style={{ gap: ACTION_BUTTON_GAP }}>
+        <Row fullX style={actionRowStyle}>
+          {primaryActions.map((action) => renderActionButton(action, 'primary'))}
+          {overflowActions.length > 0 && (
+            <Button
+              text={t('more')}
+              preset="home"
+              icon="more"
+              onClick={() => setShowOverflowActions((prev) => !prev)}
+              full
+              style={actionButtonStyle}
+              textStyle={actionButtonTextStyle}
+              max2Lines
+              data-testid="more-button"
+            />
           )}
-          {MAX_PRIMARY_ACTIONS - overflowActions.length > 1 && (
-            <Button preset="homeGold" style={{ ...actionButtonStyle, opacity: 0 }}></Button>
-          )}
-          {MAX_PRIMARY_ACTIONS - overflowActions.length > 2 && (
-            <Button preset="homeGold" style={{ ...actionButtonStyle, opacity: 0 }}></Button>
-          )}
-
-          {overflowActions.map((action) => renderActionButton(action, 'overflow'))}
         </Row>
-      )}
+
+        {showOverflowActions && overflowActions.length > 0 && (
+          <Row fullX style={actionRowStyle}>
+            {/* add empty action place to align the overflow button to the right*/}
+            {MAX_PRIMARY_ACTIONS - overflowActions.length > 0 && (
+              <Button preset="home" full style={{ ...actionButtonStyle, opacity: 0 }}></Button>
+            )}
+            {MAX_PRIMARY_ACTIONS - overflowActions.length > 1 && (
+              <Button preset="home" full style={{ ...actionButtonStyle, opacity: 0 }}></Button>
+            )}
+            {MAX_PRIMARY_ACTIONS - overflowActions.length > 2 && (
+              <Button preset="home" full style={{ ...actionButtonStyle, opacity: 0 }}></Button>
+            )}
+
+            {overflowActions.map((action) => renderActionButton(action, 'overflow'))}
+          </Row>
+        )}
+      </Column>
 
       {buyBtcModalVisible && (
         <BuyBTCModal
