@@ -19,7 +19,7 @@ export function CAT20BalanceCard(props: CAT20BalanceCardProps) {
       <TokenBalanceCardLayout
         icon={<TokenBalanceIcon iconInfo={iconInfo} />}
         onIconClick={onClick}
-        title={<RunesTicker tick={tokenBalance.name} />}
+        title={<RunesTicker tick={tokenBalance.name} truncate />}
         quantity={
           <Row itemsCenter gap="zero">
             <Text text={balanceStr} size="xs" />

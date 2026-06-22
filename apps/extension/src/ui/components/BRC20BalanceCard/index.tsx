@@ -40,7 +40,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
         <TokenBalanceCardLayout
           icon={<TokenBalanceIcon iconInfo={iconInfo} />}
           onIconClick={onClick}
-          title={<BRC20Ticker tick={ticker} displayName={displayName} />}
+          title={<BRC20Ticker tick={ticker} displayName={displayName} truncate />}
           titleExtra={
             tag || selfMint ? (
               <Row>

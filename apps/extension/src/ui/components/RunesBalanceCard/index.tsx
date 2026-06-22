@@ -23,7 +23,7 @@ export default function RunesBalanceCard(props: RunesBalanceCardProps) {
       <TokenBalanceCardLayout
         icon={<TokenBalanceIcon iconInfo={iconInfo} />}
         onIconClick={onClick}
-        title={<RunesTicker tick={tokenBalance.spacedRune} />}
+        title={<RunesTicker tick={tokenBalance.spacedRune} truncate />}
         quantity={
           <Row itemsCenter gap="zero">
             <Text text={balanceStr} size="xs" />
