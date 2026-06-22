@@ -133,12 +133,19 @@ export function TabBar(props: TabBarProps) {
             return (
               <Column
                 key={v.key}
-                style={{ borderWidth: 1, borderRadius: 20, backgroundColor: '#322D1F' }}
-                color={isSelected ? 'gold' : 'white_muted'}
+                itemsCenter
+                justifyCenter
+                px="lg"
+                style={{
+                  height: 32,
+                  borderRadius: 16,
+                  borderWidth: 0,
+                  backgroundColor: isSelected ? '#322D1F' : 'rgba(255, 255, 255, 0.08)'
+                }}
                 onClick={() => {
                   setTabKey(v.key);
                 }}>
-                <Text text={v.label} size="xs" color={isSelected ? 'gold' : 'white_muted'} mx="md" my="sm" />
+                <Text text={v.label} size="xs" color={isSelected ? 'gold' : 'white_muted'} />
               </Column>
             );
           }

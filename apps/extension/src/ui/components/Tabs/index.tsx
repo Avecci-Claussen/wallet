@@ -42,12 +42,19 @@ export function Tabs({ preset, items, defaultActiveKey, activeKey, onTabClick }:
             return (
               <Column
                 key={item.key}
-                style={{ borderWidth: 1, borderRadius: 20, backgroundColor: '#322D1F' }}
-                color={isActiveItem ? 'gold' : 'white_muted'}
+                itemsCenter
+                justifyCenter
+                px="lg"
+                style={{
+                  height: 32,
+                  borderRadius: 16,
+                  borderWidth: 0,
+                  backgroundColor: isActiveItem ? '#322D1F' : 'rgba(255, 255, 255, 0.08)'
+                }}
                 onClick={() => onTabClick(item.key)}
                 data-testid={`tab-item-${item.key}`}>
                 {typeof item.label === 'string' ? (
-                  <Text text={item.label} size="xs" color={isActiveItem ? 'gold' : 'white_muted'} mx="md" my="sm" />
+                  <Text text={item.label} size="xs" color={isActiveItem ? 'gold' : 'white_muted'} />
                 ) : (
                   item.label
                 )}
