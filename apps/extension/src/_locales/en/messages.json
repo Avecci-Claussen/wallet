@@ -693,7 +693,7 @@
     "message": "Do you confirm the transfer?"
   },
   "does_not_exist": {
-    "message": "does not exist"
+    "message": "The item you are looking for does not exist."
   },
   "does_not_support_account_removal_operations": {
     "message": "does not support account removal operations"

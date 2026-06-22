@@ -163,9 +163,8 @@ export const AddressInput = (props: InputProps) => {
             setValidAddress(address);
             setParseName(true);
           })
-          .catch((err: Error) => {
-            const errMsg = err.message + ' for ' + inputAddress;
-            setFormatError(errMsg);
+          .catch(() => {
+            setParseError(`${inputAddress} ${t('does_not_exist')}`);
           })
           .finally(() => {
             setSearching(false);
@@ -192,6 +191,14 @@ export const AddressInput = (props: InputProps) => {
     if (inputAddress == '') return;
 
     if (!validAddress) {
+      const teststr = inputAddress.toLowerCase();
+      const satsname = namesUtils.getSatsName(teststr);
+      if (satsname && SUPPORTED_DOMAINS.includes(satsname.suffix)) {
+        return;
+      }
+      if (parseError || searching) {
+        return;
+      }
       setFormatError(t('recipient_address_is_invalid'));
     }
   };
@@ -278,7 +285,7 @@ export const AddressInput = (props: InputProps) => {
           <Text preset="sub" size="sm" text={')'} />
         </Row>
       ) : null}
-      {parseError && <Text text={parseError} preset="regular" color="error" />}
+      {parseError && <Text text={parseError} preset="regular" color="error" mt="md" />}
       {addressTip && (
         <Column
           py={'lg'}
@@ -293,7 +300,7 @@ export const AddressInput = (props: InputProps) => {
           <Text text={addressTip} preset="regular" color="warning" />
         </Column>
       )}
-      <Text text={formatError} preset="regular" color="error" />
+      {formatError ? <Text text={formatError} preset="regular" color="error" mt="md" /> : null}
 
       {showContactsModal && (
         <ContactsModal
