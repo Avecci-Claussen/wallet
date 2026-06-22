@@ -107,6 +107,41 @@ function formatFeeRateTextKey(
   })
 }
 
+function buildPlaceholderFeeOptions(
+  supportLowFeeMode: boolean,
+  readonly: boolean | undefined,
+  t: (key: string) => string,
+  avgFeeRate: number
+): FeeOption[] {
+  const slowRate = supportLowFeeMode ? 0.1 : avgFeeRate
+  const list: FeeOption[] = [
+    {
+      type: FeeRateType.SLOW,
+      title: supportLowFeeMode ? t('feerate_sub1_title') : t('slow'),
+      desc: supportLowFeeMode ? '' : t('feerate_slow_desc'),
+      feeRate: slowRate,
+    },
+    {
+      type: FeeRateType.AVG,
+      title: t('avg'),
+      desc: t('feerate_avg_desc'),
+      feeRate: avgFeeRate,
+    },
+    {
+      type: FeeRateType.FAST,
+      title: t('fast'),
+      desc: t('feerate_fast_desc'),
+      feeRate: avgFeeRate,
+    },
+  ]
+
+  if (!readonly) {
+    list.push({ type: FeeRateType.CUSTOM, title: t('custom'), feeRate: 0 })
+  }
+
+  return list
+}
+
 export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
   const wallet = useWallet()
   const [feeOptions, setFeeOptions] = useState<FeeOption[]>([])
@@ -125,11 +160,27 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
 
   const supportLowFeeMode = chain.enableLowFeeMode ?? false
 
-  useAsyncEffect(async () => {
-    const feeSummary = await wallet.getFeeSummary()
+  const placeholderFeeOptions = useMemo(
+    () =>
+      buildPlaceholderFeeOptions(
+        supportLowFeeMode,
+        readonly,
+        t,
+        feeRate > 0 ? feeRate : DEFAULT_FEE_RATE
+      ),
+    [supportLowFeeMode, readonly, t, feeRate]
+  )
 
-    if (supportLowFeeMode) {
-      const lowFeeSummary = await wallet.getLowFeeSummary()
+  const hasLoadedFeeOptions = feeOptions.length > 0
+  const resolvedFeeOptions = hasLoadedFeeOptions ? feeOptions : placeholderFeeOptions
+
+  useAsyncEffect(async () => {
+    const [feeSummary, lowFeeSummary] = await Promise.all([
+      wallet.getFeeSummary(),
+      supportLowFeeMode ? wallet.getLowFeeSummary() : Promise.resolve(null),
+    ])
+
+    if (supportLowFeeMode && lowFeeSummary) {
       feeSummary.list[0] = lowFeeSummary.list[1]
 
       // try use slow fee rate if it's lower than 1 sat/vB
@@ -153,16 +204,16 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
 
   // Memoize default value to avoid repeated calculations
   const defaultFeeRate = useMemo(
-    () => feeOptions[AVG_OPTION_INDEX]?.feeRate ?? DEFAULT_FEE_RATE,
-    [feeOptions]
+    () => resolvedFeeOptions[AVG_OPTION_INDEX]?.feeRate ?? DEFAULT_FEE_RATE,
+    [resolvedFeeOptions]
   )
 
   useEffect(() => {
     let val = defaultFeeRate
     if (feeOptionIndex === FeeRateType.CUSTOM) {
       val = parseFloat(feeRateInputVal) || 0
-    } else if (feeOptions.length > 0) {
-      val = feeOptions[feeOptionIndex]?.feeRate ?? defaultFeeRate
+    } else if (resolvedFeeOptions.length > 0) {
+      val = resolvedFeeOptions[feeOptionIndex]?.feeRate ?? defaultFeeRate
     }
 
     if (val.toString() == feeRate.toString()) {
@@ -174,13 +225,14 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
     }
 
     updateFeeRateBar({ feeRate: val })
-  }, [feeOptions, feeOptionIndex, feeRateInputVal, defaultFeeRate, feeRate])
+  }, [resolvedFeeOptions, feeOptionIndex, feeRateInputVal, defaultFeeRate, feeRate])
 
   const adjustFeeRateInput = useCallback(
     (inputVal: string) => {
       // When user manually changes the input, check if we need to switch to CUSTOM
-      const shouldSwitchToCustom = feeOptionIndex !== FeeRateType.CUSTOM && feeOptions.length > 0
-      const selectedOption = feeOptions[feeOptionIndex]
+      const shouldSwitchToCustom =
+        feeOptionIndex !== FeeRateType.CUSTOM && hasLoadedFeeOptions && resolvedFeeOptions.length > 0
+      const selectedOption = resolvedFeeOptions[feeOptionIndex]
 
       // If currently on SLOW/AVG/FAST and user changes the value, switch to CUSTOM
       if (shouldSwitchToCustom && selectedOption) {
@@ -227,23 +279,23 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
         updateFeeRateBar({ feeRateInputVal: inputVal })
       }
     },
-    [defaultFeeRate, updateFeeRateBar, feeOptionIndex, feeOptions, supportLowFeeMode]
+    [defaultFeeRate, updateFeeRateBar, feeOptionIndex, resolvedFeeOptions, hasLoadedFeeOptions, supportLowFeeMode]
   )
 
   const isCustomOption = useCallback((option: FeeOption) => option.type === FeeRateType.CUSTOM, [t])
 
   const toggleLowFeeRate = useCallback(async () => {
-    const selectedOption = feeOptions[FeeRateType.SLOW]
+    const selectedOption = resolvedFeeOptions[FeeRateType.SLOW]
     updateFeeRateBar({
       feeOptionIndex: FeeRateType.SLOW,
       showCustomInput: true,
       feeRateInputVal: selectedOption.feeRate.toString(),
     })
-  }, [feeOptions, updateFeeRateBar, feeRateInputVal])
+  }, [resolvedFeeOptions, updateFeeRateBar, feeRateInputVal])
 
   const setFeeOptionIndex = useCallback(
     async (index: number) => {
-      const selectedOption = feeOptions[index]
+      const selectedOption = resolvedFeeOptions[index]
       if (supportLowFeeMode && index === FeeRateType.SLOW) {
         const acceptLowFeeMode = await wallet.getAcceptLowFeeMode()
         if (acceptLowFeeMode === false) {
@@ -266,7 +318,7 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
         })
       }
     },
-    [feeOptions, updateFeeRateBar]
+    [resolvedFeeOptions, updateFeeRateBar, supportLowFeeMode, wallet]
   )
 
   const toggleCustomInput = useCallback(
@@ -284,7 +336,8 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
   }, [feeOptionIndex, supportLowFeeMode])
 
   return {
-    feeOptions,
+    feeOptions: resolvedFeeOptions,
+    feeOptionsLoading: !hasLoadedFeeOptions,
     feeOptionIndex,
     setFeeOptionIndex,
     feeRateInputVal,
