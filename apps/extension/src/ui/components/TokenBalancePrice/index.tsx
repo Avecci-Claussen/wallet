@@ -2,7 +2,15 @@ import { Row } from '../Row';
 import { Text } from '../Text';
 import { TickPriceChange, TickUsd } from '../TickUsd';
 
-export function TokenBalancePrice({ showPrice, price, balance }: { showPrice: boolean; price: any; balance: string }) {
+export function TokenBalancePrice({
+  showPrice = false,
+  price,
+  balance
+}: {
+  showPrice?: boolean;
+  price: any;
+  balance: string;
+}) {
   if (!showPrice) {
     return null;
   }
