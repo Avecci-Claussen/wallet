@@ -8,12 +8,12 @@ import {
   Footer,
   Header,
   Icon,
-  Input,
   Layout,
   Loading,
   Row,
   Text,
-  Tooltip
+  TransferAmountCard,
+  TransferAmountSection
 } from '@/ui/components';
 import { BRC20Ticker } from '@/ui/components/BRC20Ticker';
 import { BtcUsd } from '@/ui/components/BtcUsd';
@@ -23,10 +23,11 @@ import InscriptionPreview from '@/ui/components/InscriptionPreview';
 import { OutputValueBar } from '@/ui/components/OutputValueBar';
 import { RBFBar } from '@/ui/components/RBFBar';
 import { TickUsdWithoutPrice, TokenType } from '@/ui/components/TickUsd';
+import { Tooltip } from '@/ui/components/Tooltip';
 import WebsiteBar from '@/ui/components/WebsiteBar';
 import { fontSizes } from '@/ui/theme/font';
 import { spacing } from '@/ui/theme/spacing';
-import { amountToSatoshis } from '@/ui/utils';
+import { amountToSatoshis, showLongNumber } from '@/ui/utils';
 import { paramsUtils } from '@unisat/base-utils';
 import { InscribeOrder, RawTxInfo, TokenBalance, TokenInfo } from '@unisat/wallet-shared';
 import {
@@ -170,76 +171,53 @@ function Step1(params: BRC20InscribeTransferParams) {
           <Column gap="lg" full>
             <Text text={t('inscribe_transfer')} preset="title-bold" textCenter my="lg" />
 
-            <Column>
-              <Row justifyBetween itemsCenter>
-                <Text text={t('available')} preset="regular" />
+            <TransferAmountSection
+              title={t('amount')}
+              titleExtra={
                 <TickUsdWithoutPrice tick={contextData.ticker} balance={inputAmount} type={TokenType.BRC20} />
-                {tokenBalance ? (
-                  <Column>
-                    {tokenBalance.availableBalanceUnSafe != '0' ? (
-                      <Row justifyCenter>
+              }>
+              <TransferAmountCard
+                amount={inputAmount}
+                onAmountChange={setInputAmount}
+                placeholder="0"
+                readOnly={inputDisabled}
+                showMax={Boolean(tokenBalance) && !inputDisabled}
+                onMaxClick={() => {
+                  if (tokenBalance) {
+                    setInputAmount(tokenBalance.availableBalanceSafe);
+                  }
+                }}
+                availableAmount={
+                  tokenBalance ? showLongNumber(tokenBalance.availableBalanceSafe) : t('loading')
+                }
+                unit={tokenBalance?.displayName || tokenBalance?.ticker || contextData.ticker}
+                runesDecimal={contextData.tokenInfo?.decimal}
+                inputTestId="inscribe-transfer-amount-input"
+                availableExtra={
+                  tokenBalance && tokenBalance.availableBalanceUnSafe !== '0' ? (
+                    <Tooltip
+                      title={`${tokenBalance.availableBalanceUnSafe} ${tokenBalance.ticker} ${t(
+                        'is_unconfirmed_please_wait_for_confirmation'
+                      )}`}
+                      overlayStyle={{
+                        fontSize: fontSizes.xs
+                      }}>
+                      <Row itemsCenter gap="xs">
                         <Text
-                          text={`${tokenBalance.availableBalanceSafe}  `}
-                          textCenter
+                          text={` + ${showLongNumber(tokenBalance.availableBalanceUnSafe)}`}
+                          color="textDim"
                           size="xs"
                           digital
-                          onClick={() => {
-                            setInputAmount(tokenBalance.availableBalanceSafe);
-                          }}
                         />
-                        <Tooltip
-                          title={`${tokenBalance.availableBalanceUnSafe} ${tokenBalance.ticker} ${t(
-                            'is_unconfirmed_please_wait_for_confirmation'
-                          )} `}
-                          overlayStyle={{
-                            fontSize: fontSizes.xs
-                          }}>
-                          <div>
-                            <Row>
-                              <Text
-                                text={` + ${tokenBalance.availableBalanceUnSafe}`}
-                                textCenter
-                                color="textDim"
-                                size="xs"
-                                digital
-                              />
-                              <Icon icon="circle-question" color="textDim" />
-                            </Row>
-                          </div>
-                        </Tooltip>
-
-                        <BRC20Ticker tick={tokenBalance.ticker} displayName={tokenBalance.displayName} preset="sm" />
+                        <Icon icon="circle-question" color="textDim" size={12} />
                       </Row>
-                    ) : (
-                      <Row
-                        itemsCenter
-                        onClick={() => {
-                          setInputAmount(tokenBalance.availableBalanceSafe);
-                        }}>
-                        <Text text={`${tokenBalance.availableBalanceSafe}`} digital textCenter size="xs" />
-
-                        <BRC20Ticker tick={tokenBalance.ticker} displayName={tokenBalance.displayName} preset="sm" />
-                      </Row>
-                    )}
-                  </Column>
-                ) : (
-                  <Text text={t('loading')} />
-                )}
-              </Row>
-
-              <Input
-                preset="amount"
-                placeholder={t('amount')}
-                value={inputAmount}
-                autoFocus={true}
-                enableBrc20Decimal={true}
-                onAmountInputChange={(amount) => {
-                  setInputAmount(amount);
-                }}
-                disabled={inputDisabled}
+                    </Tooltip>
+                  ) : null
+                }
               />
-              {inputError && <Text text={inputError} color="error" />}
-            </Column>
+            </TransferAmountSection>
+            {inputError ? <Text text={inputError} color="error" /> : null}
+            {inputErrorAvailable ? <Text text={inputErrorAvailable} color="error" /> : null}
 
             <Column mt="lg">
               <Text text={t('output_value')} preset="regular" />
@@ -253,7 +231,7 @@ function Step1(params: BRC20InscribeTransferParams) {
               />
             </Column>
 
-            <Column>
+            <Column mt="lg">
               <FeeRateBar />
             </Column>
 
