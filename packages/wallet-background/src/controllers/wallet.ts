@@ -1176,6 +1176,10 @@ export class WalletController extends BaseController {
 
   getNetworkType = () => {
     const chainType = this.getChainType()
+    if (!CHAINS_MAP[chainType]) {
+      preferenceService.setChainType(ChainType.BITCOIN_MAINNET)
+      return CHAINS_MAP[ChainType.BITCOIN_MAINNET]!.networkType
+    }
     return CHAINS_MAP[chainType]!.networkType
   }
 
