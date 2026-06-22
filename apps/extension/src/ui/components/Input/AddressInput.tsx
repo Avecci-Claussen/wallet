@@ -13,6 +13,7 @@ import { AccordingInscription } from '../AccordingInscription';
 import { Column } from '../Column';
 import { ContactsModal } from '../ContactsModal';
 import { CopyableAddress } from '../CopyableAddress';
+import { sendInputContainerStyle } from '../TransferAmountCard';
 
 export const AddressInput = (props: InputProps) => {
   const { t } = useI18n();
@@ -23,6 +24,7 @@ export const AddressInput = (props: InputProps) => {
     style: $inputStyleOverride,
     networkType: propsNetworkType,
     recipientLabel,
+    containerStyle,
     ...rest
   } = props;
 
@@ -176,6 +178,19 @@ export const AddressInput = (props: InputProps) => {
     }
   };
 
+  const isMultiline = Boolean(inputVal && inputVal.length > 50);
+  const addressFieldStyle = Object.assign({}, $baseTextareaStyle, {
+    padding: 0,
+    margin: 0,
+    minHeight: 'unset',
+    lineHeight: '22px',
+    alignSelf: 'center',
+    flex: 'none',
+    width: '100%',
+    display: 'block',
+    boxSizing: 'border-box' as const
+  }, $inputStyleOverride);
+
   return (
     <div style={{ alignSelf: 'stretch' }}>
       <Row justifyBetween itemsCenter style={{ marginTop: 20, marginBottom: 12 }}>
@@ -186,23 +201,44 @@ export const AddressInput = (props: InputProps) => {
         </Row>
       </Row>
       <div
-        style={Object.assign({}, $baseContainerStyle, {
+        style={Object.assign({}, $baseContainerStyle, sendInputContainerStyle, {
           flexDirection: 'column',
-          minHeight: '56.5px',
           paddingTop: 0,
           paddingBottom: 0
-        })}>
-        <Row full itemsCenter>
-          <textarea
-            placeholder={inputAddressPlaceholder}
-            style={Object.assign({}, $baseTextareaStyle, $inputStyleOverride)}
-            onChange={handleInputAddress}
-            onBlur={onAddressBlur}
-            value={inputVal}
-            rows={inputVal && inputVal.length > 50 ? 2 : 1}
-            {...rest}
-          />
-        </Row>
+        }, containerStyle)}>
+        <div
+          style={{
+            minHeight: 56,
+            height: isMultiline ? 'auto' : 56,
+            display: 'flex',
+            alignItems: isMultiline ? 'flex-start' : 'center',
+            width: '100%',
+            paddingTop: isMultiline ? 8 : 0,
+            paddingBottom: isMultiline ? 8 : 0,
+            boxSizing: 'border-box'
+          }}>
+          {isMultiline ? (
+            <textarea
+              placeholder={inputAddressPlaceholder}
+              style={{ ...addressFieldStyle, height: 44 }}
+              onChange={handleInputAddress}
+              onBlur={onAddressBlur}
+              value={inputVal}
+              rows={2}
+              {...rest}
+            />
+          ) : (
+            <input
+              type="text"
+              placeholder={inputAddressPlaceholder}
+              style={{ ...addressFieldStyle, height: 22 }}
+              onChange={handleInputAddress}
+              onBlur={onAddressBlur}
+              value={inputVal}
+              {...rest}
+            />
+          )}
+        </div>
 
         {searching && (
           <Row full mt="sm">
