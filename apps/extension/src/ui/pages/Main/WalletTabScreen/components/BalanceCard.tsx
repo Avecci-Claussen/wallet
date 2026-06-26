@@ -77,13 +77,13 @@ export function BalanceCard() {
 
       {isDetailExpanded && isCurrentChainBalance && (
         <Row
-          itemsStart
           style={{
             width: '100%',
             padding: 12,
             backgroundColor: '#F1CC9F',
             borderRadius: 16,
-            gap: 8
+            gap: 8,
+            alignItems: 'flex-start'
           }}>
           <Column style={{ flex: 1, minWidth: 0, alignItems: 'flex-start' }} gap="xs">
             <Row itemsCenter gap="xs" style={{ height: 20 }}>
