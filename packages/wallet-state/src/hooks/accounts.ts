@@ -5,7 +5,7 @@ import { Account, getAccountCapabilities } from '@unisat/wallet-shared'
 import { KeyringType } from '@unisat/keyring-service/types'
 import { AddressType, ChainType } from '@unisat/wallet-types'
 
-import { AppState } from '..'
+import { AppState, useChainType } from '..'
 import { useWallet } from '../context/WalletContext'
 import { accountActions } from '../reducers/accounts'
 import { keyringsActions } from '../reducers/keyrings'
@@ -188,24 +188,9 @@ export function useFetchBalanceCallback() {
   const wallet = useWallet()
   const currentAccount = useCurrentAccount()
   const { address } = currentAccount
+  const chainType = useChainType()
   return useCallback(async () => {
     if (!address) return
-    // const cachedBalance = await wallet.getAddressCacheBalance(currentAccount.address);
-    // const _accountBalance = await wallet.getAddressBalance(currentAccount.address);
-    // dispatch(
-    //   accountActions.setBalance({
-    //     address: currentAccount.address,
-    //     amount: _accountBalance.amount,
-    //     btc_amount: _accountBalance.btc_amount,
-    //     inscription_amount: _accountBalance.inscription_amount,
-    //     confirm_btc_amount: _accountBalance.confirm_btc_amount,
-    //     pending_btc_amount: _accountBalance.pending_btc_amount
-    //   })
-    // );
-    // if (cachedBalance.amount !== _accountBalance.amount) {
-    //   wallet.expireUICachedData(currentAccount.address);
-    //   dispatch(accountActions.expireHistory());
-    // }
 
     const summary = await wallet.getAddressSummary(address)
     dispatch(accountActions['setAddressSummary']!({ ...summary, address }))
@@ -218,7 +203,7 @@ export function useFetchBalanceCallback() {
         chainType: balanceV2.chainType,
       })
     )
-  }, [dispatch, wallet, address])
+  }, [dispatch, wallet, address, chainType])
 }
 
 export function useReloadAccounts() {
