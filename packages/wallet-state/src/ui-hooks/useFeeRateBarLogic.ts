@@ -32,38 +32,48 @@ const AVG_OPTION_INDEX = 1
 // if (Fast = Avg) -> show Fast time (30s) for both
 // if (Avg = Slow) -> show Avg time (1.5m) for both
 
+function suffixDesc(key: string, isFractal: boolean) {
+  if (isFractal) {
+    return key + '_fb'
+  }
+  return key
+}
+
 function getFractalFeeDesc(
   index: FeeRateType,
   fastRate: number,
   avgRate: number,
   slowRate: number,
-  t: (key: string) => string
+  t: (key: string) => string,
+  isFractal: boolean
 ): string {
   const { FAST, AVG, SLOW } = FeeRateType
 
   // All rates are equal
   if (fastRate === avgRate && avgRate === slowRate) {
-    return t('feerate_fast_desc_fb')
+    return t(suffixDesc('feerate_fast_desc', isFractal))
   }
 
   // Fast equals Avg
   if (fastRate === avgRate) {
-    return index === SLOW ? t('feerate_slow_desc_fb') : t('feerate_fast_desc_fb')
+    return index === SLOW
+      ? t(suffixDesc('feerate_slow_desc', isFractal))
+      : t(suffixDesc('feerate_fast_desc', isFractal))
   }
 
   // Avg equals Slow
   if (avgRate === slowRate && (index === AVG || index === SLOW)) {
-    return t('feerate_avg_desc_fb')
+    return t(suffixDesc('feerate_avg_desc', isFractal))
   }
 
   // Default descriptions
   const descriptions = {
-    [FAST]: 'feerate_fast_desc_fb',
-    [AVG]: 'feerate_avg_desc_fb',
-    [SLOW]: 'feerate_slow_desc_fb',
+    [FAST]: 'feerate_fast_desc',
+    [AVG]: 'feerate_avg_desc',
+    [SLOW]: 'feerate_slow_desc',
   }
 
-  return t(descriptions[index] || '')
+  return t(suffixDesc(descriptions[index] || '', isFractal))
 }
 
 function formatFeeRateTextKey(
@@ -82,20 +92,15 @@ function formatFeeRateTextKey(
     if (!keys) return option
 
     let title = t(keys.title)
+
     let desc = t(keys.desc)
 
-    if (isFractal) {
-      desc = getFractalFeeDesc(index, fastRate, avgRate, slowRate, t)
-    } else {
-      if (fastRate === slowRate) {
-        desc = t('feerate_fast_desc')
-      }
+    desc = getFractalFeeDesc(index, fastRate, avgRate, slowRate, t, isFractal)
 
-      if (supportLowFeeMode) {
-        if (index === SLOW) {
-          title = t('feerate_sub1_title')
-          desc = ''
-        }
+    if (supportLowFeeMode) {
+      if (index === SLOW) {
+        title = t('feerate_sub1_title')
+        desc = ''
       }
     }
 
@@ -230,7 +235,9 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
     (inputVal: string) => {
       // When user manually changes the input, check if we need to switch to CUSTOM
       const shouldSwitchToCustom =
-        feeOptionIndex !== FeeRateType.CUSTOM && hasLoadedFeeOptions && resolvedFeeOptions.length > 0
+        feeOptionIndex !== FeeRateType.CUSTOM &&
+        hasLoadedFeeOptions &&
+        resolvedFeeOptions.length > 0
       const selectedOption = resolvedFeeOptions[feeOptionIndex]
 
       // If currently on SLOW/AVG/FAST and user changes the value, switch to CUSTOM
@@ -278,7 +285,14 @@ export function useFeeRateBarLogic({ readonly }: { readonly?: boolean }) {
         updateFeeRateBar({ feeRateInputVal: inputVal })
       }
     },
-    [defaultFeeRate, updateFeeRateBar, feeOptionIndex, resolvedFeeOptions, hasLoadedFeeOptions, supportLowFeeMode]
+    [
+      defaultFeeRate,
+      updateFeeRateBar,
+      feeOptionIndex,
+      resolvedFeeOptions,
+      hasLoadedFeeOptions,
+      supportLowFeeMode,
+    ]
   )
 
   const isCustomOption = useCallback((option: FeeOption) => option.type === FeeRateType.CUSTOM, [t])
