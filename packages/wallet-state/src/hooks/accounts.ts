@@ -5,13 +5,14 @@ import { Account, getAccountCapabilities } from '@unisat/wallet-shared'
 import { KeyringType } from '@unisat/keyring-service/types'
 import { AddressType, ChainType } from '@unisat/wallet-types'
 
-import { AppState, useChainType } from '..'
+import type { AppState } from '..'
 import { useWallet } from '../context/WalletContext'
 import { accountActions } from '../reducers/accounts'
 import { keyringsActions } from '../reducers/keyrings'
 import { settingsActions } from '../reducers/settings'
 import { useAppDispatch, useAppSelector } from './base'
 import { useCurrentKeyring } from './keyrings'
+import { useChainType } from './settings'
 
 export function useAccountsState(): AppState['accounts'] {
   return useAppSelector(state => state.accounts)
