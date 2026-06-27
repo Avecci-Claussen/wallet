@@ -1,5 +1,9 @@
 # @unisat/wallet-state
 
+## 1.2.4
+
+- Update UI logics
+
 ## 1.2.3
 
 ### Patch Changes
