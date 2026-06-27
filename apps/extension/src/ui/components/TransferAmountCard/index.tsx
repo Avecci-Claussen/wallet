@@ -1,7 +1,6 @@
 import { CSSProperties, ReactNode } from 'react';
 
 import { useI18n } from '@unisat/wallet-state';
-import { BigNumber } from 'bignumber.js';
 
 import { fontSizes } from '@/ui/theme/font';
 
@@ -98,19 +97,6 @@ function isValidAmountInput(
   }
 
   return /^(0(\.\d{0,8})?|[1-9]\d*\.?\d{0,8})$/.test(value);
-}
-
-function isWithinAvailableAmount(value: string, availableAmount: string) {
-  if (value === '') return true;
-
-  const inputAmount = new BigNumber(value.replace(/,/g, ''));
-  const maxAmount = new BigNumber(availableAmount.replace(/,/g, ''));
-
-  if (!inputAmount.isFinite() || !maxAmount.isFinite()) {
-    return true;
-  }
-
-  return inputAmount.lte(maxAmount);
 }
 
 export type TransferAmountCardProps = {
@@ -230,10 +216,7 @@ export function TransferAmountCard({
           onChange={(e) => {
             if (readOnly) return;
             const value = e.target.value;
-            if (
-              isValidAmountInput(value, { disableDecimal, runesDecimal }) &&
-              isWithinAvailableAmount(value, availableAmount)
-            ) {
+            if (isValidAmountInput(value, { disableDecimal, runesDecimal })) {
               onAmountChange(value);
             }
           }}
