@@ -1,8 +1,9 @@
+import { BigNumber } from 'bignumber.js';
 import { CSSProperties, ReactNode } from 'react';
 
-import { useI18n } from '@unisat/wallet-state';
-
+import { colors } from '@/ui/theme/colors';
 import { fontSizes } from '@/ui/theme/font';
+import { useI18n } from '@unisat/wallet-state';
 
 import { Column } from '../Column';
 import { Icon } from '../Icon';
@@ -58,6 +59,27 @@ const maxButtonStyle: CSSProperties = {
   textAlign: 'center'
 };
 
+const amountActionsStyle: CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  flexShrink: 0
+};
+
+const clearButtonStyle: CSSProperties = {
+  width: 28,
+  height: 28,
+  minWidth: 28,
+  border: 'none',
+  borderRadius: 14,
+  background: 'rgba(255,255,255,0.08)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  cursor: 'pointer',
+  padding: 0
+};
+
 const unlockButtonStyle: CSSProperties = {
   height: 24,
   minWidth: 56,
@@ -81,10 +103,7 @@ const fieldHeaderStyle: CSSProperties = {
   alignItems: 'center'
 };
 
-function isValidAmountInput(
-  value: string,
-  options: { disableDecimal?: boolean; runesDecimal?: number }
-) {
+function isValidAmountInput(value: string, options: { disableDecimal?: boolean; runesDecimal?: number }) {
   if (value === '') return true;
 
   if (options.disableDecimal) {
@@ -97,6 +116,23 @@ function isValidAmountInput(
   }
 
   return /^(0(\.\d{0,8})?|[1-9]\d*\.?\d{0,8})$/.test(value);
+}
+
+function normalizeAmountValue(value: string) {
+  return value.replace(/,/g, '').trim();
+}
+
+function isAmountGreaterThanAvailable(value: string, availableAmount: string) {
+  if (value === '') return false;
+
+  const inputAmount = new BigNumber(normalizeAmountValue(value));
+  const maxAmount = new BigNumber(normalizeAmountValue(availableAmount));
+
+  if (!inputAmount.isFinite() || !maxAmount.isFinite()) {
+    return false;
+  }
+
+  return inputAmount.gt(maxAmount);
 }
 
 export type TransferAmountCardProps = {
@@ -112,6 +148,7 @@ export type TransferAmountCardProps = {
   runesDecimal?: number;
   disableDecimal?: boolean;
   inputTestId?: string;
+  error?: string;
   footer?: ReactNode;
   availableExtra?: ReactNode;
 };
@@ -171,11 +208,7 @@ export function TransferAmountUnavailableRow({
   );
 }
 
-export function TransferAmountSection(props: {
-  title?: string;
-  titleExtra?: ReactNode;
-  children: ReactNode;
-}) {
+export function TransferAmountSection(props: { title?: string; titleExtra?: ReactNode; children: ReactNode }) {
   const { t } = useI18n();
 
   return (
@@ -202,46 +235,71 @@ export function TransferAmountCard({
   runesDecimal,
   disableDecimal,
   inputTestId,
+  error,
   footer,
   availableExtra
 }: TransferAmountCardProps) {
   const { t } = useI18n();
   const inputColor = readOnly || amountMuted ? 'rgba(255, 255, 255, 0.45)' : '#fff';
+  const amountExceeded = isAmountGreaterThanAvailable(amount, availableAmount);
+  const resolvedAmountCardStyle = {
+    ...amountCardStyle,
+    borderColor: amountExceeded ? colors.danger : 'rgba(255,255,255,0.14)'
+  };
+  const amountError = error || (amountExceeded ? t('insufficient_balance') : '');
 
   return (
-    <Column gap="zero" style={amountCardStyle}>
-      <div style={amountInputSectionStyle}>
-        <input
-          value={amount}
-          onChange={(e) => {
-            if (readOnly) return;
-            const value = e.target.value;
-            if (isValidAmountInput(value, { disableDecimal, runesDecimal })) {
-              onAmountChange(value);
-            }
-          }}
-          placeholder={placeholder}
-          inputMode={runesDecimal !== undefined && runesDecimal > 0 ? 'decimal' : 'numeric'}
-          readOnly={readOnly}
-          style={{ ...inputStyle, flex: 1, color: inputColor }}
-          data-testid={inputTestId}
-        />
-        {showMax ? (
-          <button type="button" style={maxButtonStyle} onClick={onMaxClick}>
-            {t('max')}
-          </button>
-        ) : null}
-      </div>
-      <div style={dividerStyle} />
-      <Row justifyBetween itemsCenter style={{ marginTop: 12 }}>
-        <Text text={t('available')} color="ticker_color2" size="xs" />
-        <Row style={{ flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center' }}>
-          <Text text={availableAmount} color="ticker_color2" size="xs" wrap />
-          <Text text={` ${unit}`} size="xs" style={{ color: 'rgba(255, 255, 255, 0.45)' }} disableTranslate wrap />
-          {availableExtra}
+    <>
+      <Column gap="zero" style={resolvedAmountCardStyle}>
+        <div style={amountInputSectionStyle}>
+          <input
+            value={amount}
+            onChange={(e) => {
+              if (readOnly) return;
+              const value = e.target.value;
+              if (isValidAmountInput(value, { disableDecimal, runesDecimal })) {
+                onAmountChange(value);
+              }
+            }}
+            placeholder={placeholder}
+            inputMode={runesDecimal !== undefined && runesDecimal > 0 ? 'decimal' : 'numeric'}
+            readOnly={readOnly}
+            style={{ ...inputStyle, flex: 1, color: inputColor }}
+            data-testid={inputTestId}
+          />
+          <div style={amountActionsStyle}>
+            {amount && !readOnly ? (
+              <button
+                type="button"
+                style={clearButtonStyle}
+                onClick={() => onAmountChange('')}
+                aria-label="Clear amount">
+                <Icon icon="close" size={10} color="textDim" />
+              </button>
+            ) : null}
+            {showMax ? (
+              <button type="button" style={maxButtonStyle} onClick={onMaxClick}>
+                {t('max')}
+              </button>
+            ) : null}
+          </div>
+        </div>
+        <div style={dividerStyle} />
+        <Row justifyBetween itemsCenter style={{ marginTop: 12 }}>
+          <Text text={t('available')} color="ticker_color2" size="xs" />
+          <Row style={{ flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center' }}>
+            <Text text={availableAmount} color="ticker_color2" size="xs" wrap />
+            <Text text={` ${unit}`} size="xs" style={{ color: 'rgba(255, 255, 255, 0.45)' }} disableTranslate wrap />
+            {availableExtra}
+          </Row>
         </Row>
-      </Row>
-      {footer}
-    </Column>
+        {footer}
+      </Column>
+      {/* {amountError ? (
+        <Row fullX style={{ marginTop: 8 }}>
+          <Text text={amountError} color="error" size="xs" wrap />
+        </Row>
+      ) : null} */}
+    </>
   );
 }
