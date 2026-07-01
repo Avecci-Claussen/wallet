@@ -122,6 +122,22 @@ function normalizeAmountValue(value: string) {
   return value.replace(/,/g, '').trim();
 }
 
+function formatAmountValue(value: string) {
+  const normalizedValue = normalizeAmountValue(value);
+  if (normalizedValue === '') return '';
+
+  const amount = new BigNumber(normalizedValue);
+  if (!amount.isFinite()) return value;
+
+  const [integerPart, decimalPart] = normalizedValue.split('.');
+  const integerPartWithCommas = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  if (normalizedValue.includes('.')) {
+    return `${integerPartWithCommas}.${decimalPart ?? ''}`;
+  }
+
+  return integerPartWithCommas;
+}
+
 function isAmountGreaterThanAvailable(value: string, availableAmount: string) {
   if (value === '') return false;
 
@@ -242,6 +258,8 @@ export function TransferAmountCard({
   const { t } = useI18n();
   const inputColor = readOnly || amountMuted ? 'rgba(255, 255, 255, 0.45)' : '#fff';
   const amountExceeded = isAmountGreaterThanAvailable(amount, availableAmount);
+  const displayAmount = formatAmountValue(amount);
+  const displayAvailableAmount = formatAmountValue(availableAmount) || availableAmount;
   const resolvedAmountCardStyle = {
     ...amountCardStyle,
     borderColor: amountExceeded ? colors.danger : 'rgba(255,255,255,0.14)'
@@ -253,10 +271,10 @@ export function TransferAmountCard({
       <Column gap="zero" style={resolvedAmountCardStyle}>
         <div style={amountInputSectionStyle}>
           <input
-            value={amount}
+            value={displayAmount}
             onChange={(e) => {
               if (readOnly) return;
-              const value = e.target.value;
+              const value = normalizeAmountValue(e.target.value);
               if (isValidAmountInput(value, { disableDecimal, runesDecimal })) {
                 onAmountChange(value);
               }
@@ -288,7 +306,7 @@ export function TransferAmountCard({
         <Row justifyBetween itemsCenter style={{ marginTop: 12 }}>
           <Text text={t('available')} color="ticker_color2" size="xs" />
           <Row style={{ flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center' }}>
-            <Text text={availableAmount} color="ticker_color2" size="xs" wrap />
+            <Text text={displayAvailableAmount} color="ticker_color2" size="xs" wrap />
             <Text text={` ${unit}`} size="xs" style={{ color: 'rgba(255, 255, 255, 0.45)' }} disableTranslate wrap />
             {availableExtra}
           </Row>
