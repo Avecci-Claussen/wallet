@@ -34,66 +34,38 @@ interface TabDropdownProps {
 }
 
 function TabDropdown({ tab, isExpanded, selectedKey, onToggle, onSelect }: TabDropdownProps) {
-  const activeSubText = tab.subItems.find((item) => item.key === selectedKey)?.label || '';
-  const activeSubVersion = tab.subItems.find((item) => item.key === selectedKey)?.versionLabel || '';
+  const isActiveTab = tab.subItems.some((item) => item.key === selectedKey);
+  const activeSubItem = tab.subItems.find((item) => item.key === selectedKey);
+
+  const pillStyle = {
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 0,
+    backgroundColor: isActiveTab ? '#322D1F' : 'rgba(255, 255, 255, 0.08)',
+    cursor: 'pointer'
+  } as const;
 
   return (
-    <Column style={{ width: 128, position: 'relative' }} itemsCenter gap="zero">
-      {activeSubText ? (
-        <Row
-          onClick={onToggle}
-          gap="zero"
-          itemsCenter
-          style={{
-            paddingTop: 6,
-            paddingBottom: 6,
-            borderColor: colors.gold,
-            borderWidth: 1,
-            borderRadius: 16,
-            backgroundColor: '#322D1F'
-          }}
-          px="sm">
-          <Text
-            text={activeSubText}
-            mx="md"
-            size="xs"
-            style={{
-              color: colors.gold
-            }}
-          />
+    <Column style={{ position: 'relative' }} gap="zero">
+      <Row onClick={onToggle} gap="zero" itemsCenter justifyCenter px="lg" style={pillStyle}>
+        <Text
+          text={tab.label}
+          size="xs"
+          color={isActiveTab ? 'gold' : 'white_muted'}
+        />
+        {isActiveTab && activeSubItem ? (
           <Row
             px="md"
-            style={{ backgroundImage: 'linear-gradient(103.92deg, #EBB94C 0%, #E97E00 100%)', borderRadius: 10 }}>
-            <Text text={activeSubVersion} size="xs" />
-          </Row>
-
-          <Icon icon="drop_down" color="textDim" size={10} style={{ marginLeft: 5, marginRight: 5 }} />
-        </Row>
-      ) : (
-        <Row
-          onClick={onToggle}
-          gap="zero"
-          itemsCenter
-          style={{
-            paddingTop: 6,
-            paddingBottom: 6,
-            borderColor: colors.border,
-            borderWidth: 2,
-            borderRadius: 16,
-            backgroundColor: 'rgba(255, 255, 255, 0.08)'
-          }}
-          px="sm">
-          <Text
-            text={tab.key}
-            mx="md"
-            size="xs"
             style={{
-              color: colors.textDim
-            }}
-          />
-          <Icon icon="drop_down" color="textDim" size={10} style={{ marginRight: 5 }} />
-        </Row>
-      )}
+              marginLeft: 4,
+              backgroundImage: 'linear-gradient(103.92deg, #EBB94C 0%, #E97E00 100%)',
+              borderRadius: 10
+            }}>
+            <Text text={activeSubItem.versionLabel} size="xs" />
+          </Row>
+        ) : null}
+        <Icon icon="drop_down" color="textDim" size={10} style={{ marginLeft: 4 }} />
+      </Row>
 
       {isExpanded && (
         <Column
@@ -101,7 +73,7 @@ function TabDropdown({ tab, isExpanded, selectedKey, onToggle, onSelect }: TabDr
             position: 'absolute',
             top: '100%',
             left: 0,
-            width: '100%',
+            minWidth: '100%',
             borderWidth: 0,
             borderRadius: 8,
             backgroundColor: '#24282F',
@@ -112,7 +84,6 @@ function TabDropdown({ tab, isExpanded, selectedKey, onToggle, onSelect }: TabDr
           {tab.subItems.map((subItem) => (
             <Row key={subItem.key} itemsCenter justifyCenter py="sm" px="sm" gap="zero">
               <Text
-                key={subItem.key}
                 text={subItem.label}
                 color={'white_muted'}
                 mx="md"
@@ -232,9 +203,8 @@ export function CATTab() {
 
   return (
     <div ref={rootRef}>
-      <Column>
-      <Row justifyBetween>
-        <Row gap="zero">
+      <Column gap="sm">
+        <Row gap="sm">
           {tabConfigs.map((tab) => (
             <TabDropdown
               key={tab.key}
@@ -246,9 +216,8 @@ export function CATTab() {
             />
           ))}
         </Row>
-      </Row>
 
-      {renderActiveChildren}
+        <Column mt="md">{renderActiveChildren}</Column>
       </Column>
     </div>
   );
