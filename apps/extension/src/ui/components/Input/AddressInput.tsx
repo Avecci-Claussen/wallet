@@ -272,7 +272,7 @@ export const AddressInput = (props: InputProps) => {
       </div>
 
       {parseName ? (
-        <Row mt="sm" gap="zero" itemsCenter>
+        <Row mt="md" gap="sm" itemsCenter>
           <Text preset="sub" size="sm" text={t('name_recognized_and_resolved')} />
           <Text
             preset="link"
@@ -282,7 +282,6 @@ export const AddressInput = (props: InputProps) => {
               window.open('https://docs.unisat.io/unisat-wallet/name-recognized-and-resolved');
             }}
           />
-          <Text preset="sub" size="sm" text={')'} />
         </Row>
       ) : null}
       {parseError && <Text text={parseError} preset="regular" color="error" mt="md" />}
