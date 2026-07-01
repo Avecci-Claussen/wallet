@@ -43,10 +43,10 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
         title={<BRC20Ticker tick={ticker} displayName={displayName} truncate />}
         titleExtra={
           tag || selfMint ? (
-            <Row gap="sm" itemsCenter>
-              {tag && <Tag type={tag} />}
-              {selfMint && <Tag type="self-issuance" small />}
-            </Row>
+            <>
+              {tag ? <Tag type={tag} /> : null}
+              {selfMint ? <Tag type="self-issuance" small /> : null}
+            </>
           ) : null
         }
         quantity={<Text text={totalBalance} size="xs" digital />}

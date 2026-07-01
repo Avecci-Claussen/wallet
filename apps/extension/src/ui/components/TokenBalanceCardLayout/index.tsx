@@ -1,4 +1,4 @@
-import { cloneElement, CSSProperties, isValidElement, ReactNode } from 'react';
+import { CSSProperties, ReactNode } from 'react';
 
 import { Column } from '../Column';
 import { TokenBalancePrice } from '../TokenBalancePrice';
@@ -55,9 +55,7 @@ const titleCellStyle: CSSProperties = {
   maxWidth: '100%',
   overflow: 'hidden',
   display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'flex-start',
-  gap: 4,
+  alignItems: 'center',
   justifyContent: 'flex-start'
 };
 
@@ -69,18 +67,15 @@ const titleNameStyle: CSSProperties = {
 };
 
 const titleExtraStyle: CSSProperties = {
+  width: '100%',
   minWidth: 0,
   maxWidth: '100%',
   overflow: 'hidden',
   display: 'flex',
   flexWrap: 'wrap',
-  alignItems: 'center'
-};
-
-const titleExtraContentStyle: CSSProperties = {
-  minWidth: 0,
-  maxWidth: '100%',
-  flexWrap: 'wrap'
+  alignItems: 'flex-start',
+  justifyContent: 'flex-start',
+  gap: 4
 };
 
 const quantityCellStyle: CSSProperties = {
@@ -110,30 +105,23 @@ export function TokenBalanceCardLayout({
   titleExtra,
   onIconClick
 }: TokenBalanceCardLayoutProps) {
-  const titleExtraContent = isValidElement<{ style?: CSSProperties }>(titleExtra)
-    ? cloneElement(titleExtra, {
-        style: {
-          ...titleExtra.props.style,
-          ...titleExtraContentStyle
-        }
-      })
-    : titleExtra;
-
   return (
-    <div style={cardGridStyle}>
-      <div onClick={onIconClick} style={{ flexShrink: 0 }}>
-        {icon}
-      </div>
-      <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden' }}>
-        <div style={titleRowStyle}>
-          <div style={titleCellStyle}>
-            <div style={titleNameStyle}>{title}</div>
-            {titleExtra ? <div style={titleExtraStyle}>{titleExtraContent}</div> : null}
-          </div>
-          <div style={quantityCellStyle}>{quantity}</div>
+    <Column gap={titleExtra ? 'md' : 'zero'} style={{ width: '100%', minWidth: 0, overflow: 'hidden' }}>
+      <div style={{ ...cardGridStyle, alignItems: titleExtra ? 'start' : 'center' }}>
+        <div onClick={onIconClick} style={{ flexShrink: 0 }}>
+          {icon}
         </div>
-        <TokenBalancePrice showPrice={showPrice} price={price} balance={balance} />
-      </Column>
-    </div>
+        <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden' }}>
+          <div style={titleRowStyle}>
+            <div style={titleCellStyle}>
+              <div style={titleNameStyle}>{title}</div>
+            </div>
+            <div style={quantityCellStyle}>{quantity}</div>
+          </div>
+          <TokenBalancePrice showPrice={showPrice} price={price} balance={balance} />
+        </Column>
+      </div>
+      {titleExtra ? <div style={titleExtraStyle}>{titleExtra}</div> : null}
+    </Column>
   );
 }
