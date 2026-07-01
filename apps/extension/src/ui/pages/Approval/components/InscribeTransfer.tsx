@@ -187,9 +187,7 @@ function Step1(params: BRC20InscribeTransferParams) {
                     setInputAmount(tokenBalance.availableBalanceSafe);
                   }
                 }}
-                availableAmount={
-                  tokenBalance ? showLongNumber(tokenBalance.availableBalanceSafe) : t('loading')
-                }
+                availableAmount={tokenBalance ? tokenBalance.availableBalanceSafe : t('loading')}
                 unit={tokenBalance?.displayName || tokenBalance?.ticker || contextData.ticker}
                 runesDecimal={contextData.tokenInfo?.decimal}
                 inputTestId="inscribe-transfer-amount-input"
