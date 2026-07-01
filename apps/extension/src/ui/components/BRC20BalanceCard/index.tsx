@@ -56,7 +56,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
       />
 
       {hasOutWalletBalance ? (
-        <Column fullX mt="md" style={{ gap: TOKEN_BALANCE_CARD_PADDING_Y }}>
+        <Column fullX style={{ gap: TOKEN_BALANCE_CARD_PADDING_Y }}>
           <Row style={{ borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }} />
           <Row fullY justifyBetween justifyCenter>
             <Column fullY justifyCenter>
