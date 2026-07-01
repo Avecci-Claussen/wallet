@@ -1,7 +1,6 @@
-import { CSSProperties, ReactNode } from 'react';
+import { cloneElement, CSSProperties, isValidElement, ReactNode } from 'react';
 
 import { Column } from '../Column';
-import { Row } from '../Row';
 import { TokenBalancePrice } from '../TokenBalancePrice';
 
 export const TOKEN_BALANCE_CARD_HEIGHT = 68;
@@ -54,20 +53,32 @@ const titleCellStyle: CSSProperties = {
   maxWidth: '100%',
   overflow: 'hidden',
   display: 'flex',
-  alignItems: 'center',
-  gap: CONTENT_GAP,
-  flexWrap: 'nowrap',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
+  gap: 4,
   justifyContent: 'flex-start'
 };
 
 const titleNameStyle: CSSProperties = {
   minWidth: 0,
+  width: '100%',
   overflow: 'hidden',
   flex: '0 1 auto'
 };
 
 const titleExtraStyle: CSSProperties = {
-  flexShrink: 0
+  minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center'
+};
+
+const titleExtraContentStyle: CSSProperties = {
+  minWidth: 0,
+  maxWidth: '100%',
+  flexWrap: 'wrap'
 };
 
 const quantityCellStyle: CSSProperties = {
@@ -97,6 +108,15 @@ export function TokenBalanceCardLayout({
   titleExtra,
   onIconClick
 }: TokenBalanceCardLayoutProps) {
+  const titleExtraContent = isValidElement<{ style?: CSSProperties }>(titleExtra)
+    ? cloneElement(titleExtra, {
+        style: {
+          ...titleExtra.props.style,
+          ...titleExtraContentStyle
+        }
+      })
+    : titleExtra;
+
   return (
     <div style={cardGridStyle}>
       <div onClick={onIconClick} style={{ flexShrink: 0 }}>
@@ -106,7 +126,7 @@ export function TokenBalanceCardLayout({
         <div style={titleRowStyle}>
           <div style={titleCellStyle}>
             <div style={titleNameStyle}>{title}</div>
-            {titleExtra ? <div style={titleExtraStyle}>{titleExtra}</div> : null}
+            {titleExtra ? <div style={titleExtraStyle}>{titleExtraContent}</div> : null}
           </div>
           <div style={quantityCellStyle}>{quantity}</div>
         </div>

@@ -27,7 +27,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
     t
   } = useBRC20BalanceCardLogic(props);
 
-  const adaptiveHeight = Boolean(hasOutWalletBalance);
+  const adaptiveHeight = Boolean(hasOutWalletBalance || tag || selfMint);
 
   return (
     <Card
@@ -35,7 +35,8 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
       onClick={() => {
         onClick && onClick();
       }}
-      style={getTokenBalanceCardStyle(adaptiveHeight)}>
+      style={getTokenBalanceCardStyle(adaptiveHeight)}
+    >
       <TokenBalanceCardLayout
         icon={<TokenBalanceIcon iconInfo={iconInfo} />}
         onIconClick={onClick}
