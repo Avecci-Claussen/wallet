@@ -56,7 +56,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
 
       {hasOutWalletBalance ? (
         <Column fullX gap="zero">
-          <Row style={{ borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }} mt="sm" />
+          <Row style={{ borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }} mb="sm" />
           <Row fullY justifyBetween justifyCenter>
             <Column fullY justifyCenter>
               <Text text={t('brc20_in_wallet')} color="textDim" size="xs" />
