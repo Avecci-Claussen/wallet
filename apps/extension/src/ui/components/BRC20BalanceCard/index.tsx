@@ -6,7 +6,7 @@ import { Column } from '../Column';
 import { Row } from '../Row';
 import Tag from '../Tag';
 import { Text } from '../Text';
-import { getTokenBalanceCardStyle, TokenBalanceCardLayout } from '../TokenBalanceCardLayout';
+import { getTokenBalanceCardStyle, TOKEN_BALANCE_CARD_PADDING_Y, TokenBalanceCardLayout } from '../TokenBalanceCardLayout';
 import { TokenBalanceIcon } from '../TokenBalanceIcon';
 
 export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
@@ -56,8 +56,8 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
       />
 
       {hasOutWalletBalance ? (
-        <Column fullX gap="zero">
-          <Row style={{ borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }} mb="sm" />
+        <Column fullX mt="md" style={{ gap: TOKEN_BALANCE_CARD_PADDING_Y }}>
+          <Row style={{ borderTopWidth: 1, borderColor: 'rgba(255,255,255,0.1)' }} />
           <Row fullY justifyBetween justifyCenter>
             <Column fullY justifyCenter>
               <Text text={t('brc20_in_wallet')} color="textDim" size="xs" />

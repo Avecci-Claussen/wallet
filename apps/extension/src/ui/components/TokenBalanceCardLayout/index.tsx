@@ -4,6 +4,7 @@ import { Column } from '../Column';
 import { TokenBalancePrice } from '../TokenBalancePrice';
 
 export const TOKEN_BALANCE_CARD_HEIGHT = 68;
+export const TOKEN_BALANCE_CARD_PADDING_Y = 10;
 const ICON_COLUMN_WIDTH = 35;
 const CONTENT_GAP = 8;
 
@@ -12,8 +13,8 @@ export const tokenBalanceCardStyle: CSSProperties = {
   borderColor: 'rgba(255,255,255,0.1)',
   borderRadius: 12,
   boxSizing: 'border-box',
-  paddingTop: 10,
-  paddingBottom: 10,
+  paddingTop: TOKEN_BALANCE_CARD_PADDING_Y,
+  paddingBottom: TOKEN_BALANCE_CARD_PADDING_Y,
   paddingLeft: 12,
   paddingRight: 12,
   alignItems: 'stretch',
