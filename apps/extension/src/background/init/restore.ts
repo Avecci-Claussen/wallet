@@ -83,7 +83,8 @@ export async function restoreAppState() {
 
     await permissionService.init({
       storage: proxyStorage,
-      logger: logger
+      logger: logger,
+      autoSync: true
     });
 
     await contactBookService.init({

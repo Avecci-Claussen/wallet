@@ -1979,8 +1979,8 @@ export class WalletController extends BaseController {
     const data = permissionService.getConnectedSites()
     return data
   }
-  setRecentConnectedSites = (sites: ConnectedSite[]) => {
-    permissionService.setRecentConnectedSites(sites)
+  setRecentConnectedSites = async (sites: ConnectedSite[]) => {
+    await permissionService.setRecentConnectedSites(sites)
   }
   getRecentConnectedSites = (): ConnectedSite[] => {
     return permissionService.getRecentConnectedSites()
@@ -2008,8 +2008,8 @@ export class WalletController extends BaseController {
     const { origin } = sessionService.getSession(tabId) || {}
     return permissionService.getWithoutUpdate(origin!)
   }
-  setSite = (data: ConnectedSite) => {
-    permissionService.setSite(data)
+  setSite = async (data: ConnectedSite) => {
+    await permissionService.setSite(data)
     if (data.isConnected) {
       const network = this.getLegacyNetworkName()
       sessionService.broadcastEvent(
@@ -2021,21 +2021,21 @@ export class WalletController extends BaseController {
       )
     }
   }
-  updateConnectSite = (origin: string, data: ConnectedSite) => {
-    permissionService.updateConnectSite(origin, data, true)
+  updateConnectSite = async (origin: string, data: Partial<ConnectedSite>) => {
+    await permissionService.updateConnectSite(origin, data, true)
     const network = this.getLegacyNetworkName()
     sessionService.broadcastEvent(
       SESSION_EVENTS.networkChanged,
       {
         network,
       },
-      data.origin
+      origin
     )
   }
 
-  removeConnectedSite = (origin: string) => {
+  removeConnectedSite = async (origin: string) => {
     sessionService.broadcastEvent(SESSION_EVENTS.accountsChanged, [], origin)
-    permissionService.removeConnectedSite(origin)
+    await permissionService.removeConnectedSite(origin)
   }
 
   setKeyringAlianName = (keyring: WalletKeyring, name: string) => {
