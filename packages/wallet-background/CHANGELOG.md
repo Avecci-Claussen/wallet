@@ -1,5 +1,17 @@
 # @unisat/wallet-background
 
+## 4.0.0
+
+### Minor Changes
+
+- publish by extension/v1.7.17
+
+### Patch Changes
+
+- Updated dependencies
+  - @unisat/babylon-service@1.2.0
+  - @unisat/wallet-shared@0.5.0
+
 ## 3.0.2
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @unisat/wallet-shared
 
+## 0.5.0
+
+### Minor Changes
+
+- publish by extension/v1.7.17
+
 ## 0.3.0
 
 ### Minor Changes
