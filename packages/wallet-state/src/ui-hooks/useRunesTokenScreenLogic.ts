@@ -133,6 +133,12 @@ export function useRunesTokenScreenLogic() {
     nav.navToUrl(runesExplorerUrl)
   }
 
+  const onClickParent = () => {
+    if (tokenSummary.runeInfo.parent) {
+      nav.navToExplorerInscription(tokenSummary.runeInfo.parent)
+    }
+  }
+
   return {
     runeid,
     tokenSummary,
@@ -150,6 +156,7 @@ export function useRunesTokenScreenLogic() {
 
     enableTransfer,
     onClickSend,
+    onClickParent,
 
     enableTrade,
     onClickTrade,
