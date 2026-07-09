@@ -1,5 +1,11 @@
 # @unisat/base-utils
 
+## 0.3.0
+
+### Minor Changes
+
+- Add bnUtils.toDisplayAmount and bnUtils.toDisplayUSD functions
+
 ## 0.2.0
 
 ### Minor Changes
