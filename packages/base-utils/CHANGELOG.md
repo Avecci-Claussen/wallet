@@ -1,5 +1,11 @@
 # @unisat/base-utils
 
+## 0.4.0
+
+### Minor Changes
+
+- update number display
+
 ## 0.3.0
 
 ### Minor Changes

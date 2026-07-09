@@ -1,5 +1,16 @@
 # @unisat/wallet-state
 
+## 1.4.0
+
+### Minor Changes
+
+- update number display
+
+### Patch Changes
+
+- Updated dependencies
+  - @unisat/base-utils@0.4.0
+
 ## 1.3.0
 
 ### Minor Changes
@@ -11,6 +22,7 @@
 - Updated dependencies
   - @unisat/babylon-service@1.2.0
   - @unisat/wallet-shared@0.5.0
+
 ## 1.2.4
 
 - Update UI logics
