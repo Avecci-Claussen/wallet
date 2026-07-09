@@ -6,7 +6,11 @@ import { Column } from '../Column';
 import { Row } from '../Row';
 import Tag from '../Tag';
 import { Text } from '../Text';
-import { getTokenBalanceCardStyle, TOKEN_BALANCE_CARD_PADDING_Y, TokenBalanceCardLayout } from '../TokenBalanceCardLayout';
+import {
+  getTokenBalanceCardStyle,
+  TOKEN_BALANCE_CARD_PADDING_Y,
+  TokenBalanceCardLayout
+} from '../TokenBalanceCardLayout';
 import { TokenBalanceIcon } from '../TokenBalanceIcon';
 
 export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
@@ -18,12 +22,19 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
     displayName,
     tag,
     onClick,
+
     totalBalance,
-    selfMint,
-    onProgBalance,
-    hasOutWalletBalance,
     inWalletBalance,
     onSwapBalance,
+    onProgBalance,
+
+    displayTotalBalance,
+    displayInWalletBalance,
+    displayOnSwapBalance,
+    displayOnProgBalance,
+
+    selfMint,
+    hasOutWalletBalance,
     t
   } = useBRC20BalanceCardLogic(props);
 
@@ -35,8 +46,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
       onClick={() => {
         onClick && onClick();
       }}
-      style={getTokenBalanceCardStyle(adaptiveHeight)}
-    >
+      style={getTokenBalanceCardStyle(adaptiveHeight)}>
       <TokenBalanceCardLayout
         icon={<TokenBalanceIcon iconInfo={iconInfo} />}
         onIconClick={onClick}
@@ -49,7 +59,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
             </>
           ) : null
         }
-        quantity={<Text text={totalBalance} size="xs" digital />}
+        quantity={<Text text={displayTotalBalance} size="xs" digital />}
         showPrice={showPrice}
         price={price}
         balance={totalBalance}
@@ -64,7 +74,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
             </Column>
 
             <Row itemsCenter fullY gap="zero">
-              <Text text={inWalletBalance} size="xs" digital />
+              <Text text={displayInWalletBalance} size="xs" digital />
             </Row>
           </Row>
 
@@ -75,7 +85,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
               </Column>
 
               <Row itemsCenter fullY gap="zero">
-                <Text text={onSwapBalance} size="xs" digital />
+                <Text text={displayOnSwapBalance} size="xs" digital />
               </Row>
             </Row>
           ) : null}
@@ -87,7 +97,7 @@ export default function BRC20BalanceCard(props: BRC20BalanceCardProps) {
               </Column>
 
               <Row itemsCenter fullY gap="zero">
-                <Text text={onProgBalance} size="xs" digital />
+                <Text text={displayOnProgBalance} size="xs" digital />
               </Row>
             </Row>
           ) : null}

@@ -15,7 +15,7 @@ import {
 } from '..'
 import { shortAddress } from '../utils/ui-utils'
 
-import BigNumber from 'bignumber.js'
+import { bnUtils } from '@unisat/base-utils'
 const SWAP_MODULE_ADDRESS = '6a2095ee19329a210f8d5ded9b5cfa55b74fdd3b1e9af1e202072db6d1be82d45bfd'
 const BRIDGE_BURN_ADDRESS = '6a20ada13e56859a2ab2eeb93cb4dc19c6e3f5e94d0ed38ed95a30ddc43711a0ff14'
 const BRC20PROG_MODULE_ADDRESS = '6a09425243323050524f47'
@@ -28,6 +28,7 @@ export interface BRC20OutWalletBalanceItem {
   key: 'wallet' | 'swap' | 'prog'
   label: string
   amount: string
+  displayAmount: string
 }
 
 const INSWAP_SWAP_ANCHOR = '#swap'
@@ -332,6 +333,7 @@ export function useBRC20TokenScreenLogic() {
         key: 'wallet',
         label: t('brc20_in_wallet'),
         amount: inWalletBalance || '0',
+        displayAmount: bnUtils.toDisplayAmount(inWalletBalance || '0'),
       },
     ]
 
@@ -340,6 +342,7 @@ export function useBRC20TokenScreenLogic() {
         key: 'swap',
         label: t('brc20_on_swap'),
         amount: onSwapBalance,
+        displayAmount: bnUtils.toDisplayAmount(onSwapBalance || '0'),
       })
     }
 
@@ -348,6 +351,7 @@ export function useBRC20TokenScreenLogic() {
         key: 'prog',
         label: t('brc20_on_prog'),
         amount: onProgBalance,
+        displayAmount: bnUtils.toDisplayAmount(onProgBalance || '0'),
       })
     }
 
@@ -355,13 +359,16 @@ export function useBRC20TokenScreenLogic() {
   }, [inWalletBalance, onProgBalance, onSwapBalance, t])
   const totalBalance = useMemo(() => {
     if (!inWalletBalance) {
-      return '--'
+      return ''
     }
-    return new BigNumber(inWalletBalance)
-      .plus(new BigNumber(onSwapBalance || 0))
-      .plus(new BigNumber(onProgBalance || 0))
+    return bnUtils
+      .toBigNumber(inWalletBalance)
+      .plus(bnUtils.toBigNumber(onSwapBalance || '0'))
+      .plus(bnUtils.toBigNumber(onProgBalance || '0'))
       .toString()
   }, [onSwapBalance, onProgBalance, inWalletBalance])
+
+  const displayTotalBalance = bnUtils.toDisplayAmount(totalBalance)
 
   const brc20prog_ticker = encodeURIComponent(ticker)
   const ensureSiteEnabled = (enabled: boolean) => {
@@ -451,10 +458,12 @@ export function useBRC20TokenScreenLogic() {
   const iconInfo = useBRC20IconInfo(ticker)
 
   return {
+    // balance
     totalBalance,
-    onSwapBalance,
-    onProgBalance,
-    inWalletBalance,
+
+    // displayBalance
+    displayTotalBalance,
+
     outWalletBalanceItems,
     enableHistory,
     enableTrade,
