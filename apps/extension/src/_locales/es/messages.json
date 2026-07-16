@@ -129,7 +129,7 @@
     "message": "Lista de Riesgo de Quema de ARC20"
   },
   "are_not_supported": {
-    "message": "no son soportados."
+    "message": "."
   },
   "are_not_supported_yet": {
     "message": "aún no son soportados."
@@ -822,7 +822,7 @@
     "message": "Para activos Atomicals,"
   },
   "for_ordinals_assets": {
-    "message": "Para activos Ordinals,"
+    "message": "UniSat Wallet actualmente no admite "
   },
   "from": {
     "message": "De"
@@ -1794,7 +1794,7 @@
     "message": "Rango"
   },
   "rare_sats": {
-    "message": "Sats raros"
+    "message": "Rare Sats"
   },
   "rate_us": {
     "message": "Califica nuestra app"

@@ -129,7 +129,7 @@
     "message": "Liste des Risques de Brûlage d'ARC20"
   },
   "are_not_supported": {
-    "message": "ne sont pas pris en charge."
+    "message": "."
   },
   "are_not_supported_yet": {
     "message": "ne sont pas encore pris en charge."
@@ -822,7 +822,7 @@
     "message": "Pour les actifs Atomicals,"
   },
   "for_ordinals_assets": {
-    "message": "Pour les actifs Ordinals,"
+    "message": "UniSat Wallet ne prend actuellement pas en charge les "
   },
   "from": {
     "message": "De"
@@ -1794,7 +1794,7 @@
     "message": "Plage"
   },
   "rare_sats": {
-    "message": "Sats rares"
+    "message": "Rare Sats"
   },
   "rate_us": {
     "message": "Notez-nous"

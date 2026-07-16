@@ -129,7 +129,7 @@
     "message": "ARC20 Burn Risk List"
   },
   "are_not_supported": {
-    "message": "are not supported."
+    "message": "."
   },
   "are_not_supported_yet": {
     "message": "are not supported yet."
@@ -828,7 +828,7 @@
     "message": "For Atomicals assets,"
   },
   "for_ordinals_assets": {
-    "message": "For Ordinals assets,"
+    "message": "UniSat Wallet currently does not support "
   },
   "from": {
     "message": "From"
@@ -1800,7 +1800,7 @@
     "message": "Range"
   },
   "rare_sats": {
-    "message": "Rare sats"
+    "message": "Rare Sats"
   },
   "rate_us": {
     "message": "Rate us"

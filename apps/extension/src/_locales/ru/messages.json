@@ -129,7 +129,7 @@
     "message": "Список рисков сжигания ARC20"
   },
   "are_not_supported": {
-    "message": "не поддерживаются."
+    "message": "."
   },
   "are_not_supported_yet": {
     "message": "пока не поддерживаются."
@@ -822,7 +822,7 @@
     "message": "Для активов Atomicals,"
   },
   "for_ordinals_assets": {
-    "message": "Для активов Ordinals,"
+    "message": "UniSat Wallet в настоящее время не поддерживает "
   },
   "from": {
     "message": "От"
@@ -1794,7 +1794,7 @@
     "message": "Диапазон"
   },
   "rare_sats": {
-    "message": "Редкие сатоши"
+    "message": "Rare Sats"
   },
   "rate_us": {
     "message": "Оцените нас"

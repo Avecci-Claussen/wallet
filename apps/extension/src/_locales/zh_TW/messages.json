@@ -129,7 +129,7 @@
     "message": "ARC20 銷毀風險清單"
   },
   "are_not_supported": {
-    "message": "不支援。"
+    "message": ""
   },
   "are_not_supported_yet": {
     "message": "尚不支援。"
@@ -822,7 +822,7 @@
     "message": "對於 Atomicals 資產，"
   },
   "for_ordinals_assets": {
-    "message": "對於 Ordinals 資產，"
+    "message": "UniSat 錢包目前暫不支持"
   },
   "from": {
     "message": "從"
@@ -1797,7 +1797,7 @@
     "message": "範圍"
   },
   "rare_sats": {
-    "message": "稀有聰 (Rare sats)"
+    "message": "稀有聰 (Rare Sats)"
   },
   "rate_us": {
     "message": "給我們評分"

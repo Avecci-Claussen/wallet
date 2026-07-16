@@ -129,7 +129,7 @@
     "message": "ARC20バーンリスクリスト"
   },
   "are_not_supported": {
-    "message": "はサポートされていません。"
+    "message": "をサポートしていません。"
   },
   "are_not_supported_yet": {
     "message": "はまだサポートされていません。"
@@ -822,7 +822,7 @@
     "message": "Atomicalsアセットについては、"
   },
   "for_ordinals_assets": {
-    "message": "Ordinalsアセットについては、"
+    "message": "UniSat Walletは現在"
   },
   "from": {
     "message": "送信元"
@@ -1794,7 +1794,7 @@
     "message": "範囲"
   },
   "rare_sats": {
-    "message": "レアsat"
+    "message": "Rare Sats"
   },
   "rate_us": {
     "message": "評価してください"
