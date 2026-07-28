@@ -642,6 +642,28 @@ importers:
         specifier: ^7.0.0
         version: 7.0.0(webpack@5.64.4)
 
+  packages/alkanes-lib:
+    dependencies:
+      '@unisat/wallet-bitcoin':
+        specifier: ^1.0.0
+        version: link:../wallet-bitcoin
+      '@unisat/wallet-types':
+        specifier: ^1.0.0
+        version: link:../wallet-types
+    devDependencies:
+      '@types/node':
+        specifier: ^20.0.0
+        version: 20.8.0
+      tsup:
+        specifier: ^7.0.0
+        version: 7.2.0(typescript@5.2.2)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.2.2
+      vitest:
+        specifier: ^0.34.0
+        version: 0.34.0(jsdom@27.4.0)
+
   packages/approval-service:
     dependencies:
       '@unisat/wallet-shared':

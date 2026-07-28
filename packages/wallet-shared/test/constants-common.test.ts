@@ -36,8 +36,9 @@ describe('common constants', () => {
   })
 
   it('chain map and chain list are consistent', () => {
-    expect(CHAINS_MAP[ChainType.BITCOIN_MAINNET]?.unit).toBe('BTC')
-    expect(CHAINS_MAP[ChainType.BITCOIN_TESTNET]?.networkType).toBe(NetworkType.TESTNET)
+    expect(CHAINS_MAP[ChainType.BITCOIN_MAINNET]?.unit).toBe('tBTC')
+    expect(CHAINS_MAP[ChainType.BITCOIN_MAINNET]?.networkType).toBe(NetworkType.MAINNET)
+    expect(CHAINS_MAP[ChainType.BITCOIN_TESTNET]).toBeUndefined()
     expect(CHAINS_MAP[ChainType.FRACTAL_BITCOIN_MAINNET]?.isFractal).toBe(true)
 
     expect(CHAINS).toHaveLength(Object.keys(CHAINS_MAP).length)
