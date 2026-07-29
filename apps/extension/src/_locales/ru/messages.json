@@ -2692,5 +2692,8 @@
   },
   "readonly_signing_signature_placeholder": {
     "message": "Подпись"
+  },
+  "load_more_items": {
+    "message": "Загрузить еще {count}"
   }
 }

@@ -2695,5 +2695,8 @@
   },
   "readonly_signing_signature_placeholder": {
     "message": "簽名"
+  },
+  "load_more_items": {
+    "message": "再載入 {count} 筆"
   }
 }

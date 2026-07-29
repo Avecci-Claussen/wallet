@@ -2683,5 +2683,8 @@
   },
   "readonly_signing_signature_placeholder": {
     "message": "Firma"
+  },
+  "load_more_items": {
+    "message": "Cargar {count} mas"
   }
 }

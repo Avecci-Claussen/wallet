@@ -1,7 +1,7 @@
 import React, { CSSProperties, useState } from 'react';
 
 import { colors } from '@/ui/theme/colors';
-import { spacing } from '@/ui/theme/spacing';
+import { Gap, spacing, spacingGap } from '@/ui/theme/spacing';
 
 import { Column } from '../Column';
 import { Icon, IconTypes } from '../Icon';
@@ -57,6 +57,10 @@ export interface ButtonProps {
   };
   disabled?: boolean;
   full?: boolean;
+  mt?: Gap;
+  mb?: Gap;
+  mx?: Gap;
+  my?: Gap;
   max2Lines?: boolean;
 }
 
@@ -323,6 +327,10 @@ export function Button(props: ButtonProps) {
     iconSize,
     disabled,
     full,
+    mt,
+    mb,
+    mx,
+    my,
     max2Lines,
     ...rest
   } = props;
@@ -335,7 +343,11 @@ export function Button(props: ButtonProps) {
     $viewStyleOverride,
     hover && !disabled ? $hoverViewPresets[preset] : {},
     disabled ? $baseDisabledViewStyle : {},
-    full ? { flex: 1 } : {}
+    full ? { flex: 1 } : {},
+    mt ? { marginTop: spacingGap[mt] } : {},
+    mb ? { marginBottom: spacingGap[mb] } : {},
+    mx ? { marginLeft: spacingGap[mx], marginRight: spacingGap[mx] } : {},
+    my ? { marginTop: spacingGap[my], marginBottom: spacingGap[my] } : {}
   );
   const $textStyle = Object.assign({}, $textPresets[preset], $textStyleOverride);
 

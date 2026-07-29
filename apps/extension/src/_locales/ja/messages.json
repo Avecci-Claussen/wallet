@@ -2692,5 +2692,8 @@
   },
   "readonly_signing_signature_placeholder": {
     "message": "署名"
+  },
+  "load_more_items": {
+    "message": "さらに{count}件読み込む"
   }
 }

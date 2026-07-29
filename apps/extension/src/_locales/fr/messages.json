@@ -2692,5 +2692,8 @@
   },
   "readonly_signing_signature_placeholder": {
     "message": "Signature"
+  },
+  "load_more_items": {
+    "message": "Charger {count} de plus"
   }
 }

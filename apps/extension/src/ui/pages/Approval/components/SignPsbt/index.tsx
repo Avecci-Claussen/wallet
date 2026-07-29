@@ -31,6 +31,7 @@ import MultiSignDisclaimerModal from './components/MultiSignDisclaimerModal';
 import { OutputsList } from './components/OutputsList';
 import PsbtDataSection from './components/PsbtDataSection';
 import { SignPsbtSection } from './components/Section';
+import { getIncrementalListResetKey } from './components/useIncrementalList';
 
 const ITEM_HEIGHT = 72 + 8; // item height + margin top
 
@@ -149,6 +150,7 @@ export default function SignPsbt(props: SignPsbtProps) {
   let header = props.header;
 
   const isValidData = isValid && currentDecodedPsbt;
+  const listResetKey = getIncrementalListResetKey(currentToSignData?.psbtHex || '');
 
   const ForwardTransactionItem = forwardRef(TransactionItem);
   const refList = useRef<ListRef>(null);
@@ -224,7 +226,8 @@ export default function SignPsbt(props: SignPsbtProps) {
                 borderColor: hasSighashNoneRisk || hasParseError ? '#ff4d4f' : '#2C2C2C',
                 borderWidth: 1,
                 background: '#1A1A1A'
-              }}>
+              }}
+            >
               <Row justifyBetween fullX>
                 <Column>
                   <Text text={`${t('transaction_count')}: ${toSignDatas.length}`} size="xs" color="textDim" />
@@ -246,7 +249,8 @@ export default function SignPsbt(props: SignPsbtProps) {
             height={layoutHeight}
             itemHeight={ITEM_HEIGHT}
             itemKey={(item) => 'psbt_' + item.index}
-            ref={refList}>
+            ref={refList}
+          >
             {(item, index) => (
               <ForwardTransactionItem
                 buttonText={item.buttonText}
@@ -309,12 +313,14 @@ export default function SignPsbt(props: SignPsbtProps) {
                   decodedPsbt={currentDecodedPsbt}
                   toSignData={currentToSignData}
                   runesPriceMap={runesPriceMap}
+                  resetKey={listResetKey}
                   setContractPopoverData={setContractPopoverData}
                 />
 
                 <OutputsList
                   decodedPsbt={currentDecodedPsbt}
                   runesPriceMap={runesPriceMap}
+                  resetKey={listResetKey}
                   setContractPopoverData={setContractPopoverData}
                 />
               </Column>
