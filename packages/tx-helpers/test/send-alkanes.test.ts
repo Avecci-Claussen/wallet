@@ -33,8 +33,10 @@ describe('send alkanes', () => {
     const runestone = Runestone.fromOpreturnHex(
       psbt.txOutputs[0]!.script.toString('hex')
     ) as Runestone
-    const protocol = runestone.protocols[0]!
-    const edict = protocol.protocolData.edicts![0]!
+    const protocol = runestone.protocols?.[0]
+    if (!protocol) throw new Error('Expected Alkanes protocol data')
+    const edict = protocol.protocolData.edicts?.[0]
+    if (!edict) throw new Error('Expected Alkanes transfer edict')
     expect(protocol.protocolTag).toBe(BigInt(1))
     expect(protocol.protocolData.pointer).toBe(BigInt(1))
     expect(edict).toMatchObject({ amount: BigInt(100), output: 1 })
@@ -64,8 +66,10 @@ describe('send alkanes', () => {
     const runestone = Runestone.fromOpreturnHex(
       psbt.txOutputs[0]!.script.toString('hex')
     ) as Runestone
-    const protocol = runestone.protocols[0]!
-    const edict = protocol.protocolData.edicts![0]!
+    const protocol = runestone.protocols?.[0]
+    if (!protocol) throw new Error('Expected Alkanes protocol data')
+    const edict = protocol.protocolData.edicts?.[0]
+    if (!edict) throw new Error('Expected Alkanes transfer edict')
     expect(protocol.protocolData.pointer).toBe(BigInt(1))
     expect(edict).toMatchObject({ amount: BigInt(100), output: 2 })
     expect(edict.id.toString()).toBe('1000:10')
