@@ -320,12 +320,6 @@
   "cap": {
     "message": "Límite"
   },
-  "cat": {
-    "message": "CAT"
-  },
-  "cat20_warning_nomerge": {
-    "message": "Necesitas al menos 2 UTXOs para fusionar"
-  },
   "cbor_data_is_required_for_parsing_cosmos_signature": {
     "message": "Los datos CBOR son requeridos para analizar la firma Cosmos"
   },
@@ -1199,18 +1193,6 @@
   "learn_more_about_keystone": {
     "message": "Más información sobre Keystone"
   },
-  "legacy_address_warning": {
-    "message": "No se recomienda usar direcciones heredadas, ya que pueden provocar tarifas de transacción más altas o el bloqueo no intencionado de saldos CAT20."
-  },
-  "legacy_address_warning_2": {
-    "message": "No se recomienda enviar transacciones a direcciones heredadas, ya que esto puede resultar en el gasto no intencionado de saldos CAT20."
-  },
-  "legacy_address_warning_3": {
-    "message": "No se recomienda usar direcciones heredadas, ya que pueden provocar tarifas de transacción más altas o el bloqueo no intencionado de saldos CAT20."
-  },
-  "legacy_address_warning_4": {
-    "message": "No se recomienda enviar transacciones a direcciones heredadas, ya que esto puede resultar en el gasto no intencionado de saldos CAT20."
-  },
   "legacy_p2pkh": {
     "message": "Legacy (P2PKH)"
   },
@@ -1309,9 +1291,6 @@
   },
   "merge_utxos_failed": {
     "message": "Combinación fallida"
-  },
-  "merge_utxos_for_cat20_asset": {
-    "message": "Fusionar UTXOs para Activo CAT20"
   },
   "merge_utxos_is_not_supported_for_keystone_yet": {
     "message": "La fusión de UTXOs aún no es compatible con Keystone"
@@ -2003,9 +1982,6 @@
   "send": {
     "message": "Enviar"
   },
-  "send_CAT721": {
-    "message": "Enviar CAT721"
-  },
   "send_alkanes": {
     "message": "Enviar Alkanes"
   },
@@ -2020,15 +1996,6 @@
   },
   "send_atomicals_inscription": {
     "message": "Enviar Inscripción Atomicals"
-  },
-  "send_cat20": {
-    "message": "Enviar CAT20"
-  },
-  "send_cat20_is_not_supported_for_keystone_yet": {
-    "message": "El envío de CAT20 aún no es compatible con Keystone"
-  },
-  "send_cat721": {
-    "message": "Enviar CAT721"
   },
   "send_inscription": {
     "message": "Puedes hacer clic en la inscripción para enviarla directamente."

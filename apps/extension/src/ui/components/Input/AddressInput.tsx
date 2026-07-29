@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Icon, Row, Text } from '@/ui/components';
-import { getAddressType, isValidAddress } from '@/ui/utils/bitcoin-utils';
+import { isValidAddress } from '@/ui/utils/bitcoin-utils';
 import { namesUtils } from '@unisat/base-utils';
 import { Inscription } from '@unisat/wallet-shared';
-import { CHAINS_MAP, SAFE_DOMAIN_CONFIRMATION } from '@unisat/wallet-shared';
+import { SAFE_DOMAIN_CONFIRMATION } from '@unisat/wallet-shared';
 import { useChain, useI18n, useWallet } from '@unisat/wallet-state';
-import { AddressType, ChainType } from '@unisat/wallet-types';
 
 import { $baseContainerStyle, $baseTextareaStyle, InputProps } from '.';
 import { AccordingInscription } from '../AccordingInscription';
@@ -72,27 +71,6 @@ export const AddressInput = (props: InputProps) => {
     inputAddressPlaceholder = t('address_or_name_fb');
   }
 
-  function getAddressTips(address: string, chanEnum: ChainType) {
-    let ret = {
-      homeTip: '',
-      sendTip: ''
-    };
-    try {
-      const chain = CHAINS_MAP[chanEnum];
-      const addressType = getAddressType(address, chain.networkType);
-      if (chain.isFractal && addressType === AddressType.P2PKH) {
-        ret = {
-          homeTip: t('legacy_address_warning_3'),
-          sendTip: t('legacy_address_warning_4')
-        };
-      }
-    } catch (e) {
-      console.log(e);
-    }
-
-    return ret;
-  }
-
   useEffect(() => {
     onAddressInputChange({
       address: validAddress,
@@ -100,12 +78,7 @@ export const AddressInput = (props: InputProps) => {
       inscription
     });
 
-    const addressTips = getAddressTips(validAddress, chain.enum);
-    if (addressTips.sendTip) {
-      setAddressTip(addressTips.sendTip);
-    } else {
-      setAddressTip('');
-    }
+    setAddressTip('');
   }, [validAddress]);
 
   const resetState = () => {

@@ -320,12 +320,6 @@
   "cap": {
     "message": "上限"
   },
-  "cat": {
-    "message": "CAT"
-  },
-  "cat20_warning_nomerge": {
-    "message": "マージするには少なくとも2つのUTXOが必要です"
-  },
   "cbor_data_is_required_for_parsing_cosmos_signature": {
     "message": "Cosmos署名の解析にはCBORデータが必要です"
   },
@@ -1199,18 +1193,6 @@
   "learn_more_about_keystone": {
     "message": "Keystoneについてさらに詳しく"
   },
-  "legacy_address_warning": {
-    "message": "レガシーアドレスを使用することは、高いトランザクション手数料や意図しないCAT20バランスのロックアップを招く可能性があります。"
-  },
-  "legacy_address_warning_2": {
-    "message": "レガシーアドレスへのトランザクションは、意図しないCAT20バランスの支出を招く可能性があります。"
-  },
-  "legacy_address_warning_3": {
-    "message": "レガシーアドレスを使用することは、高いトランザクション手数料や意図しないCAT20バランスのロックアップを招く可能性があります。"
-  },
-  "legacy_address_warning_4": {
-    "message": "レガシーアドレスへのトランザクションは、意図しないCAT20バランスの支出を招く可能性があります。"
-  },
   "legacy_p2pkh": {
     "message": "Legacy (P2PKH)"
   },
@@ -1309,9 +1291,6 @@
   },
   "merge_utxos_failed": {
     "message": "統合失敗"
-  },
-  "merge_utxos_for_cat20_asset": {
-    "message": "CAT20アセットのUTXOをマージ"
   },
   "merge_utxos_is_not_supported_for_keystone_yet": {
     "message": "UTXOのマージはまだKeystoneでサポートされていません"
@@ -2003,9 +1982,6 @@
   "send": {
     "message": "送信"
   },
-  "send_CAT721": {
-    "message": "CAT721を送信"
-  },
   "send_alkanes": {
     "message": "アルカンズ送信"
   },
@@ -2020,15 +1996,6 @@
   },
   "send_atomicals_inscription": {
     "message": "Atomicalsインスクリプションを送信"
-  },
-  "send_cat20": {
-    "message": "CAT20を送信"
-  },
-  "send_cat20_is_not_supported_for_keystone_yet": {
-    "message": "CAT20の送信はまだKeystoneでサポートされていません"
-  },
-  "send_cat721": {
-    "message": "CAT721を送信"
   },
   "send_inscription": {
     "message": "インスクリプションをクリックして直接送信できます。"

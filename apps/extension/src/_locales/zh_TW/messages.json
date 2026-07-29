@@ -320,12 +320,6 @@
   "cap": {
     "message": "鑄造次數"
   },
-  "cat": {
-    "message": "CAT"
-  },
-  "cat20_warning_nomerge": {
-    "message": "您至少需要 2 個 UTXO 才能合併"
-  },
   "cbor_data_is_required_for_parsing_cosmos_signature": {
     "message": "解析 Cosmos 簽章需要 CBOR data"
   },
@@ -1199,18 +1193,6 @@
   "learn_more_about_keystone": {
     "message": "了解更多關於 Keystone"
   },
-  "legacy_address_warning": {
-    "message": "不建議使用Legacy地址，因為它們可能會導致更高的交易費用或意外鎖定CAT20餘額。"
-  },
-  "legacy_address_warning_2": {
-    "message": "不建議將交易發送到Legacy地址，因為這可能導致CAT20被意外花費"
-  },
-  "legacy_address_warning_3": {
-    "message": "不建議使用Legacy地址，因為它們可能會導致更高的交易費用或意外鎖定CAT20餘額"
-  },
-  "legacy_address_warning_4": {
-    "message": "不建議將交易發送到Legacy地址，因為這可能導致CAT20被意外花費"
-  },
   "legacy_p2pkh": {
     "message": "傳統 (P2PKH)"
   },
@@ -1309,9 +1291,6 @@
   },
   "merge_utxos_failed": {
     "message": "合併失敗"
-  },
-  "merge_utxos_for_cat20_asset": {
-    "message": "合併 CAT20 資產的 UTXO"
   },
   "merge_utxos_is_not_supported_for_keystone_yet": {
     "message": "Keystone 尚不支援合併 UTXO"
@@ -2006,9 +1985,6 @@
   "send": {
     "message": "發送"
   },
-  "send_CAT721": {
-    "message": "發送 CAT721"
-  },
   "send_alkanes": {
     "message": "發送 Alkanes"
   },
@@ -2023,15 +1999,6 @@
   },
   "send_atomicals_inscription": {
     "message": "發送 Atomicals 銘文"
-  },
-  "send_cat20": {
-    "message": "發送 CAT20"
-  },
-  "send_cat20_is_not_supported_for_keystone_yet": {
-    "message": "Keystone 尚不支援發送 CAT20"
-  },
-  "send_cat721": {
-    "message": "發送 CAT721"
   },
   "send_inscription": {
     "message": "您可以點擊銘文直接發送。"

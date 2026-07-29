@@ -326,12 +326,6 @@
   "cap": {
     "message": "Cap"
   },
-  "cat": {
-    "message": "CAT"
-  },
-  "cat20_warning_nomerge": {
-    "message": "You need at least 2 UTXOs to merge"
-  },
   "cbor_data_is_required_for_parsing_cosmos_signature": {
     "message": "CBOR data is required for parsing Cosmos signature"
   },
@@ -1205,18 +1199,6 @@
   "learn_more_about_keystone": {
     "message": "Learn more about Keystone"
   },
-  "legacy_address_warning": {
-    "message": "It is not recommended to use legacy addresses, as they may lead to higher transaction fees or the unintended lock-up of CAT20 balances."
-  },
-  "legacy_address_warning_2": {
-    "message": "It is not recommended to send transactions to legacy addresses, as this may result in the unintended spending of CAT20 balances."
-  },
-  "legacy_address_warning_3": {
-    "message": "It is not recommended to use legacy addresses, as they may lead to higher transaction fees or the unintended lock-up of CAT20 balances."
-  },
-  "legacy_address_warning_4": {
-    "message": "It is not recommended to send transactions to legacy addresses, as this may result in the unintended spending of CAT20 balances."
-  },
   "legacy_p2pkh": {
     "message": "Legacy (P2PKH)"
   },
@@ -1315,9 +1297,6 @@
   },
   "merge_utxos_failed": {
     "message": "Merge failed"
-  },
-  "merge_utxos_for_cat20_asset": {
-    "message": "Merge UTXOs for CAT20 Asset"
   },
   "merge_utxos_is_not_supported_for_keystone_yet": {
     "message": "Merge UTXOs is not supported for Keystone yet"
@@ -2009,9 +1988,6 @@
   "send": {
     "message": "Send"
   },
-  "send_CAT721": {
-    "message": "Send CAT721"
-  },
   "send_alkanes": {
     "message": "Send Alkanes"
   },
@@ -2026,15 +2002,6 @@
   },
   "send_atomicals_inscription": {
     "message": "Send Atomicals Inscription"
-  },
-  "send_cat20": {
-    "message": "Send CAT20"
-  },
-  "send_cat20_is_not_supported_for_keystone_yet": {
-    "message": "Send CAT20 is not supported for Keystone yet"
-  },
-  "send_cat721": {
-    "message": "Send CAT721"
   },
   "send_inscription": {
     "message": "You may click on the inscription to send it directly."

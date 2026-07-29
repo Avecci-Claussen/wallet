@@ -23,11 +23,6 @@ export function useOrdinalsAssetTabKey() {
   return uiState.ordinalsAssetTabKey
 }
 
-export function useCATAssetTabKey() {
-  const uiState = useUIState()
-  return uiState.catAssetTabKey
-}
-
 export function useAlkanesAssetTabKey() {
   const uiState = useUIState()
   return uiState.alkanesAssetTabKey
@@ -200,7 +195,6 @@ export function getSupportedAssets(chainType: ChainType, address: string) {
   const assets = {
     ordinals: false,
     runes: false,
-    CAT20: false,
     alkanes: false,
     brc20Prog: false,
   }
@@ -210,15 +204,6 @@ export function getSupportedAssets(chainType: ChainType, address: string) {
 
   assets.runes = true
   assetTabKeys.push(AssetTabKey.RUNES)
-
-  if (
-    (chainType === ChainType.FRACTAL_BITCOIN_MAINNET ||
-      chainType === ChainType.FRACTAL_BITCOIN_TESTNET) &&
-    (addressType == AddressType.P2TR || addressType == AddressType.P2WPKH)
-  ) {
-    assets.CAT20 = true
-    assetTabKeys.push(AssetTabKey.CAT)
-  }
 
   if (chainType === ChainType.BITCOIN_MAINNET || chainType === ChainType.BITCOIN_SIGNET) {
     assets.alkanes = true
@@ -299,18 +284,6 @@ export function useAlkanesIconInfo(name: string, alkaneid: string) {
   return { iconUrl: '', iconShortName }
 }
 
-export function useCAT20IconInfo(name: string, tokenId: string) {
-  const baseUrl = useIconBaseUrl()
-  const iconUrl = `${baseUrl}/cat20/${name}/${tokenId}`
-  const iconShortName = name.substring(0, 2)
-  const chainType = useChainType()
-  if (chainType === ChainType.BITCOIN_MAINNET || chainType === ChainType.FRACTAL_BITCOIN_MAINNET) {
-    return { iconUrl, iconShortName }
-  }
-
-  return { iconUrl: '', iconShortName }
-}
-
 export function useBRC20MarketPlaceWebsite(ticker: string) {
   const chainType = useChainType()
   const unisatWebsite = useUnisatWebsite()
@@ -330,11 +303,6 @@ export function useRunesMarketUrl(ticker: string) {
 export function useAlkanesMarketPlaceWebsite(alkaneid: string) {
   const unisatWebsite = useUnisatWebsite()
   return `${unisatWebsite}/alkanes/market?tick=${alkaneid}`
-}
-
-export function useCAT20MarketPlaceWebsite(tokenId: string) {
-  const unisatWebsite = useUnisatWebsite()
-  return `${unisatWebsite}/dex/cat20/${tokenId}`
 }
 
 export function useRunesInscribeUrl(rune: string) {
