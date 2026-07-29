@@ -14,11 +14,13 @@ import { Text } from '../Text';
 import { BadFeeRate } from './BadFeeRate';
 import { ChangingInscription } from './ChangingInscription';
 import { InscriptionBurning } from './InscriptionBurning';
+import { MultipleAssetsList } from './MultipleAssetsList';
 import { RunesBurningList } from './RunesBurningList';
-import { SendingOutAssets } from './SendingOutAssets';
 
 const visibleRiskDetailTypes = [
   RiskType.MULTIPLE_ASSETS,
+  RiskType.RUNES_MULTIPLE_ASSETS,
+  RiskType.ALKANES_MULTIPLE_ASSETS,
   RiskType.INSCRIPTION_BURNING,
   RiskType.ATOMICALS_FT_BURNING,
   RiskType.ATOMICALS_NFT_BURNING,
@@ -151,8 +153,12 @@ export const SignPsbtWithRisksPopover = ({
   if (detailRisk) {
     if (detailRisk.type === RiskType.INSCRIPTION_BURNING) {
       return <InscriptionBurning decodedPsbt={decodedPsbt} onClose={() => setDetailRisk(null)} />;
-    } else if (detailRisk.type === RiskType.MULTIPLE_ASSETS) {
-      return <SendingOutAssets decodedPsbt={decodedPsbt} onClose={() => setDetailRisk(null)} />;
+    } else if (
+      detailRisk.type === RiskType.MULTIPLE_ASSETS ||
+      detailRisk.type === RiskType.RUNES_MULTIPLE_ASSETS ||
+      detailRisk.type === RiskType.ALKANES_MULTIPLE_ASSETS
+    ) {
+      return <MultipleAssetsList decodedPsbt={decodedPsbt} onClose={() => setDetailRisk(null)} />;
     } else if (detailRisk.type === RiskType.LOW_FEE_RATE || detailRisk.type === RiskType.HIGH_FEE_RATE) {
       const riskContentKey = getRiskContentKey(detailRisk.type);
       return (
@@ -182,7 +188,8 @@ export const SignPsbtWithRisksPopover = ({
                 key={'risk_' + index}
                 style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10 }}
                 px="md"
-                py="sm">
+                py="sm"
+              >
                 <Row justifyBetween justifyCenter mt="sm">
                   <Text text={title} color={risk.level === 'warning' ? 'warning' : 'danger'} />
                   {visibleRiskDetailTypes.includes(risk.type) ? (
@@ -223,7 +230,7 @@ export const SignPsbtWithRisksPopover = ({
             text={t('cancel')}
             preset="default"
             full
-            onClick={(e) => {
+            onClick={(_e) => {
               if (onClose) {
                 onClose();
               }
@@ -236,7 +243,7 @@ export const SignPsbtWithRisksPopover = ({
               preset="danger"
               disabled={!understand}
               full
-              onClick={(e) => {
+              onClick={(_e) => {
                 if (onConfirm) {
                   onConfirm();
                 }
