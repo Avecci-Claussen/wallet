@@ -1,5 +1,6 @@
 import { AddressType, NetworkType } from '@unisat/wallet-types'
 import { beforeEach, describe, expect, it } from 'vitest'
+import { Runestone } from '@unisat/alkanes-lib'
 import { LocalWallet, sendRunes } from '../src'
 import { dummySendRunes, expectFeeRate, genDummyUtxo, genDummyUtxos } from './utils'
 
@@ -45,6 +46,13 @@ describe('send runes', () => {
         expect(ret.inputCount).eq(2)
         expect(ret.outputCount).eq(3)
         expectFeeRate(addressType, ret.feeRate, 1)
+
+        const runestone = Runestone.fromOpreturnHex(
+          ret.psbt.txOutputs[0].script.toString('hex')
+        ) as Runestone
+        expect(runestone.edicts).toHaveLength(1)
+        expect(runestone.edicts[0]).toMatchObject({ amount: 100n, output: 1 })
+        expect(runestone.edicts[0]?.id.toString()).toBe('1000:10')
       })
 
       it('send runes with changed', async function () {

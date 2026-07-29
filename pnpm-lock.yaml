@@ -1002,6 +1002,9 @@ importers:
 
   packages/tx-helpers:
     dependencies:
+      '@unisat/alkanes-lib':
+        specifier: workspace:*
+        version: link:../alkanes-lib
       '@unisat/keyring-service':
         specifier: workspace:*
         version: link:../keyring-service

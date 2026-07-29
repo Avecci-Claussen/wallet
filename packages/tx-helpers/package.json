@@ -48,6 +48,7 @@
   "author": "UniSat",
   "license": "MIT",
   "dependencies": {
+    "@unisat/alkanes-lib": "workspace:*",
     "@unisat/wallet-bitcoin": "workspace:*",
     "@unisat/wallet-types": "workspace:*",
     "@unisat/wallet-shared": "workspace:*",
