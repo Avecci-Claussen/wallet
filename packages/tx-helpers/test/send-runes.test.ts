@@ -109,6 +109,41 @@ describe('send runes', () => {
         expect(ret.inputCount).eq(2)
         expect(ret.outputCount).eq(4)
         expectFeeRate(addressType, ret.feeRate, 1)
+
+        const runestone = Runestone.fromOpreturnHex(
+          ret.psbt.txOutputs[0].script.toString('hex')
+        ) as Runestone
+        expect(runestone.pointer).toEqual([BigInt(1)])
+        expect(runestone.edicts[0]).toMatchObject({ amount: BigInt(100), output: 2 })
+      })
+
+      it('returns alkanes to a dedicated pointer output', async function () {
+        const ret = await dummySendRunes({
+          toAddress: toWallet.address,
+          assetWallet: fromAssetWallet,
+          assetUtxo: genDummyUtxo(fromAssetWallet, 546, {
+            runes: [{ runeid: '1000:10', amount: '100' }],
+            alkanes: [{ alkaneid: '2:10', amount: '100' }],
+          }),
+          btcWallet: fromBtcWallet,
+          btcUtxos: [genDummyUtxo(fromBtcWallet, 10000)],
+          feeRate: 1,
+          runeid: '1000:10',
+          runeAmount: '100',
+          outputValue: 546,
+        })
+
+        expect(ret.outputCount).eq(4)
+
+        const runestone = Runestone.fromOpreturnHex(
+          ret.psbt.txOutputs[0].script.toString('hex')
+        ) as Runestone
+        const protocol = runestone.protocols?.[0]
+        if (!protocol) throw new Error('Expected Alkanes protocol data')
+
+        expect(runestone.pointer).toEqual([BigInt(1)])
+        expect(protocol.protocolData.pointer).toBe(BigInt(1))
+        expect(runestone.edicts[0]).toMatchObject({ amount: BigInt(100), output: 2 })
       })
     })
   })

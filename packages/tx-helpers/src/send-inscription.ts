@@ -33,6 +33,10 @@ export async function sendInscription({
     throw new WalletError(ErrorCodes.NOT_SAFE_UTXOS)
   }
 
+  if (assetUtxo.runes?.length || assetUtxo.alkanes?.length) {
+    throw new WalletError(ErrorCodes.NOT_SAFE_UTXOS)
+  }
+
   if (!enableMixed && assetUtxo.inscriptions.length !== 1) {
     throw new WalletError(ErrorCodes.NOT_SAFE_UTXOS)
   }

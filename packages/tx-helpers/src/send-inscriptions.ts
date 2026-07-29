@@ -36,7 +36,7 @@ export async function sendInscriptions({
 
   for (let i = 0; i < assetUtxos.length; i++) {
     const assetUtxo = assetUtxos[i]!
-    if (assetUtxo.inscriptions.length > 1) {
+    if (assetUtxo.inscriptions.length > 1 || assetUtxo.runes?.length || assetUtxo.alkanes?.length) {
       throw new WalletError(ErrorCodes.NOT_SAFE_UTXOS)
     }
     tx.addInput(assetUtxo)
