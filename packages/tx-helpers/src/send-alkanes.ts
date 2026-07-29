@@ -44,7 +44,7 @@ export async function sendAlkanes({
     toSignInputs.push({ index, publicKey: utxo.pubkey })
   })
 
-  let inputAmount = 0n
+  let inputAmount = BigInt(0)
   let hasOtherAlkanes = false
   assetUtxos.forEach(utxo => {
     utxo.alkanes?.forEach(alkane => {
@@ -57,7 +57,7 @@ export async function sendAlkanes({
   })
 
   const transferAmount = BigInt(amount)
-  if (transferAmount <= 0n || inputAmount < transferAmount) {
+  if (transferAmount <= BigInt(0) || inputAmount < transferAmount) {
     throw new WalletError(ErrorCodes.INSUFFICIENT_ASSET_UTXO)
   }
 
@@ -66,7 +66,7 @@ export async function sendAlkanes({
   const script = encodeRunestoneProtostone({
     protostones: [
       ProtoStone.message({
-        protocolTag: 1n,
+        protocolTag: BigInt(1),
         pointer: needChange ? 1 : recipientOutput,
         refundPointer: 0,
         calldata: Buffer.alloc(0),

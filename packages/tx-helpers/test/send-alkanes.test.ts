@@ -35,9 +35,9 @@ describe('send alkanes', () => {
     ) as Runestone
     const protocol = runestone.protocols[0]!
     const edict = protocol.protocolData.edicts![0]!
-    expect(protocol.protocolTag).toBe(1n)
-    expect(protocol.protocolData.pointer).toBe(1n)
-    expect(edict).toMatchObject({ amount: 100n, output: 1 })
+    expect(protocol.protocolTag).toBe(BigInt(1))
+    expect(protocol.protocolData.pointer).toBe(BigInt(1))
+    expect(edict).toMatchObject({ amount: BigInt(100), output: 1 })
     expect(edict.id.toString()).toBe('1000:10')
   })
 
@@ -66,8 +66,8 @@ describe('send alkanes', () => {
     ) as Runestone
     const protocol = runestone.protocols[0]!
     const edict = protocol.protocolData.edicts![0]!
-    expect(protocol.protocolData.pointer).toBe(1n)
-    expect(edict).toMatchObject({ amount: 100n, output: 2 })
+    expect(protocol.protocolData.pointer).toBe(BigInt(1))
+    expect(edict).toMatchObject({ amount: BigInt(100), output: 2 })
     expect(edict.id.toString()).toBe('1000:10')
   })
 })
