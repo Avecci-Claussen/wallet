@@ -8,7 +8,12 @@ function hasInscription(utxos: UnspentOutput[]) {
 }
 
 function hasAnyAssets(utxos: UnspentOutput[]) {
-  return utxos.some(v => v.inscriptions.length > 0 || (v.runes && v.runes.length > 0))
+  return utxos.some(
+    v =>
+      v.inscriptions.length > 0 ||
+      (v.runes && v.runes.length > 0) ||
+      (v.alkanes && v.alkanes.length > 0)
+  )
 }
 
 /**

@@ -3406,14 +3406,20 @@ export class WalletController extends BaseController {
   getAssetUtxosAlkanes = async (alkaneid: string) => {
     const account = preferenceService.getCurrentAccount()
     if (!account) throw new Error('no current account')
-    const runes_utxos = await walletApiService.alkanes.getAlkanesUtxos(account.address, alkaneid)
+    const alkanesUtxos = await walletApiService.alkanes.getAlkanesUtxos(account.address, alkaneid)
 
-    const assetUtxos = runes_utxos.map(v => {
+    const assetUtxos = alkanesUtxos.map(v => {
       return Object.assign(v, { pubkey: account.pubkey })
-    })
+    }) as unknown as UnspentOutput[]
 
     assetUtxos.forEach(v => {
       v.inscriptions = []
+    })
+
+    assetUtxos.sort((a, b) => {
+      const bAmount = b.alkanes?.find(v => v.alkaneid === alkaneid)?.amount || '0'
+      const aAmount = a.alkanes?.find(v => v.alkaneid === alkaneid)?.amount || '0'
+      return bnUtils.compareAmount(bAmount, aAmount) || 0
     })
 
     return assetUtxos
@@ -3448,26 +3454,56 @@ export class WalletController extends BaseController {
     enableRBF?: boolean
   }): Promise<ToSignData> => {
     amount = paramsUtils.formatAmount(amount)
+    if (amount === '0') {
+      throw new Error('Amount must be greater than 0')
+    }
 
     const account = preferenceService.getCurrentAccount()
     if (!account) throw new Error('no current account')
     assertCanCreateSigningRequest(account)
 
-    const txData = await walletApiService.alkanes.createAlkanesSendTx({
-      userAddress: account.address,
-      userPubkey: account.pubkey,
-      receiver: to,
+    const assetUtxos = await this.getAssetUtxosAlkanes(alkaneid)
+    const selectedAssetUtxos: UnspentOutput[] = []
+    const amountToSend = BigInt(amount)
+
+    const exactUtxo = assetUtxos.find(utxo => {
+      const balance = utxo.alkanes?.find(alkane => alkane.alkaneid === alkaneid)
+      return balance && BigInt(balance.amount) === amountToSend && utxo.alkanes?.length === 1
+    })
+    if (exactUtxo) {
+      selectedAssetUtxos.push(exactUtxo)
+    } else {
+      let total = 0n
+      for (const utxo of assetUtxos) {
+        const balance = utxo.alkanes?.find(alkane => alkane.alkaneid === alkaneid)
+        if (!balance) continue
+
+        total += BigInt(balance.amount)
+        selectedAssetUtxos.push(utxo)
+        if (total >= amountToSend) break
+      }
+    }
+
+    const btcUtxos = await this.getBTCUtxos()
+    const { psbt, toSignInputs } = await txHelpers.sendAlkanes({
+      assetUtxos: selectedAssetUtxos,
+      assetAddress: account.address,
+      btcUtxos,
+      btcAddress: account.address,
+      toAddress: to,
+      networkType: this.getNetworkType(),
       alkaneid,
       amount,
+      outputValue: UTXO_DUST,
       feeRate,
       enableRBF,
     })
 
     const toSignData = await this.getToSignData({
-      psbtHex: txData.psbtHex,
+      psbtHex: psbt.toHex(),
       options: {
-        toSignInputs: txData.toSignInputs,
-        autoFinalized: false,
+        toSignInputs: toSignInputs as any,
+        autoFinalized: true,
       },
       action: {
         name: t('send_alkanes'),

@@ -7,7 +7,6 @@ import type {
   AlkanesBalance,
   AddressAlkanesTokenSummary,
   UTXO,
-  UserToSignInput,
   AlkanesInfo,
   AlkanesCollection,
 } from '../types'
@@ -75,35 +74,4 @@ export class AlkanesService {
     })
   }
 
-  async createAlkanesSendTx({
-    userAddress,
-    userPubkey,
-    receiver,
-    alkaneid,
-    amount,
-    feeRate,
-    enableRBF = true,
-  }: {
-    userAddress: string
-    userPubkey: string
-    receiver: string
-    alkaneid: string
-    amount: string
-    feeRate: number
-    enableRBF?: boolean
-  }): Promise<{
-    orderId: string
-    psbtHex: string
-    toSignInputs: UserToSignInput[]
-  }> {
-    return this.httpClient.post('/v5/alkanes/create-send-tx', {
-      userAddress,
-      userPubkey,
-      receiver,
-      alkaneid,
-      amount,
-      feeRate,
-      enableRBF,
-    })
-  }
 }
