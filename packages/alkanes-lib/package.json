@@ -1,6 +1,6 @@
 {
   "name": "@unisat/alkanes-lib",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Minimal Alkanes utilities (varint encipher/decipher) extracted for UniSat projects",
   "main": "lib/index.js",
   "module": "lib/index.mjs",

@@ -1,5 +1,16 @@
 # @unisat/wallet-background
 
+## 5.0.0
+
+### Minor Changes
+
+- feat: add alkanes-lib
+
+### Patch Changes
+
+- Updated dependencies
+  - @unisat/tx-helpers@1.3.0
+
 ## 4.0.0
 
 ### Minor Changes

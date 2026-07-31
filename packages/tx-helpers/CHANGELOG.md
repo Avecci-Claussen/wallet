@@ -1,5 +1,16 @@
 # @unisat/tx-helpers
 
+## 1.3.0
+
+### Minor Changes
+
+- feat: add alkanes-lib
+
+### Patch Changes
+
+- Updated dependencies
+  - @unisat/alkanes-lib@0.4.0
+
 ## 1.2.3
 
 ### Patch Changes
