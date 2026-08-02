@@ -203,27 +203,14 @@ export default function CreateHDWalletScreen() {
             }))}
             onTabClick={(key) => {
               const toTabType = key as TabType;
-              if (
-                !contextData.isRestore &&
-                contextData.mnemonicVerified &&
-                toTabType !== TabType.CHOOSE_ADDRESS_TYPE
-              ) {
-                setTimeout(() => {
-                  updateContextData({ tabType: contextData.tabType });
-                }, 200);
+              if (!contextData.isRestore && contextData.mnemonicVerified && toTabType !== TabType.CHOOSE_ADDRESS_TYPE) {
                 return;
               }
               if (toTabType === TabType.CONFIRM_WORDS && !contextData.step1CreateWordsCompleted) {
-                setTimeout(() => {
-                  updateContextData({ tabType: contextData.tabType });
-                }, 200);
                 return;
               }
               if (toTabType === TabType.CHOOSE_ADDRESS_TYPE) {
                 if (!contextData.mnemonicVerified) {
-                  setTimeout(() => {
-                    updateContextData({ tabType: contextData.tabType });
-                  }, 200);
                   return;
                 }
               }

@@ -22,6 +22,7 @@ export function Step1_Create({
   const [checked, setChecked] = useState(false);
   const [generating, setGenerating] = useState(false);
   const generationRequestRef = useRef(0);
+  const generationQueueRef = useRef(Promise.resolve());
   const { t } = useI18n();
   const wallet = useWallet();
 
@@ -32,7 +33,13 @@ export function Step1_Create({
       setChecked(false);
       try {
         const strength = wordsTypeToStrength(wordsType);
-        const _mnemonics = await wallet.generatePreMnemonic(strength);
+        const generation = generationQueueRef.current.then(() => wallet.generatePreMnemonic(strength));
+        // Keep the queue usable after a failed generation attempt.
+        generationQueueRef.current = generation.then(
+          () => undefined,
+          () => undefined
+        );
+        const _mnemonics = await generation;
         if (requestId === generationRequestRef.current) {
           updateContextData({
             mnemonics: _mnemonics,
@@ -89,8 +96,12 @@ export function Step1_Create({
           }}
           value={contextData.wordsType}
         >
-          <Radio value={WordsType.WORDS_12}>{t('mnemonics_12_words')}</Radio>
-          <Radio value={WordsType.WORDS_24}>{t('mnemonics_24_words')}</Radio>
+          <Radio value={WordsType.WORDS_12} disabled={generating}>
+            {t('mnemonics_12_words')}
+          </Radio>
+          <Radio value={WordsType.WORDS_24} disabled={generating}>
+            {t('mnemonics_24_words')}
+          </Radio>
         </RadioGroup>
       </Row>
 
