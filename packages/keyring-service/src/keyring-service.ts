@@ -616,7 +616,7 @@ export class KeyringService extends EventEmitter {
         if (!isValidPassword) {
           throw new Error(this.t('password_error'))
         }
-        await this.unlockKeyrings(oldPassword)
+        await this.unlockKeyrings(oldPassword, true)
         this.password = newPassword
 
         const boostValue = this.getBoostValue()
@@ -911,11 +911,11 @@ export class KeyringService extends EventEmitter {
    * @param {string} password - The keyring controller password.
    * @returns {Promise<boolean>} Resolves to true once keyrings are persisted.
    */
-  persistAllKeyrings = (): Promise<boolean> => {
+  persistAllKeyrings = async (): Promise<boolean> => {
     if (!this.password || typeof this.password !== 'string') {
-      return Promise.reject(new Error(this.t('keyringcontroller_password_is_not_a_string')))
+      throw new Error(this.t('keyringcontroller_password_is_not_a_string'))
     }
-    return Promise.all(
+    const serializedKeyrings = await Promise.all(
       this.keyrings.map((keyring, index) => {
         return Promise.all([keyring.type, keyring.serialize()]).then(serializedKeyringArray => {
           // Label the output values on each serialized Keyring:
@@ -927,16 +927,15 @@ export class KeyringService extends EventEmitter {
         })
       })
     )
-      .then(serializedKeyrings => {
-        return this.encryptor.encrypt(
-          this.password as string,
-          serializedKeyrings as unknown as Buffer
-        )
-      })
-      .then(encryptedString => {
-        this.store.updateState({ vault: encryptedString })
-        return true
-      })
+
+    await this._restoreRecoveryDataForPersistence(serializedKeyrings)
+    const encryptedString = await this.encryptor.encrypt(
+      this.password,
+      serializedKeyrings as unknown as Buffer
+    )
+    this.store.updateState({ vault: encryptedString })
+    this._clearKeyringRecoveryData()
+    return true
   }
 
   /**
@@ -948,7 +947,7 @@ export class KeyringService extends EventEmitter {
    * @param {string} password - The keyring controller password.
    * @returns {Promise<Array<Keyring>>} The keyrings.
    */
-  unlockKeyrings = async (password: string): Promise<any[]> => {
+  unlockKeyrings = async (password: string, retainRecoveryData = false): Promise<any[]> => {
     const encryptedVault = this.store.getState().vault
     if (!encryptedVault) {
       throw new Error(this.t('cannot_unlock_without_a_previous_vault'))
@@ -966,6 +965,9 @@ export class KeyringService extends EventEmitter {
     this.cachedDisplayedKeyring = null
 
     await this._updateMemStoreKeyrings()
+    if (!retainRecoveryData) {
+      this._clearKeyringRecoveryData()
+    }
     return this.keyrings
   }
 
@@ -1203,6 +1205,75 @@ export class KeyringService extends EventEmitter {
   private _clearKeyringSecrets = () => {
     for (const keyring of this.keyrings) {
       this._clearKeyringSecret(keyring)
+    }
+  }
+
+  private _clearKeyringRecoveryData = () => {
+    for (const keyring of this.keyrings) {
+      keyring?.clearRecoveryData?.()
+    }
+  }
+
+  private _restoreRecoveryDataForPersistence = async (serializedKeyrings: any[]) => {
+    const requiresRecoveryData = serializedKeyrings.some(
+      keyring =>
+        keyring.type === KeyringType.HdKeyring &&
+        !keyring.data?.mnemonic &&
+        !keyring.data?.xpriv
+    )
+    if (!requiresRecoveryData) {
+      return
+    }
+
+    const encryptedVault = this.store.getState().vault
+    if (!encryptedVault) {
+      throw new Error(this.t('cannot_unlock_without_a_previous_vault'))
+    }
+    const persistedKeyrings = await this.encryptor.decrypt(this.password!, encryptedVault)
+
+    for (let index = 0; index < serializedKeyrings.length; index++) {
+      const serializedKeyring = serializedKeyrings[index]
+      if (
+        serializedKeyring.type !== KeyringType.HdKeyring ||
+        serializedKeyring.data?.mnemonic ||
+        serializedKeyring.data?.xpriv
+      ) {
+        continue
+      }
+
+      const persistedKeyring = persistedKeyrings[index]
+      if (
+        persistedKeyring?.type !== KeyringType.HdKeyring ||
+        (!persistedKeyring.data?.mnemonic && !persistedKeyring.data?.xpriv)
+      ) {
+        throw new Error(this.t('cannot_unlock_without_a_previous_vault'))
+      }
+      serializedKeyring.data = {
+        ...serializedKeyring.data,
+        mnemonic: persistedKeyring.data.mnemonic || '',
+        xpriv: persistedKeyring.data.xpriv || '',
+        passphrase: persistedKeyring.data.passphrase || '',
+      }
+    }
+  }
+
+  getKeyringRecoveryData = async (keyringIndex: number) => {
+    if (!this.password) {
+      throw new Error(this.t('you_need_to_unlock_wallet_first'))
+    }
+    const encryptedVault = this.store.getState().vault
+    if (!encryptedVault) {
+      throw new Error(this.t('cannot_unlock_without_a_previous_vault'))
+    }
+    const persistedKeyrings = await this.encryptor.decrypt(this.password, encryptedVault)
+    const keyring = persistedKeyrings[keyringIndex]
+    if (keyring?.type !== KeyringType.HdKeyring) {
+      throw new Error(this.t('not_supported'))
+    }
+    return {
+      mnemonic: keyring.data.mnemonic || '',
+      hdPath: keyring.data.hdPath,
+      passphrase: keyring.data.passphrase || '',
     }
   }
 

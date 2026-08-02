@@ -28,21 +28,45 @@ function createService() {
 }
 
 describe('mnemonic recovery input', () => {
-  it('normalizes whitespace and persists the canonical BIP-39 phrase', async () => {
+  it('persists the canonical BIP-39 phrase without retaining it on the unlocked keyring', async () => {
     const { service, init } = createService()
     await init()
 
     const keyring = await service.createKeyringWithMnemonics(
       `  ${mnemonic.replace('abandon abandon', 'abandon\nabandon')}  `,
       "m/84'/0'/0'/0",
-      '',
+      'test passphrase',
       AddressType.P2WPKH,
       1
     )
 
     expect(normalizeMnemonic(`\t${mnemonic}\n`)).toBe(mnemonic)
-    const serialized = (await keyring.serialize()) as { mnemonic: string }
-    expect(serialized.mnemonic).toBe(mnemonic)
+    const serialized = (await keyring.serialize()) as { mnemonic: string; passphrase: string }
+    expect(serialized.mnemonic).toBe('')
+    expect(serialized.passphrase).toBe('')
+    await service.addNewAccount(keyring)
+
+    expect(await service.getKeyringRecoveryData(0)).toEqual({
+      mnemonic,
+      hdPath: "m/84'/0'/0'/0",
+      passphrase: 'test passphrase',
+    })
+
+    await service.setLocked()
+    await service.submitPassword('test-password')
+
+    const unlockedKeyring = service.keyrings[0] as typeof keyring
+    expect((await unlockedKeyring.serialize()).mnemonic).toBe('')
+    await service.changePassword('test-password', 'new-test-password')
+
+    expect(await service.getKeyringRecoveryData(0)).toMatchObject({
+      mnemonic,
+      passphrase: 'test passphrase',
+    })
+
+    await service.setLocked()
+    await service.submitPassword('new-test-password')
+    expect(await service.getKeyringRecoveryData(0)).toMatchObject({ mnemonic })
   })
 
   it('rejects malformed derivation paths before creating a persistent keyring', async () => {

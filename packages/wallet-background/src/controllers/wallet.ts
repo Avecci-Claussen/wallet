@@ -359,13 +359,7 @@ export class WalletController extends BaseController {
     if (!isValidPassword) {
       throw new Error(t('password_error'))
     }
-    const originKeyring = keyringService.keyrings[keyring.index]!
-    const serialized = await originKeyring.serialize()
-    return {
-      mnemonic: serialized.mnemonic,
-      hdPath: serialized.hdPath,
-      passphrase: serialized.passphrase,
-    }
+    return keyringService.getKeyringRecoveryData(keyring.index)
   }
 
   createKeyringWithPrivateKey = async (

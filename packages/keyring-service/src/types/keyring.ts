@@ -25,6 +25,7 @@ export interface Keyring {
   verifyMessage(address: string, message: string, sig: string): Promise<boolean>
   exportAccount(address: string): Promise<string>
   removeAccount(address: string): void
+  clearRecoveryData?(): void
   clearSensitiveData?(): void
 
   // Optional methods for different keyring types

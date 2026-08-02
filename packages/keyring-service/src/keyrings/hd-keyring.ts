@@ -106,18 +106,26 @@ export class HdKeyring extends SimpleKeyring {
     this.mnemonic = mnemonic
     this._index2wallet = {}
 
-    let seed
-    if (bip39.mnemonicToSeedSync) {
-      seed = bip39.mnemonicToSeedSync(mnemonic, this.passphrase)
-    } else {
-      seed = bip39.mnemonicToSeed(mnemonic, this.passphrase)
+    if (!bip39.mnemonicToSeedSync) {
+      throw new Error('Btc-Hd-Keyring: mnemonicToSeedSync is required')
     }
-    this.hdWallet = hdkey.fromMasterSeed(seed)
-    this.root = this.hdWallet.derive(this.hdPath)
+    const seed = bip39.mnemonicToSeedSync(mnemonic, this.passphrase)
+    try {
+      this.hdWallet = hdkey.fromMasterSeed(seed)
+      this.root = this.hdWallet.derive(this.hdPath)
+    } finally {
+      seed?.fill?.(0)
+    }
+  }
+
+  clearRecoveryData() {
+    this.mnemonic = ''
+    this.xpriv = ''
+    this.passphrase = ''
   }
 
   changeHdPath(hdPath: string) {
-    if (!this.mnemonic) {
+    if (!this.hdWallet) {
       throw new Error('Btc-Hd-Keyring: Not support')
     }
 
@@ -133,7 +141,7 @@ export class HdKeyring extends SimpleKeyring {
   }
 
   getAccountByHdPath(hdPath: string, index: number) {
-    if (!this.mnemonic) {
+    if (!this.hdWallet) {
       throw new Error('Btc-Hd-Keyring: Not support')
     }
     let derivePath: string
@@ -270,9 +278,7 @@ export class HdKeyring extends SimpleKeyring {
     this.activeIndexes = []
     this.root = null
     this.hdWallet = undefined
-    this.mnemonic = ''
-    this.xpriv = ''
-    this.passphrase = ''
+    this.clearRecoveryData()
   }
 
   getIndexByAddress(address: string) {
