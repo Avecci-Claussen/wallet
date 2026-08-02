@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { colors } from '@/ui/theme/colors';
+import { DecodedPsbt, Risk, RiskType } from '@unisat/wallet-shared';
 import { useI18n } from '@unisat/wallet-state';
 
-import { DecodedPsbt, Risk, RiskType } from '@unisat/wallet-shared';
 import { Button } from '../Button';
 import { Column } from '../Column';
 import { Icon } from '../Icon';
@@ -14,7 +14,7 @@ import { Text } from '../Text';
 import { BadFeeRate } from './BadFeeRate';
 import { ChangingInscription } from './ChangingInscription';
 import { InscriptionBurning } from './InscriptionBurning';
-import { MultipleAssetsList } from './MultipleAssetsList';
+import { BurningAssetsCarousel, MultipleAssetsCarousel, MultipleAssetsList } from './MultipleAssetsList';
 import { RunesBurningList } from './RunesBurningList';
 
 const visibleRiskDetailTypes = [
@@ -183,6 +183,11 @@ export const SignPsbtWithRisksPopover = ({
             const riskContentKey = getRiskContentKey(risk.type);
             const title = riskContentKey.title ? t(riskContentKey.title) : risk.title;
             const desc = riskContentKey.description ? t(riskContentKey.description) : risk.desc;
+            const isMultipleAssetsRisk = risk.type === RiskType.MULTIPLE_ASSETS;
+            const isBurningRisk =
+              risk.type === RiskType.INSCRIPTION_BURNING ||
+              risk.type === RiskType.RUNES_BURNING ||
+              risk.type === RiskType.ALKANES_BURNING;
             return (
               <Column
                 key={'risk_' + index}
@@ -202,7 +207,13 @@ export const SignPsbtWithRisksPopover = ({
                   ) : null}
                 </Row>
                 <Row style={{ borderBottomWidth: 1, color: colors.border }}></Row>
-                <Text text={desc} preset="sub" />
+                {isMultipleAssetsRisk ? (
+                  <MultipleAssetsCarousel decodedPsbt={decodedPsbt} />
+                ) : isBurningRisk ? (
+                  <BurningAssetsCarousel decodedPsbt={decodedPsbt} riskType={risk.type} />
+                ) : (
+                  <Text text={desc} preset="sub" />
+                )}
               </Column>
             );
           })}
