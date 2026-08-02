@@ -2,7 +2,14 @@
 export { KeyringService, normalizeMnemonic } from './keyring-service'
 
 // Keyring implementations
-export { SimpleKeyring, HdKeyring, KeystoneKeyring, ColdWalletKeyring } from './keyrings'
+export {
+  SimpleKeyring,
+  HdKeyring,
+  KeystoneKeyring,
+  ColdWalletKeyring,
+  isKeystoneSupportedHdPath,
+  KEYSTONE_SUPPORTED_HD_PATH,
+} from './keyrings'
 
 // encryptor
 export { BrowserPassworderEncryptor } from './encryptor/browser-encryptor'

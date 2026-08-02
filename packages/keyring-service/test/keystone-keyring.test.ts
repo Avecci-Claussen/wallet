@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
 import { KeystoneKeyring } from '../src/keyrings/keystone-keyring'
+import { KeyringService } from '../src/keyring-service'
+import { AddressType } from '@unisat/wallet-types'
 
 const initOpts = {
   mfp: '52744703',
@@ -42,6 +44,20 @@ const secondAccount = {
 }
 
 describe('bitcoin-keystone-keyring', () => {
+  it('rejects an unsupported Keystone derivation path before parsing device data', async () => {
+    const service = new KeyringService()
+
+    await expect(
+      service.createKeyringWithKeystone(
+        'crypto-account',
+        '',
+        AddressType.P2WPKH,
+        "m/84'/0'/0'/6",
+        1
+      )
+    ).rejects.toThrow("Keystone only supports the standard BIP84 path m/84'/0'/0'/0")
+  })
+
   describe('constructor', () => {
     it('constructs', async () => {
       const keyring = new KeystoneKeyring(initOpts)
