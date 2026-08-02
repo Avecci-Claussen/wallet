@@ -3,8 +3,8 @@
  *
  * - Encrypt: PBKDF2-SHA256 @ 600_000 iterations + AES-GCM (OWASP-aligned)
  * - Decrypt: uses payload.iterations when present; otherwise tries 600k then legacy 10k
- *   so existing UniSat vaults (browser-passworder @ 10k) still unlock, then get re-encrypted
- *   on the next persist.
+ *   so existing UniSat vaults (browser-passworder @ 10k) still unlock. KeyringService migrates
+ *   the booted password verifier after a successful unlock.
  */
 import { Encryptor } from '../types'
 
