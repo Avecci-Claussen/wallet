@@ -1352,6 +1352,9 @@
   "mnemonics_12_words": {
     "message": "12 詞"
   },
+  "mnemonics_12_words_not_recommended": {
+    "message": "推薦使用 24 個助記詞。相較於 12 個助記詞，24 個助記詞提供更高的隨機性與安全裕度。"
+  },
   "mnemonics_24_words": {
     "message": "24 詞"
   },

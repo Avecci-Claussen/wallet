@@ -1,9 +1,10 @@
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { Button, Card, Checkbox, Column, Grid, Radio, RadioGroup, Row, Text } from '@/ui/components';
+import { Button, Card, Checkbox, Column, Grid, Icon, Radio, RadioGroup, Row, Text } from '@/ui/components';
 import { FooterButtonContainer } from '@/ui/components/FooterButtonContainer';
 import { ContextData, TabType, UpdateContextDataParams } from '@/ui/pages/Account/createHDWalletComponents/types';
+import { colors } from '@/ui/theme/colors';
 import { fontSizes } from '@/ui/theme/font';
 import { WordsType } from '@unisat/wallet-shared';
 import { useI18n, useWallet } from '@unisat/wallet-state';
@@ -84,10 +85,11 @@ export function Step1_Create({
   };
 
   const words = contextData.mnemonics ? contextData.mnemonics.split(' ') : [];
+  const isTwelveWords = contextData.wordsType === WordsType.WORDS_12;
+
   return (
     <Column gap="xl">
       <Text text={t('secret_recovery_phrase')} preset="title-bold" textCenter data-testid="mnemonic-title" />
-      <Text text={t('this_phrase_is_the_only_way_to_recover_your_wallet')} color="warning" textCenter />
 
       <Row justifyCenter>
         <RadioGroup
@@ -96,14 +98,43 @@ export function Step1_Create({
           }}
           value={contextData.wordsType}
         >
-          <Radio value={WordsType.WORDS_12} disabled={generating}>
-            {t('mnemonics_12_words')}
-          </Radio>
           <Radio value={WordsType.WORDS_24} disabled={generating}>
             {t('mnemonics_24_words')}
           </Radio>
+          <Radio value={WordsType.WORDS_12} disabled={generating}>
+            {t('mnemonics_12_words')}
+          </Radio>
         </RadioGroup>
       </Row>
+
+      <Card
+        preset="style2"
+        style={{
+          alignSelf: 'stretch',
+          justifyContent: 'flex-start',
+          border: `1px solid ${isTwelveWords ? colors.warning_content : colors.border}`
+        }}
+        data-testid="mnemonic-security-notice"
+      >
+        <Icon
+          icon={isTwelveWords ? 'warning' : 'info'}
+          size={18}
+          color={isTwelveWords ? 'warning' : 'textDim'}
+          containerStyle={{ flexShrink: 0, marginTop: 1 }}
+        />
+        <Column gap="xs">
+          <Text text={t('security_notice')} preset="sub-bold" color={isTwelveWords ? 'warning' : 'textWhite'} />
+          <Text text={t('this_phrase_is_the_only_way_to_recover_your_wallet')} preset="sub" color="textWhite" />
+          {isTwelveWords ? (
+            <Text
+              text={t('mnemonics_12_words_not_recommended')}
+              preset="sub"
+              color="warning"
+              data-testid="mnemonic-12-words-warning"
+            />
+          ) : null}
+        </Column>
+      </Card>
 
       <Row justifyCenter>
         <Grid columns={2}>
