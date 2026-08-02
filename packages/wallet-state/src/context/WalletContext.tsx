@@ -143,7 +143,8 @@ export interface WalletController {
   createKeyringWithPrivateKey(
     data: string,
     addressType: AddressType,
-    alianName?: string
+    alianName?: string,
+    compressed?: boolean
   ): Promise<Account[]>
   getPreMnemonics(): Promise<any>
   generatePreMnemonic(strength?: 128 | 256): Promise<string>
@@ -167,7 +168,8 @@ export interface WalletController {
   ): Promise<{ address: string; type: string }[]>
   createTmpKeyringWithPrivateKey(
     privateKey: string,
-    addressType: AddressType
+    addressType: AddressType,
+    compressed?: boolean
   ): Promise<WalletKeyring>
   createTmpKeyringWithKeystone(
     urType: string,

@@ -313,9 +313,17 @@ export class KeyringService extends EventEmitter {
    * @param  privateKey - The privateKey to generate address
    * @returns  A Promise that resolves to the state.
    */
-  importPrivateKey = async (privateKey: string, addressType: AddressType) => {
+  importPrivateKey = async (
+    privateKey: string,
+    addressType: AddressType,
+    compressed?: boolean
+  ) => {
     // await this.persistAllKeyrings();
-    const keyring = await this.addNewKeyring('Simple Key Pair', [privateKey], addressType)
+    const keyring = await this.addNewKeyring(
+      'Simple Key Pair',
+      [compressed === undefined ? privateKey : { privateKey, compressed }],
+      addressType
+    )
     // await this.persistAllKeyrings();
     this.setUnlocked()
     this.fullUpdate()

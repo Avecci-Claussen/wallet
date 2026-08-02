@@ -14,6 +14,13 @@ import { deriveContextHash, parseHexContext } from './derive-context-hash'
 
 const type = 'Simple Key Pair'
 
+export type SimpleKeyringAccount =
+  | string
+  | {
+      privateKey: string
+      compressed: boolean
+    }
+
 export class SimpleKeyring extends EventEmitter {
   static type = type
   type = type
@@ -28,23 +35,40 @@ export class SimpleKeyring extends EventEmitter {
   }
 
   async serialize(): Promise<any> {
-    return this.wallets.map(wallet => wallet.privateKey?.toString('hex'))
+    return this.wallets.map(wallet =>
+      wallet.compressed
+        ? wallet.privateKey?.toString('hex')
+        : { privateKey: wallet.privateKey?.toString('hex'), compressed: false }
+    )
   }
 
   async deserialize(opts: any) {
-    const privateKeys = opts as string[]
+    const privateKeys = opts as SimpleKeyringAccount[]
 
-    this.wallets = privateKeys.map(key => {
+    this.wallets = privateKeys.map(account => {
+      const key = typeof account === 'string' ? account : account.privateKey
+      const compressedOverride = typeof account === 'string' ? undefined : account.compressed
       let buf: Buffer
+      let compressed: boolean
       if (key.length === 64) {
         // privateKey
         buf = Buffer.from(key, 'hex')
+        compressed = compressedOverride ?? true
       } else {
-        // base58
-        buf = Buffer.from(decode(key).slice(1, 33))
+        // WIF: version (1 byte) || private key (32 bytes) || optional compression marker (0x01).
+        const decoded = decode(key)
+        if (decoded.length === 33) {
+          compressed = false
+        } else if (decoded.length === 34 && decoded[33] === 0x01) {
+          compressed = true
+        } else {
+          throw new Error('Invalid WIF private key')
+        }
+        buf = Buffer.from(decoded.slice(1, 33))
+        compressed = compressedOverride ?? compressed
       }
 
-      return eccManager.eccPair.fromPrivateKey(buf as any)
+      return eccManager.eccPair.fromPrivateKey(buf as any, { compressed })
     })
   }
 

@@ -16,6 +16,7 @@ const testAccount = {
   key: '88544d58a328a380a4a433e4bb44b2a9f8a1152b1467393cfc8f8e5d81137162',
   address: '02b57a152325231723ee9faabba930108b19c11a391751572f380d71b447317ae7',
 }
+const uncompressedWif = '5JrKvvvDBmHrFH2RnMysc5bKySncx359QatRbHr8pQT9L1pPcGA'
 
 describe('bitcoin-simple-keyring', () => {
   let keyring: SimpleKeyring
@@ -51,6 +52,30 @@ describe('bitcoin-simple-keyring', () => {
       const newKeyring = new SimpleKeyring([testAccount.key])
       const accounts = await newKeyring.getAccounts()
       expect(accounts).eqls([testAccount.address])
+    })
+  })
+
+  describe('#deserialize a WIF private key', function () {
+    it('preserves the compression mode encoded by an uncompressed WIF', async function () {
+      await keyring.deserialize([uncompressedWif])
+
+      const accounts = await keyring.getAccounts()
+      expect(accounts[0]).toHaveLength(130)
+      expect(bitcoin.payments.p2pkh({ pubkey: Buffer.from(accounts[0]!, 'hex') }).address).eq(
+        '1Am3Q2wcPocUbaoCrwcKr6KBTqZJAjkjiq'
+      )
+      const serialized = await keyring.serialize()
+      expect(serialized).eql([{ privateKey: testAccount.key, compressed: false }])
+
+      const restoredKeyring = new SimpleKeyring(serialized)
+      expect(await restoredKeyring.getAccounts()).eql(accounts)
+    })
+
+    it('allows a raw private key to explicitly select the uncompressed branch', async function () {
+      await keyring.deserialize([{ privateKey: testAccount.key, compressed: false }])
+
+      const accounts = await keyring.getAccounts()
+      expect(accounts[0]).toHaveLength(130)
     })
   })
 

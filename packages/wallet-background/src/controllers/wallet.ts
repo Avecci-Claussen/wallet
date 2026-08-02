@@ -360,11 +360,12 @@ export class WalletController extends BaseController {
   createKeyringWithPrivateKey = async (
     data: string,
     addressType: AddressType,
-    alianName?: string
+    alianName?: string,
+    compressed?: boolean
   ) => {
     let originKeyring: Keyring
     try {
-      originKeyring = await keyringService.importPrivateKey(data, addressType)
+      originKeyring = await keyringService.importPrivateKey(data, addressType, compressed)
     } catch (e) {
       log.error(e)
       throw e
@@ -498,8 +499,14 @@ export class WalletController extends BaseController {
     return this.displayedKeyringToWalletKeyring(displayedKeyring, -1, false)
   }
 
-  createTmpKeyringWithPrivateKey = async (privateKey: string, addressType: AddressType) => {
-    const originKeyring = keyringService.createTmpKeyring(KeyringType.SimpleKeyring, [privateKey])
+  createTmpKeyringWithPrivateKey = async (
+    privateKey: string,
+    addressType: AddressType,
+    compressed?: boolean
+  ) => {
+    const originKeyring = keyringService.createTmpKeyring(KeyringType.SimpleKeyring, [
+      compressed === undefined ? privateKey : { privateKey, compressed },
+    ])
     const displayedKeyring = await keyringService.displayForKeyring(originKeyring, addressType, -1)
     return this.displayedKeyringToWalletKeyring(displayedKeyring, -1, false)
   }

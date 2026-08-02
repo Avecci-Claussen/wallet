@@ -109,9 +109,9 @@ function Step2({
           isUnisatLegacy: v.isUnisatLegacy
         };
       });
-  }, [contextData]);
+  }, []);
 
-  const [previewAddresses, setPreviewAddresses] = useState<string[]>(hdPathOptions.map((v) => ''));
+  const [previewAddresses, setPreviewAddresses] = useState<string[]>(hdPathOptions.map(() => ''));
 
   const [addressAssets, setAddressAssets] = useState<{
     [key: string]: { total_btc: string; satoshis: number; total_inscription: number };
@@ -124,11 +124,43 @@ function Step2({
     addressBalances: {}
   });
   const self = selfRef.current;
+  const isRawHexPrivateKey = /^[0-9a-fA-F]{64}$/.test(contextData.wif);
+
+  const addressCandidates = useMemo(
+    () =>
+      hdPathOptions.flatMap((option) => {
+        // A WIF explicitly encodes its public-key format. Only raw private-key hex
+        // lacks this information and needs both Legacy P2PKH branches scanned.
+        if (option.addressType === AddressType.P2PKH && isRawHexPrivateKey) {
+          return [
+            { ...option, compressed: true, label: `${option.label} (compressed)` },
+            { ...option, compressed: false, label: `${option.label} (uncompressed)` }
+          ];
+        }
+
+        return [
+          {
+            ...option,
+            compressed: option.addressType === AddressType.P2PKH ? undefined : true,
+            label: option.label
+          }
+        ];
+      }),
+    [hdPathOptions, isRawHexPrivateKey]
+  );
+
   const run = async () => {
     const addresses: string[] = [];
-    for (let i = 0; i < hdPathOptions.length; i++) {
-      const options = hdPathOptions[i];
-      const keyring = await wallet.createTmpKeyringWithPrivateKey(contextData.wif, options.addressType);
+    self.maxSatoshis = 0;
+    self.recommended = 0;
+    self.addressBalances = {};
+    for (let i = 0; i < addressCandidates.length; i++) {
+      const options = addressCandidates[i];
+      const keyring = await wallet.createTmpKeyringWithPrivateKey(
+        contextData.wif,
+        options.addressType,
+        options.compressed
+      );
       const address = keyring.accounts[0].address;
       addresses.push(address);
     }
@@ -148,24 +180,37 @@ function Step2({
         self.recommended = i;
       }
 
-      updateContextData({ addressType: hdPathOptions[self.recommended].addressType });
+      const recommended = addressCandidates[self.recommended];
+      updateContextData({
+        addressType: recommended.addressType,
+        compressed: recommended.compressed
+      });
       setAddressAssets(self.addressBalances);
     }
     setPreviewAddresses(addresses);
   };
   useEffect(() => {
     run();
-  }, [contextData.wif]);
+  }, [addressCandidates, contextData.wif]);
 
   const pathIndex = useMemo(() => {
-    return hdPathOptions.findIndex((v) => v.addressType === contextData.addressType);
-  }, [hdPathOptions, contextData.addressType]);
+    return addressCandidates.findIndex(
+      (candidate) =>
+        candidate.addressType === contextData.addressType &&
+        candidate.compressed === contextData.compressed
+    );
+  }, [addressCandidates, contextData.addressType, contextData.compressed]);
 
   const navigate = useNavigate();
 
   const onNext = async () => {
     try {
-      await wallet.createKeyringWithPrivateKey(contextData.wif, contextData.addressType);
+      await wallet.createKeyringWithPrivateKey(
+        contextData.wif,
+        contextData.addressType,
+        undefined,
+        contextData.compressed
+      );
       navigate('MainScreen');
     } catch (e) {
       tools.toastError((e as any).message);
@@ -174,7 +219,7 @@ function Step2({
   return (
     <Column gap="lg">
       <Text text={t('address_type')} preset="bold" />
-      {hdPathOptions.map((item, index) => {
+      {addressCandidates.map((item, index) => {
         const address = previewAddresses[index];
         const assets = addressAssets[address] || {
           total_btc: '--',
@@ -188,12 +233,12 @@ function Step2({
         return (
           <AddressTypeCard
             key={index}
-            label={`${item.label}`}
+            label={item.label}
             address={address}
             assets={assets}
             checked={index == pathIndex}
             onClick={() => {
-              updateContextData({ addressType: item.addressType });
+              updateContextData({ addressType: item.addressType, compressed: item.compressed });
             }}
             data-testid={`address-type-card-${index}`}
           />
@@ -210,6 +255,7 @@ function Step2({
 interface ContextData {
   wif: string;
   addressType: AddressType;
+  compressed?: boolean;
   step1CreateWordsCompleted: boolean;
   tabType: TabType;
 }
@@ -217,6 +263,7 @@ interface ContextData {
 interface UpdateContextDataParams {
   wif?: string;
   addressType?: AddressType;
+  compressed?: boolean;
   step1CreateWordsCompleted?: boolean;
   tabType?: TabType;
 }
@@ -225,6 +272,7 @@ export default function CreateSimpleWalletScreen() {
   const [contextData, setContextData] = useState<ContextData>({
     wif: '',
     addressType: AddressType.P2WPKH,
+    compressed: true,
     step1CreateWordsCompleted: false,
     tabType: TabType.IMPORT_WORDS
   });
