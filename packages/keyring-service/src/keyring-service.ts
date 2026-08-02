@@ -37,6 +37,37 @@ const KEYRING_SDK_TYPES = {
   WatchAddressKeyring,
 }
 
+const MAX_HD_ACCOUNT_COUNT = 100
+
+/** Normalize BIP-39 input before validation and persistence. */
+export function normalizeMnemonic(mnemonic: string): string {
+  if (typeof mnemonic !== 'string') {
+    return ''
+  }
+
+  return mnemonic.normalize('NFKD').trim().split(/\s+/).filter(Boolean).join(' ')
+}
+
+function isValidHdPath(hdPath: string): boolean {
+  if (typeof hdPath !== 'string') {
+    return false
+  }
+
+  const parts = hdPath.split('/')
+  if (parts[0] !== 'm' || parts.length < 2) {
+    return false
+  }
+
+  return parts.slice(1).every(part => {
+    const match = /^(\d+)'?$/.exec(part)
+    if (!match) {
+      return false
+    }
+    const index = Number(match[1])
+    return Number.isSafeInteger(index) && index >= 0 && index < 0x80000000
+  })
+}
+
 /**
  * Simple Mutex Lock for managing concurrent operations
  * Ensures only one operation can proceed at a time
@@ -313,11 +344,7 @@ export class KeyringService extends EventEmitter {
    * @param  privateKey - The privateKey to generate address
    * @returns  A Promise that resolves to the state.
    */
-  importPrivateKey = async (
-    privateKey: string,
-    addressType: AddressType,
-    compressed?: boolean
-  ) => {
+  importPrivateKey = async (privateKey: string, addressType: AddressType, compressed?: boolean) => {
     // await this.persistAllKeyrings();
     const keyring = await this.addNewKeyring(
       'Simple Key Pair',
@@ -404,11 +431,22 @@ export class KeyringService extends EventEmitter {
     accountCount: number,
     accountIndexDerivation = false
   ) => {
-    if (accountCount < 1) {
+    if (
+      !Number.isSafeInteger(accountCount) ||
+      accountCount < 1 ||
+      accountCount > MAX_HD_ACCOUNT_COUNT
+    ) {
       throw new Error(this.t('keyring_error_account_count'))
     }
-    if (!bip39.validateMnemonic(seed)) {
-      return Promise.reject(new Error(this.t('mnemonic_phrase_is_invalid')))
+    const mnemonic = normalizeMnemonic(seed)
+    if (!bip39.validateMnemonic(mnemonic)) {
+      throw new Error(this.t('mnemonic_phrase_is_invalid'))
+    }
+    if (!isValidHdPath(hdPath)) {
+      throw new Error(this.t('invalid_derivation_path'))
+    }
+    if (typeof passphrase !== 'string') {
+      throw new Error(this.t('mnemonic_phrase_is_invalid'))
     }
 
     // await this.persistAllKeyrings();
@@ -420,7 +458,7 @@ export class KeyringService extends EventEmitter {
     const keyring = await this.addNewKeyring(
       'HD Key Tree',
       {
-        mnemonic: seed,
+        mnemonic,
         activeIndexes,
         hdPath,
         passphrase,

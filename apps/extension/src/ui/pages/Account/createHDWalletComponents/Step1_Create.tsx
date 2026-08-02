@@ -37,7 +37,8 @@ export function Step1_Create({
           updateContextData({
             mnemonics: _mnemonics,
             wordsType,
-            step1CreateWordsCompleted: false
+            step1CreateWordsCompleted: false,
+            mnemonicVerified: false
           });
         }
       } finally {
@@ -71,7 +72,7 @@ export function Step1_Create({
 
   const btnClick = () => {
     updateContextData({
-      tabType: TabType.CHOOSE_ADDRESS_TYPE
+      tabType: TabType.CONFIRM_WORDS
     });
   };
 
@@ -86,7 +87,8 @@ export function Step1_Create({
           onChange={(value) => {
             void onSelectWordsType(value as WordsType);
           }}
-          value={contextData.wordsType}>
+          value={contextData.wordsType}
+        >
           <Radio value={WordsType.WORDS_12}>{t('mnemonics_12_words')}</Radio>
           <Radio value={WordsType.WORDS_24}>{t('mnemonics_24_words')}</Radio>
         </RadioGroup>
@@ -108,7 +110,12 @@ export function Step1_Create({
       </Row>
 
       <Row justifyCenter>
-        <Checkbox onChange={onChange} checked={checked} style={{ fontSize: fontSizes.sm }} data-testid="mnemonic-saved-checkbox">
+        <Checkbox
+          onChange={onChange}
+          checked={checked}
+          style={{ fontSize: fontSizes.sm }}
+          data-testid="mnemonic-saved-checkbox"
+        >
           <Text text={t('i_saved_my_secret_recovery_phrase')} />
         </Checkbox>
       </Row>

@@ -5,6 +5,7 @@ import { Content, Header, Layout, Row } from '@/ui/components';
 import { TabBar } from '@/ui/components/TabBar';
 import { Step0 } from '@/ui/pages/Account/createHDWalletComponents/Step0';
 import { Step1_Create } from '@/ui/pages/Account/createHDWalletComponents/Step1_Create';
+import { Step1_Confirm } from '@/ui/pages/Account/createHDWalletComponents/Step1_Confirm';
 import { Step1_Import } from '@/ui/pages/Account/createHDWalletComponents/Step1_Import';
 import { Step2 } from '@/ui/pages/Account/createHDWalletComponents/Step2';
 import { ContextData, TabType, UpdateContextDataParams } from '@/ui/pages/Account/createHDWalletComponents/types';
@@ -18,9 +19,9 @@ export default function CreateHDWalletScreen() {
   const navigate = useNavigate();
   const { t } = useI18n();
   const { state } = useLocation();
-  const { isImport, fromUnlock } = state as {
-    isImport: boolean;
-    fromUnlock: boolean;
+  const { isImport = false, fromUnlock = false } = (state ?? {}) as {
+    isImport?: boolean;
+    fromUnlock?: boolean;
   };
 
   const [contextData, setContextData] = useState<ContextData>({
@@ -29,6 +30,7 @@ export default function CreateHDWalletScreen() {
     passphrase: '',
     addressType: AddressType.P2WPKH,
     step1CreateWordsCompleted: false,
+    mnemonicVerified: false,
     tabType: isImport ? TabType.CHOOSE_RESTORE_WALLET : TabType.CREATE_WORDS,
     restoreWalletType: RestoreWalletType.UNISAT,
     isRestore: isImport,
@@ -40,9 +42,9 @@ export default function CreateHDWalletScreen() {
 
   const updateContextData = useCallback(
     (params: UpdateContextDataParams) => {
-      setContextData(Object.assign({}, contextData, params));
+      setContextData((previous) => Object.assign({}, previous, params));
     },
-    [contextData, setContextData]
+    [setContextData]
   );
 
   const wallet = useWallet();
@@ -67,6 +69,13 @@ export default function CreateHDWalletScreen() {
       clearInterval(interval);
     };
   }, []);
+
+  useEffect(() => {
+    return () => {
+      // Generated phrases are only needed until the HD keyring is persisted.
+      wallet.removePreMnemonics();
+    };
+  }, [wallet]);
 
   const items = useMemo(() => {
     if (contextData.isRestore) {
@@ -110,8 +119,13 @@ export default function CreateHDWalletScreen() {
           children: <Step1_Create contextData={contextData} updateContextData={updateContextData} />
         },
         {
-          key: TabType.CHOOSE_ADDRESS_TYPE,
+          key: TabType.CONFIRM_WORDS,
           label: t('step_2'),
+          children: <Step1_Confirm contextData={contextData} updateContextData={updateContextData} />
+        },
+        {
+          key: TabType.CHOOSE_ADDRESS_TYPE,
+          label: t('step_3'),
           children: <Step2 contextData={contextData} updateContextData={updateContextData} />
         }
       ];
@@ -155,8 +169,14 @@ export default function CreateHDWalletScreen() {
             }))}
             onTabClick={(key) => {
               const toTabType = key as TabType;
+              if (toTabType === TabType.CONFIRM_WORDS && !contextData.step1CreateWordsCompleted) {
+                setTimeout(() => {
+                  updateContextData({ tabType: contextData.tabType });
+                }, 200);
+                return;
+              }
               if (toTabType === TabType.CHOOSE_ADDRESS_TYPE) {
-                if (!contextData.step1CreateWordsCompleted) {
+                if (!contextData.mnemonicVerified) {
                   setTimeout(() => {
                     updateContextData({ tabType: contextData.tabType });
                   }, 200);
