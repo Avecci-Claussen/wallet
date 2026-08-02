@@ -1,5 +1,5 @@
 import { CheckboxChangeEvent } from 'antd/lib/checkbox';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { Button, Card, Checkbox, Column, Grid, Radio, RadioGroup, Row, Text } from '@/ui/components';
 import { FooterButtonContainer } from '@/ui/components/FooterButtonContainer';
@@ -21,23 +21,29 @@ export function Step1_Create({
 }) {
   const [checked, setChecked] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const generationRequestRef = useRef(0);
   const { t } = useI18n();
   const wallet = useWallet();
 
   const generate = useCallback(
     async (wordsType: WordsType) => {
+      const requestId = ++generationRequestRef.current;
       setGenerating(true);
       setChecked(false);
       try {
         const strength = wordsTypeToStrength(wordsType);
         const _mnemonics = await wallet.generatePreMnemonic(strength);
-        updateContextData({
-          mnemonics: _mnemonics,
-          wordsType,
-          step1CreateWordsCompleted: false
-        });
+        if (requestId === generationRequestRef.current) {
+          updateContextData({
+            mnemonics: _mnemonics,
+            wordsType,
+            step1CreateWordsCompleted: false
+          });
+        }
       } finally {
-        setGenerating(false);
+        if (requestId === generationRequestRef.current) {
+          setGenerating(false);
+        }
       }
     },
     [updateContextData, wallet]
