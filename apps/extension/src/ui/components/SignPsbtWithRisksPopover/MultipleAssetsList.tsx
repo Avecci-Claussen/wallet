@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import type { CSSProperties } from 'react';
 
 import { DecodedPsbt, DecodedPsbtInput, Inscription, RiskType } from '@unisat/wallet-shared';
 import { useAlkanesIconInfo, useBRC20IconInfo, useI18n, useRunesIconInfo } from '@unisat/wallet-state';
@@ -73,13 +74,13 @@ function getBurnedBalances<T extends { amount: string }>(
   });
 }
 
-const assetCarouselStyle = {
+const assetCarouselStyle: CSSProperties = {
   padding: 4,
   scrollSnapType: 'x mandatory',
   WebkitOverflowScrolling: 'touch'
 };
 
-const assetCarouselCardStyle = {
+const assetCarouselCardStyle: CSSProperties = {
   flex: '0 0 120px',
   minWidth: 120,
   minHeight: 66,
@@ -90,13 +91,13 @@ const assetCarouselCardStyle = {
   scrollSnapAlign: 'start'
 };
 
-const assetTagStyle = {
-  position: 'absolute' as const,
+const assetTagStyle: CSSProperties = {
+  position: 'absolute',
   top: 6,
   left: 8
 };
 
-const inscriptionCarouselCardStyle = {
+const inscriptionCarouselCardStyle: CSSProperties = {
   flex: '0 0 80px',
   minWidth: 80,
   scrollSnapAlign: 'start'
