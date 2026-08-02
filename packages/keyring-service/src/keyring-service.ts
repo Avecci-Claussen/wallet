@@ -540,9 +540,15 @@ export class KeyringService extends EventEmitter {
       }
 
       this.password = password
+      await this.upgradeLegacyBootedIfNeeded(password)
 
       if (this.hasVault()) {
+        const shouldUpgradeVault = this.isLegacyEncryptedPayload(this.store.getState().vault)
         this.keyrings = await this.unlockKeyrings(password)
+        if (shouldUpgradeVault) {
+          await this.persistAllKeyrings()
+          this.logger.info('[KeyringService] Legacy vault payload upgraded to current KDF')
+        }
       }
 
       // Upgrade boost value if needed (on first unlock after initialization)
@@ -590,6 +596,42 @@ export class KeyringService extends EventEmitter {
 
   private getBoostValue = (): string => {
     return this.store.getState().boostValue || this.initialBoostValue
+  }
+
+  /**
+   * Re-encrypt the legacy password verifier after its password has been validated.
+   * Legacy browser-passworder payloads have no KDF iteration metadata and use 10k rounds.
+   */
+  private upgradeLegacyBootedIfNeeded = async (password: string): Promise<void> => {
+    const booted = this.store.getState().booted
+
+    if (!this.isLegacyEncryptedPayload(booted)) {
+      return
+    }
+
+    const upgradedBooted = await this.encryptor.encrypt(password, this.getBoostValue())
+    this.store.updateState({ booted: upgradedBooted })
+    this.logger.info('[KeyringService] Legacy booted payload upgraded to current KDF')
+  }
+
+  private isLegacyEncryptedPayload = (encryptedData: string | null): boolean => {
+    if (!encryptedData) {
+      return false
+    }
+
+    try {
+      const payload = JSON.parse(encryptedData)
+      return (
+        payload &&
+        typeof payload === 'object' &&
+        typeof payload.data === 'string' &&
+        typeof payload.iv === 'string' &&
+        typeof payload.salt === 'string' &&
+        typeof payload.iterations !== 'number'
+      )
+    } catch {
+      return false
+    }
   }
 
   /**
