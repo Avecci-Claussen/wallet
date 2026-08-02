@@ -255,6 +255,26 @@ export class HdKeyring extends SimpleKeyring {
     })
   }
 
+  override clearSensitiveData() {
+    super.clearSensitiveData()
+
+    const wipeHdNode = (node: any) => {
+      node?.privateKey?.fill(0)
+      node?._privateKey?.fill(0)
+      node?.chainCode?.fill(0)
+    }
+
+    wipeHdNode(this.root)
+    wipeHdNode(this.hdWallet)
+    this._index2wallet = {}
+    this.activeIndexes = []
+    this.root = null
+    this.hdWallet = undefined
+    this.mnemonic = ''
+    this.xpriv = ''
+    this.passphrase = ''
+  }
+
   getIndexByAddress(address: string) {
     for (const key in this._index2wallet) {
       if (this._index2wallet[key]?.[0] === address) {

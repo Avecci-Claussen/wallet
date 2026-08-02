@@ -16,6 +16,23 @@ const legacyVault = JSON.stringify({
 })
 
 describe('KeyringService booted KDF migration', () => {
+  it('clears keyring secrets before locking', async () => {
+    const service = new KeyringService()
+    const clearSensitiveData = vi.fn()
+    await service.init({
+      storage: { get: vi.fn(), set: vi.fn() } as any,
+      encryptor: { decrypt: vi.fn(), encrypt: vi.fn() },
+      logger: { debug: vi.fn(), info: vi.fn(), error: vi.fn() },
+      t: (key: string) => key,
+    })
+    service.keyrings = [{ clearSensitiveData } as any]
+
+    await service.setLocked()
+
+    expect(clearSensitiveData).toHaveBeenCalledTimes(1)
+    expect(service.keyrings).toEqual([])
+  })
+
   it('re-encrypts a legacy booted payload after validating the password', async () => {
     const storage = {
       get: vi.fn().mockResolvedValue({ booted: legacyBooted, vault: null, boostValue }),

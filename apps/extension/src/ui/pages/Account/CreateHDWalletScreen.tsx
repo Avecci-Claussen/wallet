@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { Content, Header, Layout, Row } from '@/ui/components';
@@ -9,8 +9,8 @@ import { Step1_Confirm } from '@/ui/pages/Account/createHDWalletComponents/Step1
 import { Step1_Import } from '@/ui/pages/Account/createHDWalletComponents/Step1_Import';
 import { Step2 } from '@/ui/pages/Account/createHDWalletComponents/Step2';
 import { ContextData, TabType, UpdateContextDataParams } from '@/ui/pages/Account/createHDWalletComponents/types';
-import { RestoreWalletType, WordsType } from '@unisat/wallet-shared';
-import { useI18n, useWallet } from '@unisat/wallet-state';
+import { BUS_METHODS, RestoreWalletType, WordsType } from '@unisat/wallet-shared';
+import { uiEventBus, useI18n, useWallet } from '@unisat/wallet-state';
 import { AddressType } from '@unisat/wallet-types';
 
 import { useNavigate } from '../MainRoute';
@@ -48,8 +48,18 @@ export default function CreateHDWalletScreen() {
   );
 
   const wallet = useWallet();
+  const clearSensitiveState = useCallback(() => {
+    setContextData((current) => ({
+      ...current,
+      mnemonics: '',
+      passphrase: '',
+      mnemonicVerified: false,
+      step1CreateWordsCompleted: false
+    }));
+    wallet.removePreMnemonics();
+  }, [wallet]);
+
   // When importing the wallet, the lock time should be extended, at least more than 10 minutes. Keep alive by emitInteractedEvent
-  const beginTimeRef = useRef<number>(Date.now());
   useEffect(() => {
     const interval = setInterval(() => {
       try {
@@ -59,14 +69,13 @@ export default function CreateHDWalletScreen() {
       }
     }, 10 * 1000); // Trigger every 10 seconds
 
-    // After more than 10 minutes, clear the interval
-    if (Date.now() - beginTimeRef.current > 10 * 60 * 1000) {
+    const timeout = setTimeout(() => {
       clearInterval(interval);
-    }
+    }, 10 * 60 * 1000);
 
-    // Cleanup interval on unmount
     return () => {
       clearInterval(interval);
+      clearTimeout(timeout);
     };
   }, []);
 
@@ -76,6 +85,18 @@ export default function CreateHDWalletScreen() {
       wallet.removePreMnemonics();
     };
   }, [wallet]);
+
+  useEffect(() => {
+    const handleLocked = () => {
+      clearSensitiveState();
+      navigate('WelcomeScreen');
+    };
+
+    uiEventBus.addEventListener(BUS_METHODS.LOCKED, handleLocked);
+    return () => {
+      uiEventBus.removeEventListener(BUS_METHODS.LOCKED, handleLocked);
+    };
+  }, [clearSensitiveState, navigate]);
 
   const items = useMemo(() => {
     if (contextData.isRestore) {
@@ -107,7 +128,13 @@ export default function CreateHDWalletScreen() {
           {
             key: TabType.CHOOSE_ADDRESS_TYPE,
             label: t('step_3'),
-            children: <Step2 contextData={contextData} updateContextData={updateContextData} />
+            children: (
+              <Step2
+                contextData={contextData}
+                updateContextData={updateContextData}
+                clearSensitiveState={clearSensitiveState}
+              />
+            )
           }
         ];
       }
@@ -126,11 +153,17 @@ export default function CreateHDWalletScreen() {
         {
           key: TabType.CHOOSE_ADDRESS_TYPE,
           label: t('step_3'),
-          children: <Step2 contextData={contextData} updateContextData={updateContextData} />
+          children: (
+            <Step2
+              contextData={contextData}
+              updateContextData={updateContextData}
+              clearSensitiveState={clearSensitiveState}
+            />
+          )
         }
       ];
     }
-  }, [contextData, updateContextData]);
+  }, [clearSensitiveState, contextData, updateContextData]);
 
   const currentChildren = useMemo(() => {
     const item = items.find((v) => v.key === contextData.tabType);
@@ -149,6 +182,7 @@ export default function CreateHDWalletScreen() {
     <Layout>
       <Header
         onBack={() => {
+          clearSensitiveState();
           if (fromUnlock) {
             navigate('WelcomeScreen');
           } else {

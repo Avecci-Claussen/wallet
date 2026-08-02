@@ -49,6 +49,7 @@ export class SimpleKeyring extends EventEmitter {
       const key = typeof account === 'string' ? account : account.privateKey
       const compressedOverride = typeof account === 'string' ? undefined : account.compressed
       let buf: Buffer
+      let decoded: Uint8Array | undefined
       let compressed: boolean
       if (key.length === 64) {
         // privateKey
@@ -56,7 +57,7 @@ export class SimpleKeyring extends EventEmitter {
         compressed = compressedOverride ?? true
       } else {
         // WIF: version (1 byte) || private key (32 bytes) || optional compression marker (0x01).
-        const decoded = decode(key)
+        decoded = decode(key)
         if (decoded.length === 33) {
           compressed = false
         } else if (decoded.length === 34 && decoded[33] === 0x01) {
@@ -68,7 +69,15 @@ export class SimpleKeyring extends EventEmitter {
         compressed = compressedOverride ?? compressed
       }
 
-      return eccManager.eccPair.fromPrivateKey(buf as any, { compressed })
+      try {
+        // ECPair retains this buffer while unlocked, so it must not share the
+        // temporary decoding buffer that is cleared below.
+        const privateKey = Buffer.from(buf)
+        return eccManager.eccPair.fromPrivateKey(privateKey as any, { compressed })
+      } finally {
+        buf.fill(0)
+        decoded?.fill(0)
+      }
     })
   }
 
@@ -144,11 +153,19 @@ export class SimpleKeyring extends EventEmitter {
     return wallet.privateKey?.toString('hex')
   }
 
+  clearSensitiveData() {
+    for (const wallet of this.wallets) {
+      wallet.privateKey?.fill(0)
+    }
+    this.wallets = []
+  }
+
   removeAccount(publicKey: string) {
     if (!this.wallets.map(wallet => wallet.publicKey.toString('hex')).includes(publicKey)) {
       throw new Error(`PublicKey ${publicKey} not found in this keyring`)
     }
 
+    this._getWalletForAccount(publicKey).privateKey?.fill(0)
     this.wallets = this.wallets.filter(wallet => wallet.publicKey.toString('hex') !== publicKey)
   }
 

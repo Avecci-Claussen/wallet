@@ -47,6 +47,18 @@ describe('bitcoin-simple-keyring', () => {
     })
   })
 
+  describe('#clearSensitiveData', function () {
+    it('zeros private-key bytes before releasing wallet references', async function () {
+      await keyring.deserialize([testAccount.key])
+      const privateKey = keyring.wallets[0]!.privateKey!
+
+      keyring.clearSensitiveData()
+
+      expect([...privateKey]).toEqual(new Array(32).fill(0))
+      expect(keyring.wallets).toEqual([])
+    })
+  })
+
   describe('#constructor with a private key', function () {
     it('has the correct addresses', async function () {
       const newKeyring = new SimpleKeyring([testAccount.key])

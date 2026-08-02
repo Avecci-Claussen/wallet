@@ -14,10 +14,12 @@ import { AddressType } from '@unisat/wallet-types';
 
 export function Step2({
   contextData,
-  updateContextData
+  updateContextData,
+  clearSensitiveState
 }: {
   contextData: ContextData;
   updateContextData: (params: UpdateContextDataParams) => void;
+  clearSensitiveState: () => void;
 }) {
   const wallet = useWallet();
   const tools = useTools();
@@ -274,6 +276,7 @@ export function Step2({
           isMagicEden
         );
       }
+      clearSensitiveState();
       navigate('MainScreen');
     } catch (e) {
       tools.toastError((e as any).message);

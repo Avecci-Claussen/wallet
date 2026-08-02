@@ -258,6 +258,10 @@ export function useCreateWalletLogicImportWordsStep(params: CreateWalletLogicPar
         // @ts-ignore SAFE
         dispatch(accountActions.setCurrent(keyring?.accounts[0]))
 
+        setInputWords(new Array(selectedWordsItem.count).fill(''))
+        setInputWordsText('')
+        setInputWordsError(false)
+        setEnteredWordsCount(0)
         nav.navToTab()
       } else {
         updateContextData({

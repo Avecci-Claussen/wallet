@@ -143,6 +143,12 @@ export class WalletController extends BaseController {
   private _cacheCosmosKeyringKey: string | null = null
   private _cosmosKeyring: CosmosKeyring | null = null
 
+  private clearCosmosKeyringCache = () => {
+    this._cosmosKeyring?.destroy()
+    this._cosmosKeyring = null
+    this._cacheCosmosKeyringKey = null
+  }
+
   cosmosChainInfoMap: Record<string, CosmosChainInfo> = Object.assign({}, COSMOS_CHAINS_MAP)
 
   private backgroundInited = false
@@ -209,6 +215,7 @@ export class WalletController extends BaseController {
   }
 
   lockWallet = async () => {
+    this.clearCosmosKeyringCache()
     await keyringService.setLocked()
     // sessionService.broadcastEvent(SESSION_EVENTS.accountsChanged, [])
     sessionService.broadcastEvent(SESSION_EVENTS.lock)
@@ -308,9 +315,13 @@ export class WalletController extends BaseController {
 
   /* keyrings */
 
-  clearKeyrings = () => keyringService.clearKeyrings()
+  clearKeyrings = () => {
+    this.clearCosmosKeyringCache()
+    return keyringService.clearKeyrings()
+  }
 
   resetAllData = async () => {
+    this.clearCosmosKeyringCache()
     await keyringService.resetAllData()
     await preferenceService.resetAllData()
     await permissionService.resetAllData()
@@ -647,6 +658,7 @@ export class WalletController extends BaseController {
   }
 
   removeKeyring = async (keyring: WalletKeyring) => {
+    this.clearCosmosKeyringCache()
     await keyringService.removeKeyring(keyring.index)
     const keyrings = await this.getKeyrings()
     const nextKeyring = keyrings[keyrings.length - 1]
@@ -694,6 +706,7 @@ export class WalletController extends BaseController {
       throw new Error('Keyring is corrupted')
     }
 
+    this.clearCosmosKeyringCache()
     preferenceService.setCurrentKeyringIndex(keyring.index)
     const account = keyring.accounts[accountIndex]!
     preferenceService.setCurrentAccount(account)
@@ -2815,6 +2828,9 @@ export class WalletController extends BaseController {
   getCosmosKeyring = async (chainId: string) => {
     if (!this.cosmosChainInfoMap[chainId]) {
       throw new Error('Not supported chainId')
+    }
+    if (!keyringService.memStore.getState().isUnlocked) {
+      throw new Error(t('you_need_to_unlock_wallet_first'))
     }
 
     const currentAccount = await this.getCurrentAccount()

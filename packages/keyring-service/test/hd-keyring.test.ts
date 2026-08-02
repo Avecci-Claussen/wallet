@@ -22,6 +22,25 @@ describe('bitcoin-hd-keyring', () => {
     })
   })
 
+  describe('#clearSensitiveData', () => {
+    it('zeros derived and master private-key bytes before clearing references', () => {
+      const keyring = new HdKeyring({
+        mnemonic: sampleMnemonic,
+        activeIndexes: [0],
+      })
+      const masterPrivateKey = keyring.hdWallet.privateKey
+      const accountPrivateKey = keyring.wallets[0]!.privateKey!
+
+      keyring.clearSensitiveData()
+
+      expect([...masterPrivateKey]).toEqual(new Array(32).fill(0))
+      expect([...accountPrivateKey]).toEqual(new Array(32).fill(0))
+      expect(keyring.mnemonic).toBe('')
+      expect(keyring.passphrase).toBe('')
+      expect(keyring.hdWallet).toBeUndefined()
+    })
+  })
+
   describe('re-initialization protection', () => {
     const alreadyProvidedError = 'Btc-Hd-Keyring: Secret recovery phrase already provided'
     it('double generateRandomMnemonic', async () => {

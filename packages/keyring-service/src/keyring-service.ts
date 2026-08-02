@@ -279,6 +279,7 @@ export class KeyringService extends EventEmitter {
       addressTypes: [],
     })
 
+    this._clearKeyringSecrets()
     this.keyrings = []
     this.addressTypes = []
     this.cachedDisplayedKeyring = null
@@ -556,6 +557,7 @@ export class KeyringService extends EventEmitter {
     this.memStore.updateState({ isUnlocked: false })
 
     // remove keyrings
+    this._clearKeyringSecrets()
     this.keyrings = []
     this.addressTypes = []
     this.cachedDisplayedKeyring = null
@@ -845,6 +847,7 @@ export class KeyringService extends EventEmitter {
   }
 
   removeKeyring = async (keyringIndex: number): Promise<any> => {
+    this._clearKeyringSecret(this.keyrings[keyringIndex])
     delete this.keyrings[keyringIndex]
     this.keyrings[keyringIndex] = new EmptyKeyring()
     this.cachedDisplayedKeyring = null
@@ -1187,6 +1190,7 @@ export class KeyringService extends EventEmitter {
   clearKeyrings = async (): Promise<void> => {
     // clear keyrings from memory
 
+    this._clearKeyringSecrets()
     this.keyrings = []
     this.addressTypes = []
     this.cachedDisplayedKeyring = null
@@ -1194,6 +1198,20 @@ export class KeyringService extends EventEmitter {
     this.memStore.updateState({
       keyrings: [],
     })
+  }
+
+  private _clearKeyringSecrets = () => {
+    for (const keyring of this.keyrings) {
+      this._clearKeyringSecret(keyring)
+    }
+  }
+
+  private _clearKeyringSecret = (keyring: Keyring | undefined) => {
+    try {
+      keyring?.clearSensitiveData?.()
+    } catch (error) {
+      this.logger?.error?.('[KeyringService] Failed to clear keyring secrets', error)
+    }
   }
 
   /**

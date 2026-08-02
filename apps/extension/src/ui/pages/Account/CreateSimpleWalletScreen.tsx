@@ -5,9 +5,9 @@ import { AddressTypeCard } from '@/ui/components/AddressTypeCard';
 import { FooterButtonContainer } from '@/ui/components/FooterButtonContainer';
 import { TabBar } from '@/ui/components/TabBar';
 import { satoshisToAmount } from '@/ui/utils';
-import { useI18n, useTools, useWallet } from '@unisat/wallet-state';
+import { uiEventBus, useI18n, useTools, useWallet } from '@unisat/wallet-state';
 
-import { ADDRESS_TYPES } from '@unisat/wallet-shared';
+import { ADDRESS_TYPES, BUS_METHODS } from '@unisat/wallet-shared';
 import { AddressType } from '@unisat/wallet-types';
 import { useNavigate } from '../MainRoute';
 import { TabType } from './createHDWalletComponents/types';
@@ -19,31 +19,29 @@ function Step1({
   contextData: ContextData;
   updateContextData: (params: UpdateContextDataParams) => void;
 }) {
-  const [wif, setWif] = useState('');
   const [disabled, setDisabled] = useState(true);
   const wallet = useWallet();
   const { t } = useI18n();
   useEffect(() => {
     setDisabled(true);
 
-    if (!wif) {
+    if (!contextData.wif) {
       return;
     }
 
     setDisabled(false);
-  }, [wif]);
+  }, [contextData.wif]);
 
   const onChange = (e) => {
     const val = e.target.value;
-    setWif(val);
-    updateContextData({ step1CreateWordsCompleted: val });
+    updateContextData({ wif: val, step1CreateWordsCompleted: Boolean(val) });
   };
 
   const tools = useTools();
 
   const btnClick = async () => {
     try {
-      const _res = await wallet.createTmpKeyringWithPrivateKey(wif, AddressType.P2TR);
+      const _res = await wallet.createTmpKeyringWithPrivateKey(contextData.wif, AddressType.P2TR);
       if (_res.accounts.length == 0) {
         throw new Error(t('invalid_privatekey'));
       }
@@ -52,7 +50,6 @@ function Step1({
       return;
     }
     updateContextData({
-      wif,
       tabType: TabType.CHOOSE_ADDRESS_TYPE
     });
   };
@@ -63,6 +60,7 @@ function Step1({
 
       <Input
         placeholder={t('wif_private_key_or_hex_private_key')}
+        value={contextData.wif}
         onKeyUp={(e: React.KeyboardEvent<HTMLInputElement>) => {
           if ('Enter' == e.key) {
             btnClick();
@@ -211,6 +209,7 @@ function Step2({
         undefined,
         contextData.compressed
       );
+      updateContextData({ wif: '', step1CreateWordsCompleted: false });
       navigate('MainScreen');
     } catch (e) {
       tools.toastError((e as any).message);
@@ -277,12 +276,32 @@ export default function CreateSimpleWalletScreen() {
     tabType: TabType.IMPORT_WORDS
   });
   const { t } = useI18n();
+  const navigate = useNavigate();
   const updateContextData = useCallback(
     (params: UpdateContextDataParams) => {
       setContextData(Object.assign({}, contextData, params));
     },
     [contextData, setContextData]
   );
+  const clearSensitiveState = useCallback(() => {
+    setContextData((current) => ({
+      ...current,
+      wif: '',
+      step1CreateWordsCompleted: false
+    }));
+  }, []);
+
+  useEffect(() => {
+    const handleLocked = () => {
+      clearSensitiveState();
+      navigate('WelcomeScreen');
+    };
+
+    uiEventBus.addEventListener(BUS_METHODS.LOCKED, handleLocked);
+    return () => {
+      uiEventBus.removeEventListener(BUS_METHODS.LOCKED, handleLocked);
+    };
+  }, [clearSensitiveState, navigate]);
 
   const items = [
     {
@@ -303,6 +322,7 @@ export default function CreateSimpleWalletScreen() {
     <Layout>
       <Header
         onBack={() => {
+          clearSensitiveState();
           window.history.go(-1);
         }}
         title={t('create_single_wallet')}
