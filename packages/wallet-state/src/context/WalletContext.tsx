@@ -146,11 +146,17 @@ export interface WalletController {
     alianName?: string,
     compressed?: boolean
   ): Promise<Account[]>
-  getPreMnemonics(): Promise<any>
   generatePreMnemonic(strength?: 128 | 256): Promise<string>
   removePreMnemonics(): void
   createKeyringWithMnemonics(
     mnemonic: string,
+    hdPath: string,
+    passphrase: string,
+    addressType: AddressType,
+    accountCount: number,
+    accountIndexDerivation?: boolean
+  ): Promise<{ address: string; type: string }[]>
+  createKeyringWithPreMnemonic(
     hdPath: string,
     passphrase: string,
     addressType: AddressType,
@@ -196,6 +202,13 @@ export interface WalletController {
 
   createTmpKeyringWithMnemonics(
     mnemonic: string,
+    hdPath: string,
+    passphrase: string,
+    addressType: AddressType,
+    accountCount?: number,
+    accountIndexDerivation?: boolean
+  ): Promise<WalletKeyring>
+  createTmpKeyringWithPreMnemonic(
     hdPath: string,
     passphrase: string,
     addressType: AddressType,

@@ -79,6 +79,22 @@ describe('mnemonic recovery input', () => {
     expect(service.keyrings).toHaveLength(0)
   })
 
+  it('creates a keyring from the encrypted pre-mnemonic without returning it to the caller', async () => {
+    const { service, init } = createService()
+    await init()
+
+    const generatedMnemonic = await service.generatePreMnemonic()
+    const keyring = await service.createKeyringWithPreMnemonic(
+      "m/84'/0'/0'/0",
+      '',
+      AddressType.P2WPKH,
+      1
+    )
+
+    expect((await keyring.getAccounts()).length).toBe(1)
+    expect(await service.getPreMnemonics()).toBe(generatedMnemonic)
+  })
+
   it('rejects unsafe account counts before deriving accounts', async () => {
     const { service, init } = createService()
     await init()

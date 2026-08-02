@@ -145,7 +145,9 @@ export function Step1_Confirm({
           disabled={!isVerified}
           text={t('continue')}
           preset="primary"
-          onClick={() => updateContextData({ mnemonicVerified: true, tabType: TabType.CHOOSE_ADDRESS_TYPE })}
+          onClick={() =>
+            updateContextData({ mnemonics: '', mnemonicVerified: true, tabType: TabType.CHOOSE_ADDRESS_TYPE })
+          }
           data-testid="mnemonic-confirm-continue-button"
         />
       </FooterButtonContainer>

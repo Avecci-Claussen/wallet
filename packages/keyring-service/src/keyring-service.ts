@@ -479,6 +479,54 @@ export class KeyringService extends EventEmitter {
     return keyring
   }
 
+  createKeyringWithPreMnemonic = async (
+    hdPath: string,
+    passphrase: string,
+    addressType: AddressType,
+    accountCount: number,
+    accountIndexDerivation = false
+  ) => {
+    const mnemonic = await this.getPreMnemonics()
+    return await this.createKeyringWithMnemonics(
+      mnemonic,
+      hdPath,
+      passphrase,
+      addressType,
+      accountCount,
+      accountIndexDerivation
+    )
+  }
+
+  createTmpKeyringWithPreMnemonic = async (
+    hdPath: string,
+    passphrase: string,
+    addressType: AddressType,
+    accountCount = 1,
+    accountIndexDerivation = false
+  ) => {
+    const mnemonic = normalizeMnemonic(await this.getPreMnemonics())
+    if (!bip39.validateMnemonic(mnemonic)) {
+      throw new Error(this.t('mnemonic_phrase_is_invalid'))
+    }
+    if (!isValidHdPath(hdPath)) {
+      throw new Error(this.t('invalid_derivation_path'))
+    }
+    if (typeof passphrase !== 'string') {
+      throw new Error(this.t('mnemonic_phrase_is_invalid'))
+    }
+    if (!Number.isSafeInteger(accountCount) || accountCount < 1 || accountCount > MAX_HD_ACCOUNT_COUNT) {
+      throw new Error(this.t('keyring_error_account_count'))
+    }
+
+    return this.createTmpKeyring('HD Key Tree', {
+      mnemonic,
+      activeIndexes: Array.from({ length: accountCount }, (_, index) => index),
+      hdPath,
+      passphrase,
+      accountIndexDerivation,
+    })
+  }
+
   createKeyringWithKeystone = async (
     urType: string,
     urCbor: string,

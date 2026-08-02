@@ -395,7 +395,6 @@ export class WalletController extends BaseController {
     preferenceService.setShowSafeNotice(true)
   }
 
-  getPreMnemonics = () => keyringService.getPreMnemonics()
   generatePreMnemonic = async (strength: 128 | 256 = 128) => {
     return await keyringService.generatePreMnemonic(strength)
   }
@@ -410,6 +409,37 @@ export class WalletController extends BaseController {
   ) => {
     const originKeyring = await keyringService.createKeyringWithMnemonics(
       mnemonic,
+      hdPath,
+      passphrase,
+      addressType,
+      accountCount,
+      accountIndexDerivation
+    )
+    keyringService.removePreMnemonics()
+
+    const displayedKeyring = await keyringService.displayForKeyring(
+      originKeyring,
+      addressType,
+      keyringService.keyrings.length - 1
+    )
+    const keyring = this.displayedKeyringToWalletKeyring(
+      displayedKeyring,
+      keyringService.keyrings.length - 1
+    )
+
+    await this.changeKeyring(keyring)
+
+    preferenceService.setShowSafeNotice(true)
+  }
+
+  createKeyringWithPreMnemonic = async (
+    hdPath: string,
+    passphrase: string,
+    addressType: AddressType,
+    accountCount: number,
+    accountIndexDerivation = false
+  ) => {
+    const originKeyring = await keyringService.createKeyringWithPreMnemonic(
       hdPath,
       passphrase,
       addressType,
@@ -453,6 +483,25 @@ export class WalletController extends BaseController {
       accountIndexDerivation,
     })
     const displayedKeyring = await keyringService.displayForKeyring(originKeyring, addressType, -1)
+    return this.displayedKeyringToWalletKeyring(displayedKeyring, -1, false)
+  }
+
+  createTmpKeyringWithPreMnemonic = async (
+    hdPath: string,
+    passphrase: string,
+    addressType: AddressType,
+    accountCount = 1,
+    accountIndexDerivation = false
+  ) => {
+    const originKeyring = await keyringService.createTmpKeyringWithPreMnemonic(
+      hdPath,
+      passphrase,
+      addressType,
+      accountCount,
+      accountIndexDerivation
+    )
+    const displayedKeyring = await keyringService.displayForKeyring(originKeyring, addressType, -1)
+    originKeyring.clearRecoveryData?.()
     return this.displayedKeyringToWalletKeyring(displayedKeyring, -1, false)
   }
 
