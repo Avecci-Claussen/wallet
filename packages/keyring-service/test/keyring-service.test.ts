@@ -9,6 +9,11 @@ const legacyBooted = JSON.stringify({
   iv: 'legacy-iv',
   salt: 'legacy-salt',
 })
+const legacyVault = JSON.stringify({
+  data: 'legacy-vault-ciphertext',
+  iv: 'legacy-vault-iv',
+  salt: 'legacy-vault-salt',
+})
 
 describe('KeyringService booted KDF migration', () => {
   it('re-encrypts a legacy booted payload after validating the password', async () => {
@@ -82,5 +87,36 @@ describe('KeyringService booted KDF migration', () => {
     await expect(service.submitPassword(password)).rejects.toThrow('password_error')
     expect(encryptor.encrypt).not.toHaveBeenCalled()
     expect(service.store.getState().booted).toBe(legacyBooted)
+  })
+
+  it('re-encrypts a legacy vault after successfully unlocking it', async () => {
+    const storage = {
+      get: vi.fn().mockResolvedValue({ booted: legacyBooted, vault: legacyVault, boostValue }),
+      set: vi.fn().mockResolvedValue(undefined),
+    }
+    const encryptor = {
+      decrypt: vi.fn().mockResolvedValueOnce(boostValue).mockResolvedValueOnce([]),
+      encrypt: vi
+        .fn()
+        .mockResolvedValueOnce(
+          JSON.stringify({ data: 'current-booted', iv: 'current-iv', salt: 'current-salt', iterations: 600000 })
+        )
+        .mockResolvedValueOnce(
+          JSON.stringify({ data: 'current-vault', iv: 'current-iv', salt: 'current-salt', iterations: 600000 })
+        ),
+    }
+    const service = new KeyringService()
+
+    await service.init({
+      storage: storage as any,
+      encryptor,
+      logger: { debug: vi.fn(), info: vi.fn(), error: vi.fn() },
+      t: (key: string) => key,
+    })
+    await service.submitPassword(password)
+
+    expect(encryptor.decrypt).toHaveBeenCalledWith(password, legacyVault)
+    expect(encryptor.encrypt).toHaveBeenLastCalledWith(password, [])
+    expect(JSON.parse(service.store.getState().vault!)).toMatchObject({ iterations: 600000 })
   })
 })

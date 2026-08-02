@@ -543,7 +543,12 @@ export class KeyringService extends EventEmitter {
       await this.upgradeLegacyBootedIfNeeded(password)
 
       if (this.hasVault()) {
+        const shouldUpgradeVault = this.isLegacyEncryptedPayload(this.store.getState().vault)
         this.keyrings = await this.unlockKeyrings(password)
+        if (shouldUpgradeVault) {
+          await this.persistAllKeyrings()
+          this.logger.info('[KeyringService] Legacy vault payload upgraded to current KDF')
+        }
       }
 
       // Upgrade boost value if needed (on first unlock after initialization)
@@ -600,26 +605,33 @@ export class KeyringService extends EventEmitter {
   private upgradeLegacyBootedIfNeeded = async (password: string): Promise<void> => {
     const booted = this.store.getState().booted
 
-    try {
-      const payload = JSON.parse(booted)
-      const isLegacyPayload =
-        payload &&
-        typeof payload === 'object' &&
-        typeof payload.data === 'string' &&
-        typeof payload.iv === 'string' &&
-        typeof payload.salt === 'string' &&
-        typeof payload.iterations !== 'number'
-
-      if (!isLegacyPayload) {
-        return
-      }
-    } catch {
+    if (!this.isLegacyEncryptedPayload(booted)) {
       return
     }
 
     const upgradedBooted = await this.encryptor.encrypt(password, this.getBoostValue())
     this.store.updateState({ booted: upgradedBooted })
     this.logger.info('[KeyringService] Legacy booted payload upgraded to current KDF')
+  }
+
+  private isLegacyEncryptedPayload = (encryptedData: string | null): boolean => {
+    if (!encryptedData) {
+      return false
+    }
+
+    try {
+      const payload = JSON.parse(encryptedData)
+      return (
+        payload &&
+        typeof payload === 'object' &&
+        typeof payload.data === 'string' &&
+        typeof payload.iv === 'string' &&
+        typeof payload.salt === 'string' &&
+        typeof payload.iterations !== 'number'
+      )
+    } catch {
+      return false
+    }
   }
 
   /**
