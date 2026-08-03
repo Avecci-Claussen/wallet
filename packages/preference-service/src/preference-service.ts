@@ -46,7 +46,6 @@ const defaultTemplate: BasePreferenceStore = {
   },
   showSafeNotice: true,
   addressFlags: {},
-  enableSignData: false,
   autoLockTimeId: DEFAULT_LOCKTIME_ID,
   openInSidePanel: false,
   developerMode: false,
@@ -157,10 +156,6 @@ export class PreferenceService extends EventEmitter<PreferenceServiceEvents> {
 
     if (typeof this.store.externalLinkAck !== 'boolean') {
       this.store.externalLinkAck = false
-    }
-
-    if (typeof this.store.enableSignData !== 'boolean') {
-      this.store.enableSignData = false
     }
 
     if (typeof this.store.showSafeNotice !== 'boolean') {
@@ -478,14 +473,6 @@ export class PreferenceService extends EventEmitter<PreferenceServiceEvents> {
 
   setShowSafeNotice(showSafeNotice: boolean): void {
     this.store.showSafeNotice = showSafeNotice
-  }
-
-  getEnableSignData(): boolean {
-    return this.store.enableSignData
-  }
-
-  setEnableSignData(enableSignData: boolean): void {
-    this.store.enableSignData = enableSignData
   }
 
   /**

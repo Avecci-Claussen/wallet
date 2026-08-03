@@ -86,9 +86,6 @@
   "all_read": {
     "message": "Todo leído"
   },
-  "allow_sign_data_requests": {
-    "message": "Permitir solicitudes signData"
-  },
   "allow_this_site_to_switch_the_chain": {
     "message": "¿Permitir que este sitio cambie la cadena?"
   },
@@ -713,15 +710,6 @@
   "enable_atomicals_assets_warning": {
     "message": "Los activos atomicals ya no se mostrarán en la billetera y podrán gastarse como saldo normal. Procede con precaución."
   },
-  "enable_sign_data_popover_warning": {
-    "message": "Permitir solicitudes signData puede hacerte vulnerable a ataques de phishing. Siempre revisa la URL y ten cuidado al firmar mensajes que contengan código."
-  },
-  "enable_sign_data_popover_warning_2": {
-    "message": "Si te han pedido que actives esta configuración, podrías estar siendo víctima de una estafa"
-  },
-  "enable_sign_data_warning": {
-    "message": "Si habilitas esta configuración, podrías recibir solicitudes de firma que no son legibles. Al firmar un mensaje que no entiendes, podrías estar aceptando entregar tus fondos y NFTs. Estás en riesgo de ataques de phishing. Protégete desactivando signData."
-  },
   "enable_unconfirmed_balance": {
     "message": "Habilitar Saldo No Confirmado"
   },
@@ -967,9 +955,6 @@
   },
   "i_have_signed_scan_result": {
     "message": "He Firmado, Escanear Resultado"
-  },
-  "i_only_sign_what_i_understand": {
-    "message": "Solo firmo lo que entiendo"
   },
   "i_saved_my_secret_recovery_phrase": {
     "message": "He guardado Mi Frase Secreta de Recuperación"
@@ -2072,12 +2057,6 @@
   "derive_context_hash_warning": {
     "message": "Aprueba solo si confías en este sitio."
   },
-  "sign_data_request": {
-    "message": "Solicitud de Firma de Datos"
-  },
-  "sign_data_requests": {
-    "message": "Solicitudes signData"
-  },
   "sign_multiple_transactions": {
     "message": "Firmar Múltiples Transacciones"
   },
@@ -2098,9 +2077,6 @@
   },
   "signdata_is_required_for_cosmos_signing": {
     "message": "signData es requerido para la firma Cosmos"
-  },
-  "signdata_required_tip": {
-    "message": "Necesitas habilitar la función de solicitud signData en Ajustes -> Avanzado para continuar."
   },
   "signed": {
     "message": "Firmado"
@@ -2486,9 +2462,6 @@
   "understand_and_accept_the_risks_associated_with_this_transaction": {
     "message": "Entiendo y acepto los riesgos asociados con esta transacción."
   },
-  "understand_sign_data_warning": {
-    "message": "Entiendo que puedo perder todos mis fondos y NFTs si habilito las solicitudes signData."
-  },
   "unisat": {
     "message": "UNISAT"
   },
@@ -2608,9 +2581,6 @@
   },
   "you_are_signing": {
     "message": "Estás firmando:"
-  },
-  "you_are_signing_data": {
-    "message": "Estás firmando datos:"
   },
   "you_can_unlock_these_assets_by_using_the_utxos_tools": {
     "message": "Puedes desbloquear estos activos usando las herramientas UTXO."

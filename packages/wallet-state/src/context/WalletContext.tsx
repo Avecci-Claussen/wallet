@@ -461,9 +461,6 @@ export interface WalletController {
     signature: string
   }>
 
-  getEnableSignData(): Promise<boolean>
-  setEnableSignData(enable: boolean): Promise<void>
-
   getRunesList(
     address: string,
     currentPage: number,

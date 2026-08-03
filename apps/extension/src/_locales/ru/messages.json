@@ -86,9 +86,6 @@
   "all_read": {
     "message": "Всё прочитано"
   },
-  "allow_sign_data_requests": {
-    "message": "Разрешить запросы signData"
-  },
   "allow_this_site_to_switch_the_chain": {
     "message": "Разрешить этому сайту переключить блокчейн?"
   },
@@ -713,15 +710,6 @@
   "enable_atomicals_assets_warning": {
     "message": "Активы atomicals больше не будут отображаться в кошельке, и их можно будет тратить как обычный баланс. Пожалуйста, действуйте с осторожностью."
   },
-  "enable_sign_data_popover_warning": {
-    "message": "Разрешение запросов signData может сделать вас уязвимым для фишинговых атак. Всегда проверяйте URL и будьте осторожны при подписании сообщений, содержащих код."
-  },
-  "enable_sign_data_popover_warning_2": {
-    "message": "Если вас попросили включить эту настройку, возможно, вас пытаются обмануть"
-  },
-  "enable_sign_data_warning": {
-    "message": "Если вы включите эту настройку, вы можете получать запросы подписи, которые не читаемы. Подписывая сообщение, которое вы не понимаете, вы можете согласиться на передачу ваших средств и NFT. Вы подвергаетесь риску фишинговых атак. Защитите себя, отключив signData."
-  },
   "enable_unconfirmed_balance": {
     "message": "Включить неподтверждённый баланс"
   },
@@ -967,9 +955,6 @@
   },
   "i_have_signed_scan_result": {
     "message": "Я Подписал, Отсканировать Результат"
-  },
-  "i_only_sign_what_i_understand": {
-    "message": "Я подписываю только то, что понимаю"
   },
   "i_saved_my_secret_recovery_phrase": {
     "message": "Я сохранил(а) свою секретную фразу восстановления"
@@ -2072,12 +2057,6 @@
   "derive_context_hash_warning": {
     "message": "Одобряйте только если вы доверяете этому сайту."
   },
-  "sign_data_request": {
-    "message": "Запрос подписи данных"
-  },
-  "sign_data_requests": {
-    "message": "Запросы signData"
-  },
   "sign_multiple_transactions": {
     "message": "Подписать несколько транзакций"
   },
@@ -2098,9 +2077,6 @@
   },
   "signdata_is_required_for_cosmos_signing": {
     "message": "signData требуется для подписи Cosmos"
-  },
-  "signdata_required_tip": {
-    "message": "Вам необходимо включить функцию запроса подписи данных (signData) в Настройки -> Расширенные, чтобы продолжить."
   },
   "signed": {
     "message": "Подписано"
@@ -2486,9 +2462,6 @@
   "understand_and_accept_the_risks_associated_with_this_transaction": {
     "message": "Я понимаю и принимаю риски, связанные с этой транзакцией."
   },
-  "understand_sign_data_warning": {
-    "message": "Я понимаю, что могу потерять все свои средства и NFT, если включу запросы signData."
-  },
   "unisat": {
     "message": "UNISAT"
   },
@@ -2617,9 +2590,6 @@
   },
   "you_are_signing": {
     "message": "Вы подписываете:"
-  },
-  "you_are_signing_data": {
-    "message": "Вы подписываете данные:"
   },
   "you_can_unlock_these_assets_by_using_the_utxos_tools": {
     "message": "Вы можете разблокировать эти активы с помощью инструментов UTXO."

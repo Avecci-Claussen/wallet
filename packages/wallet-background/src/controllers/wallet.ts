@@ -2560,14 +2560,6 @@ export class WalletController extends BaseController {
     }
   }
 
-  getEnableSignData = async () => {
-    return preferenceService.getEnableSignData()
-  }
-
-  setEnableSignData = async (enable: boolean) => {
-    return preferenceService.setEnableSignData(enable)
-  }
-
   getRunesList = async (address: string, currentPage: number, pageSize: number) => {
     const cursor = (currentPage - 1) * pageSize
     const size = pageSize

@@ -86,9 +86,6 @@
   "all_read": {
     "message": "All Read"
   },
-  "allow_sign_data_requests": {
-    "message": "Allow signData requests"
-  },
   "allow_this_site_to_switch_the_chain": {
     "message": "Allow this site to switch the chain?"
   },
@@ -719,15 +716,6 @@
   "enable_atomicals_assets_warning": {
     "message": "The atomicals assets will no longer be displayed in the wallet, and they can be spent as regular balance. Please proceed with caution."
   },
-  "enable_sign_data_popover_warning": {
-    "message": "Allowing signData requests can make you vulnerable to phishing attacks. Always review the URL and be careful when signing messages that contain code."
-  },
-  "enable_sign_data_popover_warning_2": {
-    "message": "If you've been asked to turn this setting on, you might be getting scammed"
-  },
-  "enable_sign_data_warning": {
-    "message": "If you enable this setting, you might get signature requests that aren't readable. By signing a message you don't understand, you could be agreeing to give away your funds and NFTs.You're at risk for phishing attacks. Protect yourself by turning off signData."
-  },
   "enable_unconfirmed_balance": {
     "message": "Enable Unconfirmed Balance"
   },
@@ -973,9 +961,6 @@
   },
   "i_have_signed_scan_result": {
     "message": "I Have Signed, Scan Result"
-  },
-  "i_only_sign_what_i_understand": {
-    "message": "I only sign what I understand"
   },
   "i_saved_my_secret_recovery_phrase": {
     "message": "I saved My Secret Recovery Phrase"
@@ -2078,12 +2063,6 @@
   "derive_context_hash_warning": {
     "message": "Only approve if you trust this site."
   },
-  "sign_data_request": {
-    "message": "Sign Data request"
-  },
-  "sign_data_requests": {
-    "message": "signData requests"
-  },
   "sign_multiple_transactions": {
     "message": "Sign Multiple Transactions"
   },
@@ -2104,9 +2083,6 @@
   },
   "signdata_is_required_for_cosmos_signing": {
     "message": "signData is required for Cosmos signing"
-  },
-  "signdata_required_tip": {
-    "message": "You need to enable the signData request feature in Settings -> Advanced to continue."
   },
   "signed": {
     "message": "Signed"
@@ -2492,9 +2468,6 @@
   "understand_and_accept_the_risks_associated_with_this_transaction": {
     "message": "I understand and accept the risks associated with this transaction."
   },
-  "understand_sign_data_warning": {
-    "message": "I understand that I can lose all of my funds and NFTs if I enable signData requests."
-  },
   "unisat": {
     "message": "UNISAT"
   },
@@ -2623,9 +2596,6 @@
   },
   "you_are_signing": {
     "message": "You are signing:"
-  },
-  "you_are_signing_data": {
-    "message": "You are signing data:"
   },
   "you_can_unlock_these_assets_by_using_the_utxos_tools": {
     "message": "You can unlock these assets by using the UTXO tools."
