@@ -7,6 +7,7 @@ import {
   addressToScriptPk,
   bitcoin,
   decodeAddress,
+  isPayToAnchorAddress,
   toPsbtNetwork,
   toXOnly,
   UTXO_DUST,
@@ -196,13 +197,14 @@ export class Transaction {
   }
 
   calSendAllNetworkFee(toAddress: string) {
-    const outputAddressType = decodeAddress(toAddress).addressType
     const hasWitnessInput = this.inputs.some(v => utxoHelper.hasWitness(v.utxo.addressType))
     const inputSize = this.inputs.reduce(
       (size, input) => size + utxoHelper.getAddedVirtualSize(input.utxo.addressType),
       0
     )
-    const outputSize = utxoHelper.getOutputVirtualSize(outputAddressType)
+    const outputSize = isPayToAnchorAddress(toAddress, this.networkType)
+      ? utxoHelper.getScriptOutputVirtualSize(addressToScriptPk(toAddress, this.networkType))
+      : utxoHelper.getOutputVirtualSize(decodeAddress(toAddress).addressType)
     const txOverhead =
       8 +
       utxoHelper.getVarIntSize(this.inputs.length) +
@@ -236,6 +238,11 @@ export class Transaction {
   }
 
   addOutput(address: string, value: number) {
+    if (isPayToAnchorAddress(address, this.networkType)) {
+      this.addScriptOutput(addressToScriptPk(address, this.networkType), value)
+      return
+    }
+
     this.outputs.push({
       address,
       value,

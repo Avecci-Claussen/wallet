@@ -9,6 +9,19 @@ describe('sendBTC', () => {
     // todo
   })
 
+  it('creates the Pay-to-Anchor output script for a P2A recipient', async () => {
+    const fromWallet = LocalWallet.fromRandom(AddressType.P2WPKH, NetworkType.MAINNET)
+    const { psbt } = await sendBTC({
+      btcUtxos: [genDummyUtxo(fromWallet, 100000)],
+      tos: [{ address: 'bc1pfeessrawgf', satoshis: 1000 }],
+      networkType: NetworkType.MAINNET,
+      changeAddress: fromWallet.address,
+      feeRate: 1,
+    })
+
+    expect(psbt.txOutputs[0]!.script.toString('hex')).eq('51024e73')
+  })
+
   const testAddressTypes = [
     AddressType.P2TR,
     AddressType.P2WPKH,
