@@ -1,15 +1,17 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { colors } from '@/ui/theme/colors';
 import { DecodedPsbt, Risk, RiskType } from '@unisat/wallet-shared';
 import { useI18n } from '@unisat/wallet-state';
 
 import { Button } from '../Button';
+import { Checkbox } from '../Checkbox';
 import { Column } from '../Column';
 import { Icon } from '../Icon';
 import { Input } from '../Input';
 import { Popover } from '../Popover';
 import { Row } from '../Row';
+import { Spin } from '../Spin';
 import { Text } from '../Text';
 import { BadFeeRate } from './BadFeeRate';
 import { ChangingInscription } from './ChangingInscription';
@@ -128,8 +130,12 @@ export const SignPsbtWithRisksPopover = ({
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [understand, setUnderstand] = useState(false);
+  const [indexingRiskAccepted, setIndexingRiskAccepted] = useState(false);
   const { t } = useI18n();
   const AGREEMENT_TEXT = 'CONFIRM';
+  const hasUtxoIndexingRisk = decodedPsbt.risks.some((risk) => risk.type === RiskType.UTXO_INDEXING);
+  const otherRisks = decodedPsbt.risks.filter((risk) => risk.type !== RiskType.UTXO_INDEXING);
+  const [showIndexingRisk, setShowIndexingRisk] = useState(hasUtxoIndexingRisk);
 
   useEffect(() => {
     if (inputValue.toUpperCase() === AGREEMENT_TEXT) {
@@ -141,14 +147,7 @@ export const SignPsbtWithRisksPopover = ({
 
   const [detailRisk, setDetailRisk] = useState<Risk | null>();
 
-  const confirmable = useMemo(() => {
-    const foundCriticalRisk = decodedPsbt.risks.find((v) => v.level === 'critical');
-    if (foundCriticalRisk) {
-      return false;
-    } else {
-      return true;
-    }
-  }, [decodedPsbt]);
+  const confirmable = !otherRisks.some((risk) => risk.level === 'critical');
 
   if (detailRisk) {
     if (detailRisk.type === RiskType.INSCRIPTION_BURNING) {
@@ -171,15 +170,73 @@ export const SignPsbtWithRisksPopover = ({
     }
   }
 
+  if (showIndexingRisk) {
+    const hasCriticalRisk = decodedPsbt.risks.some((risk) => risk.level === 'critical');
+
+    return (
+      <Popover onClose={onClose} data-testid="utxo-indexing-risk-popover">
+        <Column itemsCenter gap="lg" fullX>
+          <Spin size="large" style={{ marginTop: 8 }} />
+          <Column itemsCenter gap="md" fullX>
+            <Text text={t('utxo_indexing_risk_title')} preset="title" textCenter />
+            <Text text={t('utxo_indexing_risk_description')} preset="sub" textCenter />
+          </Column>
+
+          <Column
+            fullX
+            gap="sm"
+            style={{
+              backgroundColor: indexingRiskAccepted ? 'rgba(245, 84, 84, 0.08)' : 'transparent',
+              borderRadius: 8,
+              padding: 12
+            }}>
+            <Text text={t('utxo_indexing_risk_asset_warning')} color="danger" />
+          </Column>
+
+          {!hasCriticalRisk && (
+            <Checkbox
+              checked={indexingRiskAccepted}
+              checkedColor={colors.red}
+              checkColor={colors.white}
+              style={{ alignSelf: 'stretch' }}
+              data-testid="utxo-indexing-risk-checkbox"
+              onChange={(e) => setIndexingRiskAccepted(e.target.checked)}>
+              <Text text={t('utxo_indexing_risk_agreement')} preset="sub" />
+            </Checkbox>
+          )}
+
+          <Column fullX gap="md">
+            {!hasCriticalRisk && (
+              <Button
+                text={t('understand_the_risks_continue')}
+                preset="delete"
+                disabled={!indexingRiskAccepted}
+                full
+                onClick={() => {
+                  if (otherRisks.length > 0) {
+                    setShowIndexingRisk(false);
+                  } else {
+                    onConfirm();
+                  }
+                }}
+              />
+            )}
+            <Button text={t('try_again_later')} preset="primary" full onClick={onClose} />
+          </Column>
+        </Column>
+      </Popover>
+    );
+  }
+
   return (
-    <Popover>
+    <Popover onClose={onClose}>
       <Column justifyCenter itemsCenter>
         <Icon icon={'alert'} color={'red'} size={20} />
         <Text text={t('use_at_your_own_risk')} preset="title-bold" />
         <Text text={t('please_be_aware_that_sending_the_following_assets_involves_risk')} preset="sub" />
 
         <Column gap="md" fullX mb="md">
-          {decodedPsbt.risks.map((risk, index) => {
+          {otherRisks.map((risk, index) => {
             const riskContentKey = getRiskContentKey(risk.type);
             const title = riskContentKey.title ? t(riskContentKey.title) : risk.title;
             const desc = riskContentKey.description ? t(riskContentKey.description) : risk.desc;
@@ -193,8 +250,7 @@ export const SignPsbtWithRisksPopover = ({
                 key={'risk_' + index}
                 style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10 }}
                 px="md"
-                py="sm"
-              >
+                py="sm">
                 <Row justifyBetween justifyCenter mt="sm">
                   <Text text={title} color={risk.level === 'warning' ? 'warning' : 'danger'} />
                   {visibleRiskDetailTypes.includes(risk.type) ? (

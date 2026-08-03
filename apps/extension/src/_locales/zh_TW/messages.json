@@ -2514,10 +2514,22 @@
     "message": "使用者已拒絕請求。"
   },
   "utxo_indexing_risk_description": {
-    "message": "所選的UTXO屬於仍在索引中的交易。為確保交易的安全性和可靠性，請在繼續之前等待索引完成。"
+    "message": "此 UTXO 仍在索引中，其附帶資產可能尚未完全識別。我們強烈建議等待索引完成，通常約需 5 分鐘。"
+  },
+  "utxo_indexing_risk_asset_warning": {
+    "message": "現在發送可能導致永久性資產損失。"
+  },
+  "utxo_indexing_risk_agreement": {
+    "message": "我了解這可能導致永久性資產損失，仍要發送此 UTXO"
   },
   "utxo_indexing_risk_title": {
-    "message": "UTXO索引正在進行中"
+    "message": "請自行承擔風險"
+  },
+  "understand_the_risks_continue": {
+    "message": "了解風險並繼續"
+  },
+  "try_again_later": {
+    "message": "稍後再試"
   },
   "utxo_not_found": {
     "message": "找不到 UTXO。"

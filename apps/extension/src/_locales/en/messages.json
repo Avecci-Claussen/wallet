@@ -2517,10 +2517,22 @@
     "message": "User rejected the request."
   },
   "utxo_indexing_risk_description": {
-    "message": "The selected UTXO belongs to a transaction that is still being indexed. To ensure transaction security and reliability, please wait for indexing to complete before proceeding."
+    "message": "This UTXO is still being indexed, and its attached assets may not have been fully identified yet. We strongly recommend waiting until indexing is complete. This usually takes about 5 minutes."
+  },
+  "utxo_indexing_risk_asset_warning": {
+    "message": "Sending it now may result in permanent asset loss."
+  },
+  "utxo_indexing_risk_agreement": {
+    "message": "I understand this may cause permanent asset loss and want to send this UTXO anyway"
   },
   "utxo_indexing_risk_title": {
-    "message": "UTXO Indexing in Progress"
+    "message": "Proceed at your own risk"
+  },
+  "understand_the_risks_continue": {
+    "message": "Understand the Risks, Continue"
+  },
+  "try_again_later": {
+    "message": "Try Again Later"
   },
   "utxo_not_found": {
     "message": "UTXO not found."

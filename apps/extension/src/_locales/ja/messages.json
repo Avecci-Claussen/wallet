@@ -2511,10 +2511,22 @@
     "message": "ユーザーがリクエストを拒否しました。"
   },
   "utxo_indexing_risk_description": {
-    "message": "選択されたUTXOは、まだインデックス作成中のトランザクションに属しています。トランザクションのセキュリティと信頼性を確保するため、続行する前にインデックス作成が完了するまでお待ちください。"
+    "message": "このUTXOは現在もインデックス作成中であり、関連する資産はまだ完全には識別されていない可能性があります。インデックス作成が完了するまでお待ちいただくことを強くお勧めします。通常、約5分かかります。"
+  },
+  "utxo_indexing_risk_asset_warning": {
+    "message": "今送信すると、資産を永久に失う可能性があります。"
+  },
+  "utxo_indexing_risk_agreement": {
+    "message": "これにより資産を永久に失う可能性があることを理解したうえで、このUTXOを送信します"
   },
   "utxo_indexing_risk_title": {
-    "message": "UTXOインデックス作成が進行中です"
+    "message": "自己責任で続行"
+  },
+  "understand_the_risks_continue": {
+    "message": "リスクを理解して続行"
+  },
+  "try_again_later": {
+    "message": "後でもう一度試す"
   },
   "utxo_not_found": {
     "message": "UTXOが見つかりません。"
