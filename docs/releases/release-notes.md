@@ -1,5 +1,36 @@
 # UniSat Wallet Release Notes
 
+## v1.7.19
+
+### New Features
+
+- Added local transaction construction for Alkanes transfers.
+- New wallet creation now supports 12- and 24-word recovery phrases, with 24 words selected by default.
+- Added support for pay-to-anchor recipient addresses.
+
+### Improvements
+
+- Expanded PSBT risk details with clearer asset cards, mixed-asset visibility, incremental lists for large transactions, and improved carousel interaction.
+- Improved BRC-20 balance presentation and recipient-address validation.
+
+### Security and Privacy
+
+- Strengthened vault encryption and migrated compatible legacy vaults to a stronger password-based key derivation setting after unlock.
+- Reduced the time recovery phrases, passphrases, and imported private keys remain in memory; added safer cleanup when wallets are locked, removed, or reset.
+- Hardened phishing-page isolation, embedded content restrictions, and UI message-port validation.
+- Removed direct external extension connectivity and the privileged `unisat.io` permission bypass. Provider state now returns accounts only to origins with an approved wallet connection.
+- Improved transaction safety checks for inscriptions, Runes, Alkanes, and mixed-asset UTXOs.
+
+### Breaking Changes
+
+- Removed CAT20 and CAT721 protocol support from the extension, including related asset views and send/merge flows.
+
+### Bug Fixes
+
+- Fixed recovery-phrase generation races, empty confirmation slots, duplicate derivation-path errors, and 12-word warning styling.
+- Fixed handling of mixed Rune and Alkanes assets during transaction construction.
+- Fixed several PSBT risk-detail display and interaction issues.
+
 ## v1.7.17
 
 ### New Features
