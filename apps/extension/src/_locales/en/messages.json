@@ -795,7 +795,7 @@
     "message": "Import Descriptor"
   },
   "import_descriptor_help": {
-    "message": "Paste a watch-only singlesig descriptor (wpkh / tr / sh(wpkh)). Checksum (#…) required."
+    "message": "Paste a watch-only singlesig descriptor (wpkh / tr / sh(wpkh)). Checksum (#…) required. Sparrow multipath (/<0;1>/*) is accepted and expanded to receive + change."
   },
   "import_descriptor_watch_only_note": {
     "message": "Imports as Watch Address: balances/inscriptions can show; signing is disabled. Private xprv descriptors are rejected."
@@ -825,13 +825,13 @@
     "message": "No master fingerprint in QR — descriptor export will omit [fingerprint/path] origin."
   },
 "import_descriptor_gap_note": {
-    "message": "Stores the descriptor so you can add more receive addresses later (gap discovery). v1 indexes the receive chain (0/*); change (1/*) is stored for export when the paste is a standard receive descriptor. Initial scan size:"
+    "message": "Stores the descriptor so you can add more receive addresses later (gap discovery). v1 indexes the receive chain (0/*); change (1/*) is stored for export when the paste is /0/* or Sparrow /<0;1>/*. Initial scan size:"
   },
   "import_descriptor_wallet_name": {
     "message": "Wallet name (optional)"
   },
   "import_descriptor_placeholder": {
-    "message": "wpkh([fpr/84h/0h/0h]xpub…/0/*)#checksum"
+    "message": "wpkh([fpr/84h/0h/0h]xpub…/0/*)#checksum or …/<0;1>/*)#…"
   },
   "import_descriptor_button": {
     "message": "Import watch-only"
@@ -2637,7 +2637,10 @@
   "utxo_indexing_risk_title": {
     "message": "UTXO Indexing in Progress"
   },
-  "utxo_not_found": {
+    "utxo": {
+    "message": "UTXO"
+  },
+"utxo_not_found": {
     "message": "UTXO not found."
   },
   "verify_recovery_phrase": {

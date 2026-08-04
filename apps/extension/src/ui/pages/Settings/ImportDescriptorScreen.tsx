@@ -67,6 +67,9 @@ export default function ImportDescriptorScreen() {
             placeholder={t('import_descriptor_placeholder')}
             value={raw}
             onChange={(e) => setRaw(e.target.value)}
+            rows={6}
+            spellCheck={false}
+            autoComplete="off"
             style={{ minHeight: 120 }}
           />
 

@@ -1,42 +1,33 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { Card, Column, Icon, Row, Text } from '@/ui/components';
 import { fontSizes } from '@/ui/theme/font';
+import { KeyringType } from '@unisat/keyring-service/types';
 import { getLockTimeInfo } from '@unisat/wallet-shared';
-import { useAutoLockTimeId, useChain, useCurrentKeyring, useI18n, useWallet } from '@unisat/wallet-state';
+import { useAutoLockTimeId, useChain, useCurrentKeyring, useI18n } from '@unisat/wallet-state';
 
+/**
+ * Descriptor export/import live here (not on the root Settings list).
+ * Path: Settings tab → Advanced → these rows.
+ */
 export function SecurityCard() {
   const navigate = useNavigate();
   const { t } = useI18n();
-  const wallet = useWallet();
   const autoLockTimeId = useAutoLockTimeId();
   const lockTimeConfig = getLockTimeInfo(autoLockTimeId, t);
   const currentKeyring = useCurrentKeyring();
   const chain = useChain();
-  const [canExport, setCanExport] = useState(false);
 
   // BIP-380 descriptors are Bitcoin-only (not Fractal)
   const descriptorsAvailable = !chain?.isFractal;
 
-  useEffect(() => {
-    let cancelled = false;
-    if (!descriptorsAvailable) {
-      setCanExport(false);
-      return;
-    }
-    wallet
-      .canExportAccountDescriptor()
-      .then((ok: boolean) => {
-        if (!cancelled) setCanExport(Boolean(ok));
-      })
-      .catch(() => {
-        if (!cancelled) setCanExport(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [wallet, descriptorsAvailable, currentKeyring?.key, currentKeyring?.type]);
+  // Show Export for HD / cold / watch — export screen shows a clear error if unsupported
+  // (avoids hiding the menu when canExport RPC is stale/unavailable).
+  const showExport =
+    descriptorsAvailable &&
+    (currentKeyring?.type === KeyringType.HdKeyring ||
+      currentKeyring?.type === KeyringType.ColdWalletKeyring ||
+      currentKeyring?.type === KeyringType.WatchAddressKeyring);
 
   return (
     <Card style={{ borderRadius: 10 }}>
@@ -67,7 +58,7 @@ export function SecurityCard() {
           </Row>
         </Row>
 
-        {canExport ? (
+        {showExport ? (
           <Row
             justifyBetween
             style={{
