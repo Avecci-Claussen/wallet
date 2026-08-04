@@ -224,6 +224,7 @@ export function Step2({
 
   const submitCustomHdPath = (text: string) => {
     setPathError('');
+    setError('');
     text = text.replace(/[\u2018\u2019]/g, "'").trim();
     setPathText(text);
     if (text !== '') {
@@ -467,7 +468,7 @@ export function Step2({
         </Column>
       )}
 
-      {error && <Text text={error} color="error" />}
+      {!pathError && error && <Text text={error} color="error" />}
 
       {restoreWallet.phraseSupport && (
         <Column mt="lg">
