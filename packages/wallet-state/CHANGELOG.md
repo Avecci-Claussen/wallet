@@ -1,5 +1,19 @@
 # @unisat/wallet-state
 
+## 1.6.0
+
+### Minor Changes
+
+- Improve safety
+
+### Patch Changes
+
+- Updated dependencies
+  - @unisat/babylon-service@1.3.0
+  - @unisat/base-utils@0.5.0
+  - @unisat/keyring-service@1.3.0
+  - @unisat/wallet-shared@0.6.0
+
 ## 1.5.0
 
 ### Minor Changes

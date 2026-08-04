@@ -1,5 +1,11 @@
 # @unisat/base-utils
 
+## 0.5.0
+
+### Minor Changes
+
+- Improve safety
+
 ## 0.4.0
 
 ### Minor Changes

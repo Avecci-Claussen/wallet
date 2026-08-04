@@ -1,5 +1,11 @@
 # @unisat/wallet-shared
 
+## 0.6.0
+
+### Minor Changes
+
+- Improve safety
+
 ## 0.5.0
 
 ### Minor Changes

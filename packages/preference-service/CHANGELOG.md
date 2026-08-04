@@ -1,5 +1,17 @@
 # @unisat/preference-service
 
+## 0.4.0
+
+### Minor Changes
+
+- Improve safety
+
+### Patch Changes
+
+- Updated dependencies
+  - @unisat/wallet-shared@0.6.0
+  - @unisat/wallet-storage@0.2.3
+
 ## 0.3.0
 
 ### Minor Changes
