@@ -561,7 +561,7 @@
     "message": "Создать наблюдательный кошелёк"
   },
   "create_with_mnemonics_12words": {
-    "message": "Создать с помощью мнемоники (12 слов)"
+    "message": "Создать с помощью мнемоники"
   },
   "current": {
     "message": "Текущий"
@@ -1827,7 +1827,7 @@
     "message": "Восстановить из мнемоники"
   },
   "restore_from_mnemonics_12words24words": {
-    "message": "Восстановить из мнемоники (12 слов, 24 слова)"
+    "message": "Восстановить из мнемоники"
   },
   "restore_from_single_private_key": {
     "message": "Восстановить из одиночного приватного ключа"

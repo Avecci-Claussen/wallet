@@ -561,7 +561,7 @@
     "message": "ウォッチウォレットを作成"
   },
   "create_with_mnemonics_12words": {
-    "message": "ニーモニック (12単語) で作成"
+    "message": "ニーモニックで作成"
   },
   "current": {
     "message": "現在"
@@ -1827,7 +1827,7 @@
     "message": "助記詞から復元"
   },
   "restore_from_mnemonics_12words24words": {
-    "message": "ニーモニック (12単語、24単語) から復元"
+    "message": "ニーモニックから復元"
   },
   "restore_from_single_private_key": {
     "message": "単一の秘密鍵から復元"

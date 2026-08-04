@@ -561,7 +561,7 @@
     "message": "Créer un Portefeuille Observateur"
   },
   "create_with_mnemonics_12words": {
-    "message": "Créer avec mnémoniques (12 mots)"
+    "message": "Créer avec mnémoniques"
   },
   "current": {
     "message": "Actuel"
@@ -1827,7 +1827,7 @@
     "message": "Restaurer depuis les mots de passe"
   },
   "restore_from_mnemonics_12words24words": {
-    "message": "Restaurer depuis mnémoniques (12 mots, 24 mots)"
+    "message": "Restaurer depuis mnémoniques"
   },
   "restore_from_single_private_key": {
     "message": "Restaurer depuis une clé privée unique"

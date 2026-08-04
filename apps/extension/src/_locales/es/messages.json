@@ -561,7 +561,7 @@
     "message": "Crear Billetera de Observación"
   },
   "create_with_mnemonics_12words": {
-    "message": "Crear con mnemónicos (12 palabras)"
+    "message": "Crear con mnemónicos"
   },
   "current": {
     "message": "Actual"
@@ -1827,7 +1827,7 @@
     "message": "Restaurar desde palabras clave"
   },
   "restore_from_mnemonics_12words24words": {
-    "message": "Restaurar desde mnemónicos (12 palabras, 24 palabras)"
+    "message": "Restaurar desde mnemónicos"
   },
   "restore_from_single_private_key": {
     "message": "Restaurar desde clave privada única"

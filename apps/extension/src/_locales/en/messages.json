@@ -567,7 +567,7 @@
     "message": "Create Watch Wallet"
   },
   "create_with_mnemonics_12words": {
-    "message": "Create with mnemonics (12-words)"
+    "message": "Create with mnemonics"
   },
   "current": {
     "message": "Current"
@@ -1833,7 +1833,7 @@
     "message": "Restore from Mnemonics"
   },
   "restore_from_mnemonics_12words24words": {
-    "message": "Restore from mnemonics (12-words、24-words)"
+    "message": "Restore from mnemonics"
   },
   "restore_from_single_private_key": {
     "message": "Restore from single private key"

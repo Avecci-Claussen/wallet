@@ -561,7 +561,7 @@
     "message": "建立觀察錢包"
   },
   "create_with_mnemonics_12words": {
-    "message": "使用助記詞創建 (12 個單詞)"
+    "message": "使用助記詞創建"
   },
   "current": {
     "message": "當前"
@@ -1830,7 +1830,7 @@
     "message": "使用助記詞恢復"
   },
   "restore_from_mnemonics_12words24words": {
-    "message": "從助記詞恢復 (12 個單詞、24 個單詞)"
+    "message": "從助記詞恢復"
   },
   "restore_from_single_private_key": {
     "message": "從單一私鑰恢復"
