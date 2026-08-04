@@ -30,6 +30,19 @@ interface ContextData {
   connectionType: 'USB' | 'QR';
 }
 
+function getErrorMessage(error: unknown, fallbackMessage: string): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'string') {
+    return error;
+  }
+  if (typeof error === 'object' && error !== null && 'message' in error && typeof error.message === 'string') {
+    return error.message;
+  }
+  return fallbackMessage;
+}
+
 function Step1({ onNext, setIsUSB }) {
   const navigate = useNavigate();
 
@@ -187,6 +200,7 @@ function Step3({
   const navigate = useNavigate();
   const wallet = useWallet();
   const tools = useTools();
+  const { t } = useI18n();
   const [addressType, setAddressType] = useState(AddressType.P2WPKH);
   const addressTypes = useMemo(() => {
     return ADDRESS_TYPES.filter((item) => item.value === AddressType.P2WPKH);
@@ -231,7 +245,7 @@ function Step3({
         );
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      setError(getErrorMessage(e, t('unknown_error')));
       return;
     }
     wallet.setShowSafeNotice(true);
@@ -332,8 +346,6 @@ function Step3({
     }
     return filtItems;
   };
-
-  const { t } = useI18n();
 
   return (
     <Layout>
