@@ -89,7 +89,7 @@ export function Step1_Confirm({
             >
               <Text text={`${index + 1}.`} size="xs" style={{ width: 20 }} color={isIncorrect ? 'error' : 'textDim'} />
               <Text
-                text={selectedWordIndex === undefined ? '...' : words[selectedWordIndex]!}
+                text={selectedWordIndex === undefined ? '' : words[selectedWordIndex]!}
                 size="xs"
                 ellipsis
                 color={isIncorrect ? 'error' : isSelected ? 'primary' : undefined}
