@@ -9,12 +9,7 @@ import {
   DelegationV2StakingState,
   getDelegationsV2,
 } from '@unisat/babylon-service'
-import {
-  ColdWalletKeyring,
-  isKeystoneSupportedHdPath,
-  KEYSTONE_SUPPORTED_HD_PATH,
-  KeystoneKeyring,
-} from '@unisat/keyring-service'
+import { ColdWalletKeyring, KeystoneKeyring } from '@unisat/keyring-service'
 import { DisplayedKeyring, Keyring, KeyringType, ToSignInput } from '@unisat/keyring-service/types'
 import * as txHelpers from '@unisat/tx-helpers'
 import { UnspentOutput, signMessageOfBIP322Simple } from '@unisat/tx-helpers'
@@ -577,16 +572,15 @@ export class WalletController extends BaseController {
     hdPath: string,
     accountCount: number
   ) => {
-    if (hdPath && !isKeystoneSupportedHdPath(hdPath)) {
-      throw new Error("Keystone only supports the standard BIP84 path m/84'/0'/0'/0")
-    }
-    if (addressType !== AddressType.P2WPKH) {
-      throw new Error('Keystone only supports Native SegWit (P2WPKH) accounts')
-    }
     const tmpKeyring = new KeystoneKeyring()
     await tmpKeyring.initFromUR(urType, urCbor)
-    tmpKeyring.changeHdPath(KEYSTONE_SUPPORTED_HD_PATH)
-    accountCount && tmpKeyring.addAccounts(accountCount)
+    if (hdPath.length >= 13) {
+      tmpKeyring.changeChangeAddressHdPath(hdPath)
+      tmpKeyring.addAccounts(accountCount)
+    } else {
+      tmpKeyring.changeHdPath(ADDRESS_TYPES[addressType]!.hdPath)
+      accountCount && tmpKeyring.addAccounts(accountCount)
+    }
 
     const opts = await tmpKeyring.serialize()
     const originKeyring = keyringService.createTmpKeyring(KeyringType.KeystoneKeyring, opts)

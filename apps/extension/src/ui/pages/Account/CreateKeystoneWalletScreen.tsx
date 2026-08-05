@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import KeystoneProductImg from '@/ui/assets/keystone-product.png';
-import { Button, Card, Column, Content, Footer, Header, Layout, Row, Text } from '@/ui/components';
+import { Button, Card, Column, Content, Footer, Header, Input, Layout, Row, Text } from '@/ui/components';
 import { AddressTypeCard2 } from '@/ui/components/AddressTypeCard';
 import KeystoneLogo from '@/ui/components/Keystone/Logo';
 import KeystoneLogoWithText from '@/ui/components/Keystone/LogoWithText';
@@ -9,6 +9,7 @@ import KeystonePopover from '@/ui/components/Keystone/Popover';
 import KeystoneScan from '@/ui/components/Keystone/Scan';
 import KeystoneFetchKey from '@/ui/components/Keystone/usb/FetchKey';
 import { colors } from '@/ui/theme/colors';
+import { isValidHdPath } from '@/ui/utils/bitcoin-utils';
 import { ScanOutlined, UsbOutlined } from '@ant-design/icons';
 import {
   useI18n,
@@ -28,6 +29,8 @@ interface ContextData {
     cbor: string;
   };
   connectionType: 'USB' | 'QR';
+  passphrase: string;
+  customHdPath: string;
 }
 
 function getErrorMessage(error: unknown, fallbackMessage: string): string {
@@ -191,9 +194,11 @@ function StepTwoUSB({ onBack, onNext }) {
 
 function Step3({
   onBack,
-  contextData
+  contextData,
+  updateContextData
 }: {
   contextData: ContextData;
+  updateContextData: (data: ContextData) => void;
   onBack: () => void;
 }) {
   const importAccounts = useImportAccountsFromKeystoneCallback();
@@ -203,7 +208,7 @@ function Step3({
   const { t } = useI18n();
   const [addressType, setAddressType] = useState(AddressType.P2WPKH);
   const addressTypes = useMemo(() => {
-    return ADDRESS_TYPES.filter((item) => item.value === AddressType.P2WPKH);
+    return ADDRESS_TYPES.filter((item) => item.displayIndex < 4).sort((a, b) => a.displayIndex - b.displayIndex);
   }, []);
 
   const [groups, setGroups] = useState<
@@ -211,6 +216,8 @@ function Step3({
   >([]);
   const [isScanned, setScanned] = useState(false);
   const [error, setError] = useState('');
+  const [pathText, setPathText] = useState(contextData.customHdPath);
+  const [pathError, setPathError] = useState('');
 
   const onConfirm = async () => {
     try {
@@ -228,7 +235,7 @@ function Step3({
           contextData.ur.cbor,
           addressType,
           accountCount,
-          '',
+          contextData.customHdPath,
           filteredPubkeys,
           contextData.connectionType
         );
@@ -239,7 +246,7 @@ function Step3({
           contextData.ur.cbor,
           addressType,
           1,
-          '',
+          contextData.customHdPath,
           undefined,
           contextData.connectionType
         );
@@ -255,6 +262,13 @@ function Step3({
   useEffect(() => {
     scanVaultAddress(1);
   }, []);
+  useEffect(() => {
+    if (contextData.customHdPath.length >= 13) {
+      scanVaultAddress(1);
+      setScanned(false);
+    }
+  }, [contextData.customHdPath]);
+
   const scanVaultAddress = async (accountCount = 1, isScanned = false) => {
     tools.showLoading(true);
     setGroups([]);
@@ -266,7 +280,7 @@ function Step3({
           contextData.ur.type,
           contextData.ur.cbor,
           addressTypes[i].value,
-          '',
+          contextData.customHdPath,
           accountCount
         );
         groups.push({
@@ -303,6 +317,20 @@ function Step3({
         });
       });
 
+      // only the  customsan path is not empty and click thie scan button , then only show the custom path address type
+      if (
+        contextData.customHdPath !== null &&
+        contextData.customHdPath !== '' &&
+        contextData.customHdPath.length >= 13 &&
+        isScanned
+      ) {
+        const saveAddressType = contextData.customHdPath.split('/')[1];
+        // find address type index by hdpath contains the saveAddressType
+        const saveAddressTypeIndex = addressTypes.findIndex((v) => v.hdPath.includes(saveAddressType));
+        // remove the groups which is not equal to saveAddressType
+        groups = groups.filter((v) => v.type === saveAddressTypeIndex);
+      }
+
       // if res is empty and groups is empty, then only show the first wallet
       if (res.length === 0 && groups.length === 0 && isScanned) {
         for (let i = 0; i < addressTypes.length; i++) {
@@ -310,7 +338,7 @@ function Step3({
             contextData.ur.type,
             contextData.ur.cbor,
             addressTypes[i].value,
-            '',
+            contextData.customHdPath,
             1
           );
           groups.push({
@@ -334,17 +362,51 @@ function Step3({
     // }
     // const group = groups[addressType];
     const group = groups.find((v) => v.type === addressType);
-    const hdPath = addressTypes.find((v) => v.value === addressType)?.hdPath;
-    const items = group.address_arr.map((v, index) => ({
-      address: v,
-      satoshis: group.satoshis_arr[index],
-      path: `${hdPath}/${index}`
-    }));
-    const filtItems = items.filter((v) => v.satoshis >= 0);
-    if (filtItems.length === 0) {
-      filtItems.push(items[0]);
+    if (contextData.customHdPath !== null && contextData.customHdPath !== '' && contextData.customHdPath.length >= 13) {
+      const items = group.address_arr.map((v, index) => ({
+        address: v,
+        satoshis: group.satoshis_arr[index],
+        path: `${contextData.customHdPath}/${index}`
+      }));
+      const filtItems = items.filter((v) => v.satoshis >= 0);
+      if (filtItems.length === 0) {
+        filtItems.push(items[0]);
+      }
+      return filtItems;
+    } else {
+      const hdPath = addressTypes.find((v) => v.value === addressType)?.hdPath;
+      const items = group.address_arr.map((v, index) => ({
+        address: v,
+        satoshis: group.satoshis_arr[index],
+        path: `${hdPath}/${index}`
+      }));
+      const filtItems = items.filter((v) => v.satoshis >= 0);
+      if (filtItems.length === 0) {
+        filtItems.push(items[0]);
+      }
+      return filtItems;
     }
-    return filtItems;
+  };
+
+  const submitCustomHdPath = (text: string) => {
+    setPathError('');
+    setPathText(text);
+    if (text !== '') {
+      const isValid = isValidHdPath(text);
+      if (!isValid) {
+        setPathError('Invalid derivation path.');
+        return;
+      }
+      updateContextData({
+        ...contextData,
+        customHdPath: text
+      });
+    } else {
+      updateContextData({
+        ...contextData,
+        customHdPath: ''
+      });
+    }
   };
 
   return (
@@ -396,6 +458,17 @@ function Step3({
             // );
           })}
         </Column>
+        <Text text={t('custom_hdpath_optional')} preset="bold" mt="lg" />
+        <Column>
+          <Input
+            placeholder={t('custom_hdpath')}
+            value={pathText}
+            onChange={(e) => {
+              submitCustomHdPath(e.target.value);
+            }}
+          />
+        </Column>
+        {pathError && <Text text={pathError} color="error" />}
         {error && <Text text={error} color="error" />}
       </Content>
       {error && (
@@ -424,6 +497,8 @@ export default function CreateKeystoneWalletScreen() {
       type: '',
       cbor: ''
     },
+    passphrase: '',
+    customHdPath: '',
     connectionType: 'QR'
   });
 
@@ -452,6 +527,8 @@ export default function CreateKeystoneWalletScreen() {
                 type,
                 cbor
               },
+              passphrase: '',
+              customHdPath: '',
               connectionType: 'USB'
             });
           }}
@@ -468,6 +545,8 @@ export default function CreateKeystoneWalletScreen() {
               type,
               cbor
             },
+            passphrase: '',
+            customHdPath: '',
             connectionType: 'QR'
           });
         }}
@@ -475,7 +554,7 @@ export default function CreateKeystoneWalletScreen() {
     );
   }
   if (step === 3) {
-    return <Step3 contextData={contextData} onBack={() => setStep(2)} />;
+    return <Step3 contextData={contextData} updateContextData={updateContextData} onBack={() => setStep(2)} />;
   }
   return <></>;
 }

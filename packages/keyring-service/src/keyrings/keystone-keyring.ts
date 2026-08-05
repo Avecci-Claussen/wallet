@@ -28,11 +28,6 @@ interface Wallet {
 const type = 'Keystone'
 
 const DEFAULT_CONNECTION_TYPE = 'QR'
-export const KEYSTONE_SUPPORTED_HD_PATH = "m/84'/0'/0'/0"
-
-export function isKeystoneSupportedHdPath(hdPath: string): boolean {
-  return hdPath === KEYSTONE_SUPPORTED_HD_PATH
-}
 
 export class KeystoneKeyring extends EventEmitter {
   static type = type

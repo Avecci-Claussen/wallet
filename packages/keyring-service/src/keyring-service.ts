@@ -7,8 +7,6 @@ import { AddressType } from '@unisat/wallet-types'
 import {
   ColdWalletKeyring,
   HdKeyring,
-  isKeystoneSupportedHdPath,
-  KEYSTONE_SUPPORTED_HD_PATH,
   KeystoneKeyring,
   ReadonlyKeyring,
   SimpleKeyring,
@@ -538,17 +536,17 @@ export class KeyringService extends EventEmitter {
     if (accountCount < 1) {
       throw new Error(this.t('keyring_error_account_count'))
     }
-    if (hdPath && !isKeystoneSupportedHdPath(hdPath)) {
-      throw new Error('Keystone only supports the standard BIP84 path m/84\'/0\'/0\'/0')
-    }
-    if (addressType !== AddressType.P2WPKH) {
-      throw new Error('Keystone only supports Native SegWit (P2WPKH) accounts')
-    }
     // await this.persistAllKeyrings();
     const tmpKeyring = new KeystoneKeyring()
     await tmpKeyring.initFromUR(urType, urCbor, connectionType)
-    tmpKeyring.changeHdPath(KEYSTONE_SUPPORTED_HD_PATH)
-    tmpKeyring.addAccounts(accountCount)
+    if (hdPath.length >= 13) {
+      tmpKeyring.changeChangeAddressHdPath(hdPath)
+      tmpKeyring.addAccounts(accountCount)
+    } else {
+      const typeConfig = ADDRESS_TYPES[addressType]
+      tmpKeyring.changeHdPath(typeConfig ? typeConfig.hdPath : '')
+      tmpKeyring.addAccounts(accountCount)
+    }
 
     const opts = await tmpKeyring.serialize()
     const keyring = await this.addNewKeyring(KeyringType.KeystoneKeyring, opts, addressType)
