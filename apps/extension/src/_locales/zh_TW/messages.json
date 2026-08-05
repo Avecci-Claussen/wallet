@@ -1418,6 +1418,9 @@
   "multiple_assets_risk_title": {
     "message": "偵測到多種資產"
   },
+  "multiple_risks_detected_description": {
+    "message": "此交易涉及多項風險。請在繼續前仔細檢查。"
+  },
   "multiple_inscriptions_are_mixed_together_please_sp": {
     "message": "多個銘文混合在一起。請先分割它們。"
   },
@@ -2515,6 +2518,9 @@
   },
   "utxo_indexing_risk_description": {
     "message": "此 UTXO 仍在索引中，其附帶資產可能尚未完全識別。我們強烈建議等待索引完成，通常約需 5 分鐘。"
+  },
+  "utxo_indexing_in_progress": {
+    "message": "索引處理中"
   },
   "utxo_indexing_risk_asset_warning": {
     "message": "現在發送可能導致永久性資產損失。"

@@ -1415,6 +1415,9 @@
   "multiple_assets_risk_title": {
     "message": "複数の資産が検出されました"
   },
+  "multiple_risks_detected_description": {
+    "message": "このトランザクションには複数のリスクがあります。続行する前に慎重に確認してください。"
+  },
   "multiple_inscriptions_are_mixed_together_please_sp": {
     "message": "複数のインスクリプションが混在しています。最初に分割してください。"
   },
@@ -2512,6 +2515,9 @@
   },
   "utxo_indexing_risk_description": {
     "message": "このUTXOは現在もインデックス作成中であり、関連する資産はまだ完全には識別されていない可能性があります。インデックス作成が完了するまでお待ちいただくことを強くお勧めします。通常、約5分かかります。"
+  },
+  "utxo_indexing_in_progress": {
+    "message": "インデックス作成中"
   },
   "utxo_indexing_risk_asset_warning": {
     "message": "今送信すると、資産を永久に失う可能性があります。"

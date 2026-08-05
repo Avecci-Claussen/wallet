@@ -11,13 +11,54 @@ import { Icon } from '../Icon';
 import { Input } from '../Input';
 import { Popover } from '../Popover';
 import { Row } from '../Row';
-import { Spin } from '../Spin';
 import { Text } from '../Text';
 import { BadFeeRate } from './BadFeeRate';
 import { ChangingInscription } from './ChangingInscription';
 import { InscriptionBurning } from './InscriptionBurning';
 import { BurningAssetsCarousel, MultipleAssetsCarousel, MultipleAssetsList } from './MultipleAssetsList';
 import { RunesBurningList } from './RunesBurningList';
+
+const riskPopoverStyle = {
+  width: 343,
+  boxSizing: 'border-box' as const,
+  padding: '24px 16px',
+  borderRadius: 12,
+  backgroundColor: '#181A1F'
+};
+
+const riskCardStyle = {
+  border: '1px solid rgba(255, 255, 255, 0.15)',
+  borderRadius: 8,
+  overflow: 'hidden'
+};
+
+const riskCardHeaderStyle = {
+  minHeight: 36,
+  padding: '0 8px'
+};
+
+function IndexingRiskDescription({ text }: { text: string }) {
+  const duration = 'about 5 minutes.';
+  const durationIndex = text.indexOf(duration);
+  const descriptionStyle = {
+    color: 'rgba(255, 255, 255, 0.65)',
+    fontSize: 12,
+    lineHeight: '16px',
+    padding: '0 8px 8px'
+  };
+
+  if (durationIndex === -1) {
+    return <div style={descriptionStyle}>{text}</div>;
+  }
+
+  return (
+    <div style={descriptionStyle}>
+      {text.slice(0, durationIndex)}
+      <span style={{ color: 'rgba(244, 182, 44, 0.85)' }}>{duration}</span>
+      {text.slice(durationIndex + duration.length)}
+    </div>
+  );
+}
 
 const visibleRiskDetailTypes = [
   RiskType.MULTIPLE_ASSETS,
@@ -135,7 +176,6 @@ export const SignPsbtWithRisksPopover = ({
   const AGREEMENT_TEXT = 'CONFIRM';
   const hasUtxoIndexingRisk = decodedPsbt.risks.some((risk) => risk.type === RiskType.UTXO_INDEXING);
   const otherRisks = decodedPsbt.risks.filter((risk) => risk.type !== RiskType.UTXO_INDEXING);
-  const [showIndexingRisk, setShowIndexingRisk] = useState(hasUtxoIndexingRisk);
 
   useEffect(() => {
     if (inputValue.toUpperCase() === AGREEMENT_TEXT) {
@@ -170,27 +210,95 @@ export const SignPsbtWithRisksPopover = ({
     }
   }
 
-  if (showIndexingRisk) {
-    const hasCriticalRisk = decodedPsbt.risks.some((risk) => risk.level === 'critical');
+  if (hasUtxoIndexingRisk) {
+    const hasCriticalRisk = otherRisks.some((risk) => risk.level === 'critical');
 
     return (
-      <Popover onClose={onClose} data-testid="utxo-indexing-risk-popover">
-        <Column itemsCenter gap="lg" fullX>
-          <Spin size="large" style={{ marginTop: 8 }} />
-          <Column itemsCenter gap="md" fullX>
-            <Text text={t('utxo_indexing_risk_title')} preset="title" textCenter />
-            <Text text={t('utxo_indexing_risk_description')} preset="sub" textCenter />
+      <Popover
+        onClose={onClose}
+        contentStyle={riskPopoverStyle}
+        closeStyle={{ top: 24, right: 16 }}
+        data-testid="utxo-indexing-risk-popover"
+      >
+        <Column fullX gap="xl">
+          <Column fullX gap="lg">
+            <Text text={t('utxo_indexing_risk_title')} size="md" style={{ fontWeight: 600 }} textCenter />
+            <Text
+              text={t('multiple_risks_detected_description')}
+              preset="sub"
+              style={{ color: 'rgba(255, 255, 255, 0.65)', lineHeight: '16px' }}
+            />
           </Column>
 
-          <Column
-            fullX
-            gap="sm"
-            style={{
-              backgroundColor: indexingRiskAccepted ? 'rgba(245, 84, 84, 0.08)' : 'transparent',
-              borderRadius: 8,
-              padding: 12
-            }}>
-            <Text text={t('utxo_indexing_risk_asset_warning')} color="danger" />
+          <Column fullX gap="lg">
+            {otherRisks.map((risk, index) => {
+              const riskContentKey = getRiskContentKey(risk.type);
+              const title = riskContentKey.title ? t(riskContentKey.title) : risk.title;
+              const desc = riskContentKey.description ? t(riskContentKey.description) : risk.desc;
+              const isMultipleAssetsRisk = [
+                RiskType.MULTIPLE_ASSETS,
+                RiskType.RUNES_MULTIPLE_ASSETS,
+                RiskType.ALKANES_MULTIPLE_ASSETS
+              ].includes(risk.type);
+              const isBurningRisk =
+                risk.type === RiskType.INSCRIPTION_BURNING ||
+                risk.type === RiskType.RUNES_BURNING ||
+                risk.type === RiskType.ALKANES_BURNING;
+
+              return (
+                <Column key={'risk_' + index} fullX gap="zero" style={riskCardStyle}>
+                  <Row fullX justifyBetween itemsCenter style={riskCardHeaderStyle}>
+                    <Row itemsCenter gap="md" style={{ minWidth: 0 }}>
+                      <Icon icon="alert" color="red_light2" size={16} />
+                      <Text text={title} size="xs" color={risk.level === 'warning' ? 'warning' : 'danger'} />
+                    </Row>
+                    {visibleRiskDetailTypes.includes(risk.type) ? (
+                      <Row
+                        itemsCenter
+                        gap="md"
+                        onClick={() => {
+                          setDetailRisk(risk);
+                        }}
+                      >
+                        <Text text={t('view')} preset="sub" style={{ color: 'rgba(255, 255, 255, 0.65)' }} />
+                        <Icon icon="right" size={10} color="white_muted" />
+                      </Row>
+                    ) : null}
+                  </Row>
+                  <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.15)' }} />
+                  {isMultipleAssetsRisk ? (
+                    <MultipleAssetsCarousel decodedPsbt={decodedPsbt} />
+                  ) : isBurningRisk ? (
+                    <BurningAssetsCarousel decodedPsbt={decodedPsbt} riskType={risk.type} />
+                  ) : (
+                    <Text
+                      text={desc}
+                      preset="sub"
+                      style={{ color: 'rgba(255, 255, 255, 0.65)', lineHeight: '16px', padding: '8px' }}
+                    />
+                  )}
+                </Column>
+              );
+            })}
+
+            <Column fullX gap="md" style={riskCardStyle}>
+              <Row fullX itemsCenter gap="md" style={riskCardHeaderStyle}>
+                <div
+                  aria-hidden
+                  style={{
+                    width: 16,
+                    height: 16,
+                    border: '2px solid #F55454',
+                    borderBottomColor: 'transparent',
+                    borderRadius: '50%',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <Text text={t('utxo_indexing_in_progress')} size="xs" color="danger" />
+              </Row>
+              <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.15)' }} />
+              <IndexingRiskDescription text={t('utxo_indexing_risk_description')} />
+            </Column>
           </Column>
 
           {!hasCriticalRisk && (
@@ -198,10 +306,15 @@ export const SignPsbtWithRisksPopover = ({
               checked={indexingRiskAccepted}
               checkedColor={colors.red}
               checkColor={colors.white}
-              style={{ alignSelf: 'stretch' }}
+              style={{ alignSelf: 'stretch', alignItems: 'flex-start' }}
               data-testid="utxo-indexing-risk-checkbox"
-              onChange={(e) => setIndexingRiskAccepted(e.target.checked)}>
-              <Text text={t('utxo_indexing_risk_agreement')} preset="sub" />
+              onChange={(e) => setIndexingRiskAccepted(e.target.checked)}
+            >
+              <Text
+                text={t('utxo_indexing_risk_agreement')}
+                preset="sub"
+                style={{ color: 'rgba(255, 255, 255, 0.65)', lineHeight: '16px', flex: 1 }}
+              />
             </Checkbox>
           )}
 
@@ -213,11 +326,7 @@ export const SignPsbtWithRisksPopover = ({
                 disabled={!indexingRiskAccepted}
                 full
                 onClick={() => {
-                  if (otherRisks.length > 0) {
-                    setShowIndexingRisk(false);
-                  } else {
-                    onConfirm();
-                  }
+                  onConfirm();
                 }}
               />
             )}
@@ -250,7 +359,8 @@ export const SignPsbtWithRisksPopover = ({
                 key={'risk_' + index}
                 style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10 }}
                 px="md"
-                py="sm">
+                py="sm"
+              >
                 <Row justifyBetween justifyCenter mt="sm">
                   <Text text={title} color={risk.level === 'warning' ? 'warning' : 'danger'} />
                   {visibleRiskDetailTypes.includes(risk.type) ? (

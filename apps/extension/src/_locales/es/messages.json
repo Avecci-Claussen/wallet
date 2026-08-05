@@ -1415,6 +1415,9 @@
   "multiple_assets_risk_title": {
     "message": "Múltiples activos detectados"
   },
+  "multiple_risks_detected_description": {
+    "message": "Esta transacción implica múltiples riesgos. Revísela detenidamente antes de continuar."
+  },
   "multiple_inscriptions_are_mixed_together_please_sp": {
     "message": "Múltiples inscripciones están mezcladas. Por favor, divídelas primero."
   },
@@ -2503,6 +2506,9 @@
   },
   "utxo_indexing_risk_description": {
     "message": "Este UTXO todavía se está indexando y es posible que sus activos adjuntos no se hayan identificado por completo. Recomendamos encarecidamente esperar hasta que se complete la indexación. Esto normalmente tarda unos 5 minutos."
+  },
+  "utxo_indexing_in_progress": {
+    "message": "Indexación en curso"
   },
   "utxo_indexing_risk_asset_warning": {
     "message": "Enviarlo ahora puede provocar una pérdida permanente de activos."

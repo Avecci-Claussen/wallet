@@ -1421,6 +1421,9 @@
   "multiple_assets_risk_title": {
     "message": "Multiple assets detected"
   },
+  "multiple_risks_detected_description": {
+    "message": "This transaction involves multiple risks. Please review carefully before continuing."
+  },
   "multiple_inscriptions_are_mixed_together_please_sp": {
     "message": "Multiple inscriptions are mixed together. Please split them first."
   },
@@ -2518,6 +2521,9 @@
   },
   "utxo_indexing_risk_description": {
     "message": "This UTXO is still being indexed, and its attached assets may not have been fully identified yet. We strongly recommend waiting until indexing is complete. This usually takes about 5 minutes."
+  },
+  "utxo_indexing_in_progress": {
+    "message": "Indexing in progress"
   },
   "utxo_indexing_risk_asset_warning": {
     "message": "Sending it now may result in permanent asset loss."

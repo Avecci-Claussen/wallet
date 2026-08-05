@@ -4,15 +4,14 @@ import type { CSSProperties } from 'react';
 import { DecodedPsbt, DecodedPsbtInput, Inscription, RiskType } from '@unisat/wallet-shared';
 import { useAlkanesIconInfo, useBRC20IconInfo, useI18n, useRunesIconInfo } from '@unisat/wallet-state';
 
-import AssetTag from '../AssetTag';
 import { Card } from '../Card';
 import { Column } from '../Column';
+import { Image } from '../Image';
 import InscriptionPreview from '../InscriptionPreview';
 import { Row } from '../Row';
 import { RunesTicker } from '../RunesTicker';
 import { Text } from '../Text';
 import { getTokenBalanceCardStyle } from '../TokenBalanceCardLayout';
-import { TokenBalanceIcon } from '../TokenBalanceIcon';
 import { RiskDetailPopover, riskAssetCardStyle } from './RiskDetailPopover';
 
 function getInputAssetsCount(input: DecodedPsbtInput) {
@@ -75,7 +74,8 @@ function getBurnedBalances<T extends { amount: string }>(
 }
 
 const assetCarouselStyle: CSSProperties = {
-  padding: 4,
+  gap: 4,
+  padding: '0 8px',
   scrollSnapType: 'x mandatory',
   WebkitOverflowScrolling: 'touch'
 };
@@ -83,18 +83,19 @@ const assetCarouselStyle: CSSProperties = {
 const assetCarouselCardStyle: CSSProperties = {
   flex: '0 0 120px',
   minWidth: 120,
-  minHeight: 66,
-  height: 66,
-  paddingTop: 15,
-  paddingBottom: 5,
+  minHeight: 60,
+  height: 60,
+  padding: '18px 8px 4px',
+  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+  borderRadius: 12,
   position: 'relative',
   scrollSnapAlign: 'start'
 };
 
 const assetTagStyle: CSSProperties = {
   position: 'absolute',
-  top: 6,
-  left: 8
+  top: 0,
+  left: 0
 };
 
 const inscriptionCarouselCardStyle: CSSProperties = {
@@ -103,6 +104,53 @@ const inscriptionCarouselCardStyle: CSSProperties = {
   scrollSnapAlign: 'start'
 };
 
+function AssetIcon({ iconInfo }: { iconInfo: { iconShortName?: string; iconUrl: string } }) {
+  if (iconInfo.iconUrl) {
+    return (
+      <Image
+        size={24}
+        style={{ borderRadius: 12, flexShrink: 0 }}
+        src={iconInfo.iconUrl}
+        fallbackSrc="./images/icons/artifacts/unknown.png"
+      />
+    );
+  }
+
+  return (
+    <Column
+      itemsCenter
+      justifyCenter
+      style={{ width: 24, height: 24, borderRadius: 12, border: '1px solid rgba(244, 182, 44, 0.85)', flexShrink: 0 }}
+    >
+      <Text text={iconInfo.iconShortName || '?'} size="xs" color="gold" />
+    </Column>
+  );
+}
+
+const carouselTagStyles = {
+  'brc-20': { backgroundColor: 'rgba(244, 182, 44, 0.1)', color: 'rgba(244, 182, 44, 0.65)' },
+  Runes: { backgroundColor: 'rgba(243, 145, 100, 0.1)', color: 'rgba(243, 145, 100, 0.65)' },
+  Alkanes: { backgroundColor: 'rgba(62, 125, 224, 0.1)', color: 'rgba(62, 125, 224, 0.65)' }
+};
+
+function CarouselAssetTag({ type }: { type: keyof typeof carouselTagStyles }) {
+  return (
+    <div
+      style={{
+        ...carouselTagStyles[type],
+        height: 16,
+        padding: '1px 6px',
+        borderRadius: '0 0 8px 0',
+        boxSizing: 'border-box',
+        fontSize: 10,
+        lineHeight: '14px'
+      }}
+    >
+      {type}
+    </div>
+  );
+}
+
 function RuneAssetCard({ rune }: { rune: DecodedPsbtInput['runes'][number] }) {
   const iconInfo = useRunesIconInfo(rune.spacedRune || rune.rune);
   const amount = new BigNumber(rune.amount).div(10 ** rune.divisibility).toString();
@@ -110,10 +158,10 @@ function RuneAssetCard({ rune }: { rune: DecodedPsbtInput['runes'][number] }) {
   return (
     <Card style={{ ...getTokenBalanceCardStyle(), ...assetCarouselCardStyle }}>
       <div style={assetTagStyle}>
-        <AssetTag type="Runes" small />
+        <CarouselAssetTag type="Runes" />
       </div>
       <Row fullX itemsCenter gap="sm" style={{ minWidth: 0 }}>
-        <TokenBalanceIcon iconInfo={iconInfo} />
+        <AssetIcon iconInfo={iconInfo} />
         <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden' }}>
           <RunesTicker tick={rune.spacedRune || rune.rune} truncate />
           <Text text={`${amount} ${rune.symbol || ''}`.trim()} size="xs" ellipsis />
@@ -131,10 +179,10 @@ function AlkaneAssetCard({ alkane }: { alkane: DecodedPsbtInput['alkanes'][numbe
   return (
     <Card style={{ ...getTokenBalanceCardStyle(), ...assetCarouselCardStyle }}>
       <div style={assetTagStyle}>
-        <AssetTag type="Alkanes" small />
+        <CarouselAssetTag type="Alkanes" />
       </div>
       <Row fullX itemsCenter gap="sm" style={{ minWidth: 0 }}>
-        <TokenBalanceIcon iconInfo={iconInfo} />
+        <AssetIcon iconInfo={iconInfo} />
         <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden' }}>
           <RunesTicker tick={name} truncate />
           <Text text={`${amount} ${alkane.symbol || ''}`.trim()} size="xs" ellipsis />
@@ -150,10 +198,10 @@ function Brc20AssetCard({ ticker, amount }: { ticker: string; amount: string }) 
   return (
     <Card style={{ ...getTokenBalanceCardStyle(), ...assetCarouselCardStyle }}>
       <div style={assetTagStyle}>
-        <AssetTag type="brc-20" small />
+        <CarouselAssetTag type="brc-20" />
       </div>
       <Row fullX itemsCenter gap="sm" style={{ minWidth: 0 }}>
-        <TokenBalanceIcon iconInfo={iconInfo} />
+        <AssetIcon iconInfo={iconInfo} />
         <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden' }}>
           <Text text={ticker} size="sm" ellipsis />
           <Text text={amount} size="xs" ellipsis />
@@ -182,7 +230,8 @@ export const MultipleAssetsCarousel = ({ decodedPsbt }: { decodedPsbt: DecodedPs
             <Row
               key={`inscription:${outpoint}:${inscription.inscriptionId}`}
               style={inscriptionCarouselCardStyle}
-              itemsCenter>
+              itemsCenter
+            >
               <InscriptionPreview data={inscription} preset="xs" infoBgColor="#292929" />
             </Row>
           )),
@@ -230,7 +279,8 @@ export const BurningAssetsCarousel = ({ decodedPsbt, riskType }: { decodedPsbt: 
               <Row
                 key={`burned-inscription:${inscription.inscriptionId}`}
                 style={inscriptionCarouselCardStyle}
-                itemsCenter>
+                itemsCenter
+              >
                 <InscriptionPreview data={inscription} preset="xs" infoBgColor="#292929" />
               </Row>
             )
@@ -295,7 +345,8 @@ export const MultipleAssetsList = ({ decodedPsbt, onClose }: { decodedPsbt: Deco
                     px="md"
                     py="xl"
                     style={riskAssetCardStyle}
-                    mt="md">
+                    mt="md"
+                  >
                     <Text text={inscription.brc20?.tick || ''} />
                     <Text text={inscription.brc20?.amt || ''} />
                   </Row>
