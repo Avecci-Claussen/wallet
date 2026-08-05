@@ -100,8 +100,8 @@ const $viewPresets = {
   } as CSSProperties),
 
   delete: Object.assign({}, $baseViewStyle, {
-    backgroundColor: 'rgba(245, 84, 84, 0.10)',
-    border: '1px solid #F55454',
+    backgroundColor: colors.transparent,
+    border: '1px solid #EE344C',
     height: '48px',
     borderRadius: 8
   } as CSSProperties),
@@ -229,7 +229,7 @@ const $hoverViewPresets: Record<Presets, CSSProperties> = {
     backgroundColor: colors.red_dark
   },
   delete: {
-    backgroundColor: 'rgba(245, 84, 84, 0.15)'
+    backgroundColor: colors.transparent
   },
   bar: {
     backgroundColor: '#383535'
@@ -277,7 +277,7 @@ const $textPresets: Record<Presets, CSSProperties> = {
   primary: Object.assign({}, $baseTextStyle, { color: colors.black }),
   approval: Object.assign({}, $baseTextStyle, { color: colors.black }),
   danger: Object.assign({}, $baseTextStyle, { color: colors.white }),
-  delete: Object.assign({}, $baseTextStyle, { color: '#F55454' }),
+  delete: Object.assign({}, $baseTextStyle, { color: '#EE344C' }),
   bar: Object.assign({}, $baseTextStyle, { textAlign: 'left', fontWeight: 'bold' } as CSSProperties),
 
   defaultV2: Object.assign({}, $baseTextStyle, {}),
