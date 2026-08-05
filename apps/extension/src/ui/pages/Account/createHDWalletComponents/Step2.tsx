@@ -451,7 +451,7 @@ export function Step2({
           );
         })}
 
-      {restoreWallet.customPathSupport && (
+      {!scanned && restoreWallet.customPathSupport && (
         <Column mt="lg">
           <Text text={t('custom_hdpath_optional')} preset="bold" />
           <Column>
@@ -470,7 +470,7 @@ export function Step2({
 
       {!pathError && error && <Text text={error} color="error" />}
 
-      {restoreWallet.phraseSupport && (
+      {!scanned && restoreWallet.phraseSupport && (
         <Column mt="lg">
           <Text text={t('phrase_optional')} preset="bold" />
           <Input

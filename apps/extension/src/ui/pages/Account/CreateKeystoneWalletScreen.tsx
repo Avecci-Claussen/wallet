@@ -458,17 +458,21 @@ function Step3({
             // );
           })}
         </Column>
-        <Text text={t('custom_hdpath_optional')} preset="bold" mt="lg" />
-        <Column>
-          <Input
-            placeholder={t('custom_hdpath')}
-            value={pathText}
-            onChange={(e) => {
-              submitCustomHdPath(e.target.value);
-            }}
-          />
-        </Column>
-        {pathError && <Text text={pathError} color="error" />}
+        {!isScanned && (
+          <>
+            <Text text={t('custom_hdpath_optional')} preset="bold" mt="lg" />
+            <Column>
+              <Input
+                placeholder={t('custom_hdpath')}
+                value={pathText}
+                onChange={(e) => {
+                  submitCustomHdPath(e.target.value);
+                }}
+              />
+            </Column>
+            {pathError && <Text text={pathError} color="error" />}
+          </>
+        )}
         {error && <Text text={error} color="error" />}
       </Content>
       {error && (
