@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
-import type { CSSProperties } from 'react';
+import { useRef } from 'react';
+import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 
 import { DecodedPsbt, DecodedPsbtInput, Inscription, RiskType } from '@unisat/wallet-shared';
 import { useAlkanesIconInfo, useBRC20IconInfo, useI18n, useRunesIconInfo } from '@unisat/wallet-state';
@@ -74,10 +75,14 @@ function getBurnedBalances<T extends { amount: string }>(
 }
 
 const assetCarouselStyle: CSSProperties = {
+  display: 'flex',
+  width: '100%',
+  overflowX: 'auto',
   gap: 4,
   padding: '0 8px',
-  scrollSnapType: 'x mandatory',
-  WebkitOverflowScrolling: 'touch'
+  WebkitOverflowScrolling: 'touch',
+  cursor: 'grab',
+  userSelect: 'none'
 };
 
 const assetCarouselCardStyle: CSSProperties = {
@@ -88,8 +93,7 @@ const assetCarouselCardStyle: CSSProperties = {
   padding: '18px 8px 4px',
   backgroundColor: 'rgba(255, 255, 255, 0.06)',
   borderRadius: 12,
-  position: 'relative',
-  scrollSnapAlign: 'start'
+  position: 'relative'
 };
 
 const assetDetailCardStyle: CSSProperties = {
@@ -112,9 +116,51 @@ const assetTagStyle: CSSProperties = {
 
 const inscriptionCarouselCardStyle: CSSProperties = {
   flex: '0 0 80px',
-  minWidth: 80,
-  scrollSnapAlign: 'start'
+  minWidth: 80
 };
+
+function AssetCarousel({ children }: { children: ReactNode }) {
+  const dragState = useRef<{ startX: number; scrollLeft: number } | null>(null);
+
+  const onMouseDown = (event: MouseEvent<HTMLDivElement>) => {
+    if (event.button !== 0) {
+      return;
+    }
+
+    dragState.current = {
+      startX: event.clientX,
+      scrollLeft: event.currentTarget.scrollLeft
+    };
+    event.currentTarget.style.cursor = 'grabbing';
+    event.preventDefault();
+  };
+
+  const onMouseMove = (event: MouseEvent<HTMLDivElement>) => {
+    if (!dragState.current) {
+      return;
+    }
+
+    event.currentTarget.scrollLeft = dragState.current.scrollLeft - (event.clientX - dragState.current.startX);
+    event.preventDefault();
+  };
+
+  const stopDragging = (event: MouseEvent<HTMLDivElement>) => {
+    dragState.current = null;
+    event.currentTarget.style.cursor = 'grab';
+  };
+
+  return (
+    <div
+      style={assetCarouselStyle}
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={stopDragging}
+      onMouseLeave={stopDragging}
+    >
+      {children}
+    </div>
+  );
+}
 
 function AssetIcon({ iconInfo }: { iconInfo: { iconShortName?: string; iconUrl: string } }) {
   if (iconInfo.iconUrl) {
@@ -237,7 +283,7 @@ export const MultipleAssetsCarousel = ({ decodedPsbt }: { decodedPsbt: DecodedPs
   const mixedInputs = decodedPsbt.inputInfos.filter((input) => getInputAssetsCount(input) > 1);
 
   return (
-    <Row fullX gap="xs" overflowX style={assetCarouselStyle}>
+    <AssetCarousel>
       {mixedInputs.flatMap((input) => {
         const inscriptions = input.inscriptions
           .map((inscription) => getInscription(decodedPsbt.inscriptions, inscription))
@@ -270,7 +316,7 @@ export const MultipleAssetsCarousel = ({ decodedPsbt }: { decodedPsbt: DecodedPs
           ))
         ];
       })}
-    </Row>
+    </AssetCarousel>
   );
 };
 
@@ -288,7 +334,7 @@ export const BurningAssetsCarousel = ({ decodedPsbt, riskType }: { decodedPsbt: 
   );
 
   return (
-    <Row fullX gap="xs" overflowX style={assetCarouselStyle}>
+    <AssetCarousel>
       {riskType === RiskType.INSCRIPTION_BURNING
         ? burnedInscriptions.map((inscription) =>
             inscription.brc20 ? (
@@ -314,7 +360,7 @@ export const BurningAssetsCarousel = ({ decodedPsbt, riskType }: { decodedPsbt: 
       {riskType === RiskType.ALKANES_BURNING
         ? burnedAlkanes.map((alkane) => <AlkaneAssetCard key={`burned-alkane:${alkane.alkaneid}`} alkane={alkane} />)
         : null}
-    </Row>
+    </AssetCarousel>
   );
 };
 
