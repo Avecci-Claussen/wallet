@@ -92,6 +92,18 @@ const assetCarouselCardStyle: CSSProperties = {
   scrollSnapAlign: 'start'
 };
 
+const assetDetailCardStyle: CSSProperties = {
+  flex: '0 1 auto',
+  minWidth: 0,
+  minHeight: 60,
+  height: 'auto',
+  width: '100%',
+  padding: '18px 12px 8px',
+  backgroundColor: 'rgba(255, 255, 255, 0.06)',
+  borderRadius: 12,
+  position: 'relative'
+};
+
 const assetTagStyle: CSSProperties = {
   position: 'absolute',
   top: 0,
@@ -151,18 +163,20 @@ function CarouselAssetTag({ type }: { type: keyof typeof carouselTagStyles }) {
   );
 }
 
-function RuneAssetCard({ rune }: { rune: DecodedPsbtInput['runes'][number] }) {
+function RuneAssetCard({ rune, fullWidth = false }: { rune: DecodedPsbtInput['runes'][number]; fullWidth?: boolean }) {
   const iconInfo = useRunesIconInfo(rune.spacedRune || rune.rune);
   const amount = new BigNumber(rune.amount).div(10 ** rune.divisibility).toString();
 
   return (
-    <Card style={{ ...getTokenBalanceCardStyle(), ...assetCarouselCardStyle }}>
+    <Card
+      style={{ ...getTokenBalanceCardStyle(fullWidth), ...(fullWidth ? assetDetailCardStyle : assetCarouselCardStyle) }}
+    >
       <div style={assetTagStyle}>
         <CarouselAssetTag type="Runes" />
       </div>
-      <Row fullX itemsCenter gap="sm" style={{ minWidth: 0 }}>
+      <Row fullX itemsCenter gap="sm" style={{ minWidth: 0, overflow: 'hidden' }}>
         <AssetIcon iconInfo={iconInfo} />
-        <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden' }}>
+        <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden', flex: fullWidth ? 1 : undefined }}>
           <RunesTicker tick={rune.spacedRune || rune.rune} truncate />
           <Text text={`${amount} ${rune.symbol || ''}`.trim()} size="xs" ellipsis />
         </Column>
@@ -171,19 +185,27 @@ function RuneAssetCard({ rune }: { rune: DecodedPsbtInput['runes'][number] }) {
   );
 }
 
-function AlkaneAssetCard({ alkane }: { alkane: DecodedPsbtInput['alkanes'][number] }) {
+function AlkaneAssetCard({
+  alkane,
+  fullWidth = false
+}: {
+  alkane: DecodedPsbtInput['alkanes'][number];
+  fullWidth?: boolean;
+}) {
   const name = alkane.name || alkane.symbol || alkane.alkaneid;
   const iconInfo = useAlkanesIconInfo(name, alkane.alkaneid);
   const amount = new BigNumber(alkane.amount).div(10 ** alkane.divisibility).toString();
 
   return (
-    <Card style={{ ...getTokenBalanceCardStyle(), ...assetCarouselCardStyle }}>
+    <Card
+      style={{ ...getTokenBalanceCardStyle(fullWidth), ...(fullWidth ? assetDetailCardStyle : assetCarouselCardStyle) }}
+    >
       <div style={assetTagStyle}>
         <CarouselAssetTag type="Alkanes" />
       </div>
-      <Row fullX itemsCenter gap="sm" style={{ minWidth: 0 }}>
+      <Row fullX itemsCenter gap="sm" style={{ minWidth: 0, overflow: 'hidden' }}>
         <AssetIcon iconInfo={iconInfo} />
-        <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden' }}>
+        <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden', flex: fullWidth ? 1 : undefined }}>
           <RunesTicker tick={name} truncate />
           <Text text={`${amount} ${alkane.symbol || ''}`.trim()} size="xs" ellipsis />
         </Column>
@@ -358,13 +380,7 @@ export const MultipleAssetsList = ({ decodedPsbt, onClose }: { decodedPsbt: Deco
               <Column fullX gap="sm" mt="md">
                 <Text text={`${t('runes')}:`} preset="sub" />
                 {input.runes.map((rune) => (
-                  <Row key={rune.runeid} justifyBetween fullX px="md" py="xl" style={riskAssetCardStyle}>
-                    <Row>
-                      <Text text={rune.spacedRune || rune.rune} />
-                      {rune.symbol ? <Text text={` (${rune.symbol})`} /> : null}
-                    </Row>
-                    <Text text={new BigNumber(rune.amount).div(10 ** rune.divisibility).toString()} />
-                  </Row>
+                  <RuneAssetCard key={rune.runeid} rune={rune} fullWidth />
                 ))}
               </Column>
             ) : null}
@@ -373,13 +389,7 @@ export const MultipleAssetsList = ({ decodedPsbt, onClose }: { decodedPsbt: Deco
               <Column fullX gap="sm" mt="md">
                 <Text text={`${t('alkanes')}:`} preset="sub" />
                 {input.alkanes.map((alkane) => (
-                  <Row key={alkane.alkaneid} justifyBetween fullX px="md" py="xl" style={riskAssetCardStyle}>
-                    <Row>
-                      <Text text={alkane.name || alkane.symbol} />
-                      {alkane.symbol && alkane.name !== alkane.symbol ? <Text text={` (${alkane.symbol})`} /> : null}
-                    </Row>
-                    <Text text={new BigNumber(alkane.amount).div(10 ** alkane.divisibility).toString()} />
-                  </Row>
+                  <AlkaneAssetCard key={alkane.alkaneid} alkane={alkane} fullWidth />
                 ))}
               </Column>
             ) : null}
