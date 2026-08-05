@@ -13,11 +13,8 @@ import { Row } from '../Row';
 import { RunesTicker } from '../RunesTicker';
 import { Text } from '../Text';
 import { getTokenBalanceCardStyle } from '../TokenBalanceCardLayout';
+import { Tooltip } from '../Tooltip';
 import { RiskDetailPopover, riskAssetCardStyle } from './RiskDetailPopover';
-
-function getInputAssetsCount(input: DecodedPsbtInput) {
-  return input.inscriptions.length + input.runes.length + input.alkanes.length;
-}
 
 function getInscription(inscriptions: Record<string, Inscription>, inscription: Inscription) {
   return inscriptions[inscription.inscriptionId] || inscription;
@@ -114,11 +111,6 @@ const assetTagStyle: CSSProperties = {
   left: 0
 };
 
-const inscriptionCarouselCardStyle: CSSProperties = {
-  flex: '0 0 80px',
-  minWidth: 80
-};
-
 function AssetCarousel({ children }: { children: ReactNode }) {
   const dragState = useRef<{ startX: number; scrollLeft: number } | null>(null);
 
@@ -187,6 +179,7 @@ function AssetIcon({ iconInfo }: { iconInfo: { iconShortName?: string; iconUrl: 
 
 const carouselTagStyles = {
   'brc-20': { backgroundColor: 'rgba(244, 182, 44, 0.1)', color: 'rgba(244, 182, 44, 0.65)' },
+  Inscription: { backgroundColor: 'rgba(149, 117, 205, 0.14)', color: 'rgba(202, 174, 255, 0.8)' },
   Runes: { backgroundColor: 'rgba(243, 145, 100, 0.1)', color: 'rgba(243, 145, 100, 0.65)' },
   Alkanes: { backgroundColor: 'rgba(62, 125, 224, 0.1)', color: 'rgba(62, 125, 224, 0.65)' }
 };
@@ -279,12 +272,40 @@ function Brc20AssetCard({ ticker, amount }: { ticker: string; amount: string }) 
   );
 }
 
-export const MultipleAssetsCarousel = ({ decodedPsbt }: { decodedPsbt: DecodedPsbt }) => {
-  const mixedInputs = decodedPsbt.inputInfos.filter((input) => getInputAssetsCount(input) > 1);
+function InscriptionAssetCard({ inscription }: { inscription: Inscription }) {
+  const number = inscription.inscriptionNumber ? `# ${inscription.inscriptionNumber}` : inscription.inscriptionId;
+  const shortId = `${inscription.inscriptionId.slice(0, 6)}...${inscription.inscriptionId.slice(-6)}`;
 
   return (
+    <div style={{ flex: '0 0 120px', minWidth: 120 }}>
+      <Tooltip
+        block
+        placement="top"
+        title={
+          <div style={{ width: 120, height: 120 }}>
+            <InscriptionPreview data={inscription} preset="small" asLogo />
+          </div>
+        }
+        overlayStyle={{ padding: 0, overflow: 'hidden', borderRadius: 8 }}
+      >
+        <Card style={assetCarouselCardStyle}>
+          <div style={assetTagStyle}>
+            <CarouselAssetTag type="Inscription" />
+          </div>
+          <Column gap="xs" style={{ minWidth: 0, overflow: 'hidden' }}>
+            <Text text={number} size="sm" color="gold" ellipsis />
+            <Text text={shortId} size="xs" color="textDim" ellipsis />
+          </Column>
+        </Card>
+      </Tooltip>
+    </div>
+  );
+}
+
+export const MultipleAssetsCarousel = ({ decodedPsbt }: { decodedPsbt: DecodedPsbt }) => {
+  return (
     <AssetCarousel>
-      {mixedInputs.flatMap((input) => {
+      {decodedPsbt.inputInfos.flatMap((input) => {
         const inscriptions = input.inscriptions
           .map((inscription) => getInscription(decodedPsbt.inscriptions, inscription))
           .filter((inscription) => !inscription.brc20);
@@ -295,13 +316,7 @@ export const MultipleAssetsCarousel = ({ decodedPsbt }: { decodedPsbt: DecodedPs
 
         return [
           ...inscriptions.map((inscription) => (
-            <Row
-              key={`inscription:${outpoint}:${inscription.inscriptionId}`}
-              style={inscriptionCarouselCardStyle}
-              itemsCenter
-            >
-              <InscriptionPreview data={inscription} preset="xs" infoBgColor="#292929" />
-            </Row>
+            <InscriptionAssetCard key={`inscription:${outpoint}:${inscription.inscriptionId}`} inscription={inscription} />
           )),
           ...brc20Inscriptions.map((inscription) => (
             <Brc20AssetCard
@@ -344,13 +359,7 @@ export const BurningAssetsCarousel = ({ decodedPsbt, riskType }: { decodedPsbt: 
                 amount={inscription.brc20.amt || ''}
               />
             ) : (
-              <Row
-                key={`burned-inscription:${inscription.inscriptionId}`}
-                style={inscriptionCarouselCardStyle}
-                itemsCenter
-              >
-                <InscriptionPreview data={inscription} preset="xs" infoBgColor="#292929" />
-              </Row>
+              <InscriptionAssetCard key={`burned-inscription:${inscription.inscriptionId}`} inscription={inscription} />
             )
           )
         : null}
@@ -366,82 +375,68 @@ export const BurningAssetsCarousel = ({ decodedPsbt, riskType }: { decodedPsbt: 
 
 export const MultipleAssetsList = ({ decodedPsbt, onClose }: { decodedPsbt: DecodedPsbt; onClose: () => void }) => {
   const { t } = useI18n();
-  const mixedInputs = decodedPsbt.inputInfos.filter((input) => getInputAssetsCount(input) > 1);
+  const inputInscriptions = decodedPsbt.inputInfos.flatMap((input) =>
+    input.inscriptions.map((inscription) => getInscription(decodedPsbt.inscriptions, inscription))
+  );
+  const inscriptions = inputInscriptions.filter((inscription) => !inscription.brc20);
+  const brc20Inscriptions = inputInscriptions.filter((inscription) => inscription.brc20);
+  const runes = decodedPsbt.inputInfos.flatMap((input) => input.runes);
+  const alkanes = decodedPsbt.inputInfos.flatMap((input) => input.alkanes);
 
   return (
     <RiskDetailPopover title={t('multiple_assets_risk_title')} onClose={onClose}>
-      {mixedInputs.map((input) => {
-        const inscriptions = input.inscriptions
-          .map((inscription) => getInscription(decodedPsbt.inscriptions, inscription))
-          .filter((inscription) => !inscription.brc20);
-        const brc20Inscriptions = input.inscriptions
-          .map((inscription) => getInscription(decodedPsbt.inscriptions, inscription))
-          .filter((inscription) => inscription.brc20);
+      {inscriptions.length > 0 ? (
+        <Column fullX gap="md">
+          <Text text={`${t('inscriptions')}:`} preset="sub" />
+          <Row fullX px="md" style={riskAssetCardStyle} overflowX>
+            {inscriptions.map((inscription) => (
+              <InscriptionPreview
+                key={inscription.inscriptionId}
+                data={inscription}
+                preset="small"
+                infoBgColor="#292929"
+              />
+            ))}
+          </Row>
+        </Column>
+      ) : null}
 
-        return (
-          <Column key={`${input.txid}:${input.vout}`} fullX gap="sm">
-            <Text
-              text={`${input.txid.slice(0, 8)}...${input.txid.slice(-8)}:${input.vout}`}
-              preset="sub"
-              color="textDim"
-            />
+      {brc20Inscriptions.length > 0 ? (
+        <Column fullX gap="sm">
+          <Text text={`${t('brc20')}:`} preset="sub" />
+          {brc20Inscriptions.map((inscription) => (
+            <Row
+              key={inscription.inscriptionId}
+              justifyBetween
+              fullX
+              px="md"
+              py="xl"
+              style={riskAssetCardStyle}
+            >
+              <Text text={inscription.brc20?.tick || ''} />
+              <Text text={inscription.brc20?.amt || ''} />
+            </Row>
+          ))}
+        </Column>
+      ) : null}
 
-            {inscriptions.length > 0 ? (
-              <Column fullX gap="md" mt="md">
-                <Text text={`${t('inscriptions')}:`} preset="sub" />
-                <Row fullX px="md" style={riskAssetCardStyle} overflowX>
-                  {inscriptions.map((inscription) => (
-                    <InscriptionPreview
-                      key={inscription.inscriptionId}
-                      data={inscription}
-                      preset="small"
-                      infoBgColor="#292929"
-                    />
-                  ))}
-                </Row>
-              </Column>
-            ) : null}
+      {runes.length > 0 ? (
+        <Column fullX gap="sm">
+          <Text text={`${t('runes')}:`} preset="sub" />
+          {runes.map((rune, index) => (
+            <RuneAssetCard key={`${rune.runeid}:${index}`} rune={rune} fullWidth />
+          ))}
+        </Column>
+      ) : null}
 
-            {brc20Inscriptions.length > 0 ? (
-              <Column fullX gap="sm" mt="md">
-                <Text text={`${t('brc20')}:`} preset="sub" />
-                {brc20Inscriptions.map((inscription) => (
-                  <Row
-                    key={inscription.inscriptionId}
-                    justifyBetween
-                    fullX
-                    px="md"
-                    py="xl"
-                    style={riskAssetCardStyle}
-                    mt="md"
-                  >
-                    <Text text={inscription.brc20?.tick || ''} />
-                    <Text text={inscription.brc20?.amt || ''} />
-                  </Row>
-                ))}
-              </Column>
-            ) : null}
-
-            {input.runes.length > 0 ? (
-              <Column fullX gap="sm" mt="md">
-                <Text text={`${t('runes')}:`} preset="sub" />
-                {input.runes.map((rune) => (
-                  <RuneAssetCard key={rune.runeid} rune={rune} fullWidth />
-                ))}
-              </Column>
-            ) : null}
-
-            {input.alkanes.length > 0 ? (
-              <Column fullX gap="sm" mt="md">
-                <Text text={`${t('alkanes')}:`} preset="sub" />
-                {input.alkanes.map((alkane) => (
-                  <AlkaneAssetCard key={alkane.alkaneid} alkane={alkane} fullWidth />
-                ))}
-              </Column>
-            ) : null}
-          </Column>
-        );
-      })}
+      {alkanes.length > 0 ? (
+        <Column fullX gap="sm">
+          <Text text={`${t('alkanes')}:`} preset="sub" />
+          {alkanes.map((alkane, index) => (
+            <AlkaneAssetCard key={`${alkane.alkaneid}:${index}`} alkane={alkane} fullWidth />
+          ))}
+        </Column>
+      ) : null}
     </RiskDetailPopover>
   );
 };
