@@ -1,5 +1,11 @@
 # @unisat/keyring-service
 
+## 1.4.0
+
+### Minor Changes
+
+- fix keystone
+
 ## 1.3.0
 
 ### Minor Changes
