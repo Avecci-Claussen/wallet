@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Button, Card, Column, Grid, Row, Text } from '@/ui/components';
 import { FooterButtonContainer } from '@/ui/components/FooterButtonContainer';
-import { colors } from '@/ui/theme/colors';
 import { ContextData, TabType, UpdateContextDataParams } from '@/ui/pages/Account/createHDWalletComponents/types';
+import { colors } from '@/ui/theme/colors';
 import { useI18n } from '@unisat/wallet-state';
 
 function shuffledIndexes(length: number): number[] {
@@ -18,6 +18,9 @@ function shuffledIndexes(length: number): number[] {
 
   return indexes;
 }
+
+const SLOTS_PER_ROW = 3;
+const INITIAL_VISIBLE_SLOT_COUNT = SLOTS_PER_ROW * 2;
 
 export function Step1_Confirm({
   contextData,
@@ -37,6 +40,10 @@ export function Step1_Confirm({
 
   const hasIncorrectSelection = selectedIndexes.some((wordIndex, slotIndex) => words[wordIndex] !== words[slotIndex]);
   const isVerified = selectedIndexes.length === words.length && !hasIncorrectSelection;
+  const visibleSlotCount = Math.min(
+    words.length,
+    INITIAL_VISIBLE_SLOT_COUNT + Math.floor(selectedIndexes.length / SLOTS_PER_ROW) * SLOTS_PER_ROW
+  );
 
   const onSelect = (wordIndex: number) => {
     setSelectedIndexes((current) => {
@@ -62,10 +69,11 @@ export function Step1_Confirm({
       />
 
       <Grid columns={3} gap="sm" style={{ width: '100%' }}>
-        {words.map((_, index) => {
+        {words.slice(0, visibleSlotCount).map((_, index) => {
           const selectedWordIndex = selectedIndexes[index];
           const isIncorrect = selectedWordIndex !== undefined && words[selectedWordIndex] !== words[index];
           const isSelected = selectedWordIndex !== undefined;
+          const isCurrentSlot = !hasIncorrectSelection && !isSelected && index === selectedIndexes.length;
 
           return (
             <Card
@@ -78,15 +86,21 @@ export function Step1_Confirm({
                 padding: '0 10px',
                 gap: 6,
                 borderWidth: 1,
-                borderColor: isIncorrect ? colors.error : isSelected ? 'rgba(227, 187, 95, 0.45)' : colors.border2,
+                borderColor: isIncorrect
+                  ? colors.error
+                  : isCurrentSlot
+                  ? colors.primary
+                  : isSelected
+                  ? 'rgba(255, 255, 255, 0.3)'
+                  : colors.border2,
+                boxShadow: isCurrentSlot ? '0 0 0 1px rgba(227, 187, 95, 0.3)' : undefined,
                 backgroundColor: isIncorrect
                   ? 'rgba(229, 41, 55, 0.12)'
                   : isSelected
-                    ? 'rgba(227, 187, 95, 0.08)'
-                    : colors.card
+                  ? 'rgba(227, 187, 95, 0.08)'
+                  : colors.card
               }}
-              data-testid={`mnemonic-confirm-slot-${index}`}
-            >
+              data-testid={`mnemonic-confirm-slot-${index}`}>
               <Text text={`${index + 1}.`} size="xs" style={{ width: 20 }} color={isIncorrect ? 'error' : 'textDim'} />
               <Text
                 text={selectedWordIndex === undefined ? '' : words[selectedWordIndex]!}
@@ -111,6 +125,7 @@ export function Step1_Confirm({
               <Button
                 key={wordIndex}
                 preset="defaultV2"
+                disabled={isSelected && !isIncorrect}
                 onClick={isSelected && !isIncorrect ? undefined : () => onSelect(wordIndex)}
                 style={{
                   minHeight: 40,
@@ -121,12 +136,11 @@ export function Step1_Confirm({
                   backgroundColor: isIncorrect
                     ? 'rgba(229, 41, 55, 0.12)'
                     : isSelected
-                      ? 'rgba(227, 187, 95, 0.08)'
-                      : '#151313',
+                    ? 'rgba(227, 187, 95, 0.08)'
+                    : '#151313',
                   cursor: isSelected && !isIncorrect ? 'default' : 'pointer'
                 }}
-                data-testid={`mnemonic-confirm-word-${wordIndex}`}
-              >
+                data-testid={`mnemonic-confirm-word-${wordIndex}`}>
                 <Text
                   text={words[wordIndex]!}
                   size="sm"
