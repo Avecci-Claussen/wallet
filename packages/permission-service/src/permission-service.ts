@@ -20,7 +20,6 @@ export class PermissionService {
   private storageKey: string = 'permission'
   private logger: Logger = defaultLogger
   private autoSync: boolean = false
-  private internalRequestOrigin: string = 'https://unisat.io'
 
   constructor() {}
 
@@ -43,10 +42,6 @@ export class PermissionService {
 
       if (config.autoSync !== undefined) {
         this.autoSync = config.autoSync
-      }
-
-      if (config.internalRequestOrigin) {
-        this.internalRequestOrigin = config.internalRequestOrigin
       }
 
       if (!this.storage) {
@@ -148,7 +143,6 @@ export class PermissionService {
    */
   async touchConnectedSite(origin: string): Promise<void> {
     if (!this.lruCache) return
-    if (origin === this.internalRequestOrigin) return
 
     this.lruCache.get(origin)
     await this.sync()
@@ -163,7 +157,6 @@ export class PermissionService {
     partialUpdate?: boolean
   ): Promise<void> {
     if (!this.lruCache || !this.lruCache.has(origin)) return
-    if (origin === this.internalRequestOrigin) return
 
     if (partialUpdate) {
       const existingValue = this.lruCache.get(origin)
@@ -180,7 +173,6 @@ export class PermissionService {
    */
   hasPermission(origin: string): boolean {
     if (!this.lruCache) return false
-    if (origin === this.internalRequestOrigin) return true
 
     const site = this.lruCache.get(origin)
     return site ? site.isConnected : false
@@ -298,13 +290,6 @@ export class PermissionService {
   getSitesByDefaultChain(chain: ChainType): ConnectedSite[] {
     if (!this.lruCache) return []
     return [...this.lruCache.values()].filter((item: ConnectedSite) => item.chain === chain)
-  }
-
-  /**
-   * Check if origin is internal
-   */
-  isInternalOrigin(origin: string): boolean {
-    return origin === this.internalRequestOrigin
   }
 
   /**
