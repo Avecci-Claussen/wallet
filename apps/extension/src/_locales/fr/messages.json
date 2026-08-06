@@ -1338,7 +1338,7 @@
     "message": "12 mots"
   },
   "mnemonics_12_words_not_recommended": {
-    "message": "Nous recommandons d'utiliser une phrase de récupération de 24 mots. Par rapport à 12 mots, elle offre davantage d'aléa et une marge de sécurité plus importante."
+    "message": "Il est recommandé d’utiliser une phrase de récupération de 24 mots. Par rapport à une phrase de récupération de 12 mots, une phrase de récupération de 24 mots offre une meilleure entropie aléatoire et un niveau de sécurité plus élevé."
   },
   "mnemonics_24_words": {
     "message": "24 mots"

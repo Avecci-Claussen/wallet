@@ -1338,7 +1338,7 @@
     "message": "12 palabras"
   },
   "mnemonics_12_words_not_recommended": {
-    "message": "Recomendamos usar una frase de recuperación de 24 palabras. En comparación con 12 palabras, ofrece mayor aleatoriedad y un margen de seguridad más amplio."
+    "message": "Se recomienda utilizar una frase de recuperación de 24 palabras. En comparación con una frase de recuperación de 12 palabras, una frase de recuperación de 24 palabras ofrece una mayor aleatoriedad y un nivel de seguridad más alto."
   },
   "mnemonics_24_words": {
     "message": "24 palabras"

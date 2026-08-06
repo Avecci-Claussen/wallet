@@ -96,8 +96,7 @@ export function Step1_Create({
           onChange={(value) => {
             void onSelectWordsType(value as WordsType);
           }}
-          value={contextData.wordsType}
-        >
+          value={contextData.wordsType}>
           <Radio value={WordsType.WORDS_24} disabled={generating}>
             {t('mnemonics_24_words')}
           </Radio>
@@ -114,22 +113,21 @@ export function Step1_Create({
           justifyContent: 'flex-start',
           border: `1px solid ${isTwelveWords ? colors.warning_content : colors.border}`
         }}
-        data-testid="mnemonic-security-notice"
-      >
+        data-testid="mnemonic-security-notice">
         <Icon
-          icon={isTwelveWords ? 'warning' : 'info'}
+          icon={isTwelveWords ? 'warning2' : 'info'}
           size={18}
-          color={isTwelveWords ? 'warning' : 'textDim'}
+          color={isTwelveWords ? 'gold' : 'textDim'}
           containerStyle={{ flexShrink: 0, marginTop: 1 }}
         />
         <Column gap="xs">
-          <Text text={t('security_notice')} preset="sub-bold" color={isTwelveWords ? 'warning' : 'textWhite'} />
+          <Text text={t('security_notice')} preset="sub-bold" color={isTwelveWords ? 'gold' : 'textWhite'} />
           <Text text={t('this_phrase_is_the_only_way_to_recover_your_wallet')} preset="sub" color="textWhite" />
           {isTwelveWords ? (
             <Text
               text={t('mnemonics_12_words_not_recommended')}
               preset="sub"
-              color="warning"
+              color="gold"
               data-testid="mnemonic-12-words-warning"
             />
           ) : null}
@@ -156,8 +154,7 @@ export function Step1_Create({
           onChange={onChange}
           checked={checked}
           style={{ fontSize: fontSizes.sm }}
-          data-testid="mnemonic-saved-checkbox"
-        >
+          data-testid="mnemonic-saved-checkbox">
           <Text text={t('i_saved_my_secret_recovery_phrase')} />
         </Checkbox>
       </Row>
