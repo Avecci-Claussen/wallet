@@ -1,5 +1,11 @@
 # @unisat/permission-service
 
+## 1.2.0
+
+### Minor Changes
+
+- fix permission
+
 ## 1.1.3
 
 ### Patch Changes

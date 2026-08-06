@@ -1,5 +1,16 @@
 # @unisat/wallet-background
 
+## 7.0.0
+
+### Minor Changes
+
+- fix permission
+
+### Patch Changes
+
+- Updated dependencies
+  - @unisat/permission-service@1.2.0
+
 ## 6.1.0
 
 ### Minor Changes
