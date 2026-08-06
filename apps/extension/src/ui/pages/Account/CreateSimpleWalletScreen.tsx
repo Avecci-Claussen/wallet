@@ -9,8 +9,25 @@ import { uiEventBus, useI18n, useTools, useWallet } from '@unisat/wallet-state';
 
 import { ADDRESS_TYPES, BUS_METHODS } from '@unisat/wallet-shared';
 import { AddressType } from '@unisat/wallet-types';
+import { decode } from 'bs58check';
 import { useNavigate } from '../MainRoute';
 import { TabType } from './createHDWalletComponents/types';
+
+function getWifCompression(privateKey: string): boolean | undefined {
+  try {
+    const decoded = decode(privateKey);
+    if (decoded.length === 33) {
+      return false;
+    }
+    if (decoded.length === 34 && decoded[33] === 0x01) {
+      return true;
+    }
+  } catch {
+    // Step 1 validates the private key before this screen is shown.
+  }
+
+  return undefined;
+}
 
 function Step1({
   contextData,
@@ -122,35 +139,48 @@ function Step2({
     addressBalances: {}
   });
   const self = selfRef.current;
-  const isRawHexPrivateKey = /^[0-9a-fA-F]{64}$/.test(contextData.wif);
+  const wifCompression = useMemo(() => getWifCompression(contextData.wif), [contextData.wif]);
 
   const addressCandidates = useMemo(
     () =>
       hdPathOptions.flatMap((option) => {
-        // A WIF explicitly encodes its public-key format. Only raw private-key hex
-        // lacks this information and needs both Legacy P2PKH branches scanned.
-        if (option.addressType === AddressType.P2PKH && isRawHexPrivateKey) {
-          return [
-            { ...option, compressed: true, label: `${option.label} (compressed)` },
-            { ...option, compressed: false, label: `${option.label} (uncompressed)` }
-          ];
+        if (option.addressType === AddressType.P2PKH) {
+          if (wifCompression === false) {
+            return [
+              {
+                ...option,
+                compressed: false,
+                unsupported: true,
+                label: `${option.label} (${t('not_supported')})`
+              },
+              {
+                ...option,
+                compressed: true,
+                unsupported: false,
+                label: `${option.label} (compressed)`
+              }
+            ];
+          }
+
+          return [{ ...option, compressed: true, unsupported: false, label: option.label }];
         }
 
         return [
           {
             ...option,
-            compressed: option.addressType === AddressType.P2PKH ? undefined : true,
+            compressed: true,
+            unsupported: false,
             label: option.label
           }
         ];
       }),
-    [hdPathOptions, isRawHexPrivateKey]
+    [hdPathOptions, t, wifCompression]
   );
 
   const run = async () => {
     const addresses: string[] = [];
     self.maxSatoshis = 0;
-    self.recommended = 0;
+    self.recommended = Math.max(0, addressCandidates.findIndex((candidate) => !candidate.unsupported));
     self.addressBalances = {};
     for (let i = 0; i < addressCandidates.length; i++) {
       const options = addressCandidates[i];
@@ -173,7 +203,7 @@ function Step2({
         satoshis,
         total_inscription: balance.inscriptionCount
       };
-      if (satoshis > self.maxSatoshis) {
+      if (!addressCandidates[i].unsupported && satoshis > self.maxSatoshis) {
         self.maxSatoshis = satoshis;
         self.recommended = i;
       }
@@ -200,8 +230,12 @@ function Step2({
   }, [addressCandidates, contextData.addressType, contextData.compressed]);
 
   const navigate = useNavigate();
+  const selectedCandidate = addressCandidates[pathIndex];
 
   const onNext = async () => {
+    if (!selectedCandidate || selectedCandidate.unsupported) {
+      return;
+    }
     try {
       await wallet.createKeyringWithPrivateKey(
         contextData.wif,
@@ -235,8 +269,9 @@ function Step2({
             label={item.label}
             address={address}
             assets={assets}
-            checked={index == pathIndex}
-            onClick={() => {
+            checked={index == pathIndex && !item.unsupported}
+            disabled={item.unsupported}
+            onClick={item.unsupported ? undefined : () => {
               updateContextData({ addressType: item.addressType, compressed: item.compressed });
             }}
             data-testid={`address-type-card-${index}`}
@@ -245,7 +280,13 @@ function Step2({
       })}
 
       <FooterButtonContainer>
-        <Button text={t('continue')} preset="primary" onClick={onNext} data-testid="private-key-address-type-continue-button" />
+        <Button
+          disabled={!selectedCandidate || selectedCandidate.unsupported}
+          text={t('continue')}
+          preset="primary"
+          onClick={onNext}
+          data-testid="private-key-address-type-continue-button"
+        />
       </FooterButtonContainer>
     </Column>
   );
