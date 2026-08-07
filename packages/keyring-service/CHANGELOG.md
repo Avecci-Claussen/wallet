@@ -1,5 +1,11 @@
 # @unisat/keyring-service
 
+## 1.5.0
+
+### Minor Changes
+
+- revert keystone chagned
+
 ## 1.4.0
 
 ### Minor Changes
