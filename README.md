@@ -174,3 +174,9 @@ Previous standalone repositories have been deprecated:
 ## License
 
 This project is licensed under the MIT License.
+
+---
+
+## Previous Repository
+
+This project was previously maintained in the [unisat-wallet/extension](https://github.com/unisat-wallet/extension) repository.
