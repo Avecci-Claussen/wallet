@@ -646,6 +646,68 @@ export interface WalletController {
 
   createKeyringWithAddress(address: string): Promise<void>
 
+  exportClassicMultisigXpub(mnemonic: string): Promise<string>
+
+  previewClassicMultisig(opts: {
+    mnemonic: string
+    descriptor?: string
+    cosignerText?: string
+    k?: number
+  }): Promise<{
+    address0: string
+    change0: string
+    k: number
+    n: number
+    receive: string
+    change: string
+  }>
+
+  createClassicMultisigKeyring(opts: {
+    mnemonic: string
+    descriptor?: string
+    cosignerText?: string
+    k?: number
+  }): Promise<void>
+
+  getP2wshMultisigInfo(): Promise<{
+    k: number
+    n: number
+    address0: string
+    change0: string
+    receive: string
+    change: string
+    xpubLine: string
+  }>
+
+  buildP2wshMultisigPsbt(opts: { to: string; amount: number; feeRate?: number }): Promise<{
+    psbtBase64: string
+    fee: number
+    change: number
+    summary: {
+      fee: number
+      send: number
+      change: number
+      sighash: string
+      inputs: { txid: string; vout: number; value: number }[]
+      outputs: { address: string; value: number; isChange: boolean }[]
+    }
+  }>
+
+  summarizeP2wshMultisigPsbt(psbtBase64: string): Promise<{
+    fee: number
+    send: number
+    change: number
+    sighash: string
+    inputs: { txid: string; vout: number; value: number }[]
+    outputs: { address: string; value: number; isChange: boolean }[]
+  }>
+
+  signP2wshMultisigPsbt(psbtBase64: string): Promise<{ psbtBase64: string }>
+
+  combineP2wshMultisigPsbts(psbtBase64s: string[]): Promise<{ hex: string; txid: string }>
+
+  broadcastP2wshMultisigTx(hex: string): Promise<string>
+
   createDummyPsbt(params: { txType: DummyTxType }): Promise<ToSignData>
 }
 

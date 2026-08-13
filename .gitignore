@@ -8,12 +8,14 @@ dist/
 lib/
 /es/
 coverage/
+packages/wallet-bitcoin/collector/build/
 
 # Environment files
 .env
 .env.local
 .env.production
 .env.development
+.local/
 
 # IDE files
 .vscode/

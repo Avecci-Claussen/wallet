@@ -11,6 +11,7 @@ import {
   ReadonlyKeyring,
   SimpleKeyring,
   WatchAddressKeyring,
+  ClassicMultisigKeyring,
 } from './keyrings'
 import { EmptyKeyring } from './keyrings/empty-keyring'
 import {
@@ -35,6 +36,7 @@ const KEYRING_SDK_TYPES = {
   ColdWalletKeyring,
   ReadonlyKeyring,
   WatchAddressKeyring,
+  ClassicMultisigKeyring,
 }
 
 const MAX_HD_ACCOUNT_COUNT = 100

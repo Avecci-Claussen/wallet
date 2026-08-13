@@ -169,7 +169,8 @@ const config = (env) => {
     output: {
       path: paths.dist,
       filename: '[name].js',
-      publicPath: '/',
+      // Relative: chrome-extension pages/SW cannot fetch "/foo.wasm" the same way a website can.
+      publicPath: '',
       chunkFilename: 'chunk.[name].[contenthash].js'
     },
     module: {
@@ -452,6 +453,14 @@ const config = (env) => {
       ].filter(Boolean)
     },
     plugins: [
+      // Chrome serves .wasm as the wrong MIME type, so instantiateStreaming throws
+      // forever on this fetch. Force the arrayBuffer path in webpack's wasm runtime.
+      new webpack.BannerPlugin({
+        banner:
+          'try{if(typeof WebAssembly!=="undefined")WebAssembly.instantiateStreaming=undefined}catch(e){}',
+        raw: true,
+        entryOnly: true
+      }),
       new ESLintWebpackPlugin({
         extensions: ['ts', 'tsx', 'js', 'jsx']
       }),

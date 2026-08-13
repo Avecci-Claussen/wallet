@@ -112,6 +112,18 @@ export default function AddKeyringScreen() {
               </Card>
             </>
           )}
+
+          <Text text="P2WSH multisig" preset="regular-bold" mt="lg" />
+          <Card
+            justifyCenter
+            onClick={() => {
+              nav.navigate('CreateP2wshMultisigScreen');
+            }}
+            data-testid="create-p2wsh-multisig-option">
+            <Column full justifyCenter>
+              <Text text="Import k-of-n (wsh sortedmulti)" size="sm" />
+            </Column>
+          </Card>
         </Column>
       </Content>
     </Layout>

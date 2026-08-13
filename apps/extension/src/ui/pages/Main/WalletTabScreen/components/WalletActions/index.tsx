@@ -3,11 +3,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Column, Row } from '@/ui/components';
 import { Button, ButtonProps } from '@/ui/components/Button';
 import { BuyBTCModal } from '@/ui/pages/BuyBTC/BuyBTCModal';
-import { TypeChain } from '@unisat/wallet-shared';
+import { TypeChain, KeyringType } from '@unisat/wallet-shared';
 import {
   useChainType,
   useCurrentAccountCapabilities,
   useCurrentAddress,
+  useCurrentKeyring,
   useI18n,
   useNavigation,
   useResetFeeRateBar,
@@ -71,6 +72,8 @@ export const WalletActions = ({ chain }: WalletActionsProps) => {
   const address = useCurrentAddress();
   const { t } = useI18n();
   const accountCapabilities = useCurrentAccountCapabilities();
+  const currentKeyring = useCurrentKeyring();
+  const isP2wshMultisig = currentKeyring?.type === KeyringType.ClassicMultisigKeyring;
 
   const handleUtxoClick = () => {
     nav.navToUtxoTools();
@@ -81,6 +84,10 @@ export const WalletActions = ({ chain }: WalletActionsProps) => {
   };
 
   const onSendClick = () => {
+    if (isP2wshMultisig) {
+      nav.navigate('P2wshMultisigSpendScreen');
+      return;
+    }
     resetUiTxCreateScreen();
     resetFeeRateBar();
     nav.navigate('TxCreateScreen');
@@ -107,7 +114,7 @@ export const WalletActions = ({ chain }: WalletActionsProps) => {
         label: t('send'),
         icon: 'send',
         onClick: onSendClick,
-        disabled: !accountCapabilities.canCreateSigningRequest,
+        disabled: isP2wshMultisig ? false : !accountCapabilities.canCreateSigningRequest,
         priority: 2,
         dataTestId: 'send-button'
       }
@@ -148,7 +155,7 @@ export const WalletActions = ({ chain }: WalletActionsProps) => {
     }
 
     return items;
-  }, [accountCapabilities.canCreateSigningRequest, buyDisabled, handleUtxoClick, isFractal, t, walletConfig.disableUtxoTools]);
+  }, [accountCapabilities.canCreateSigningRequest, buyDisabled, handleUtxoClick, isFractal, isP2wshMultisig, t, walletConfig.disableUtxoTools]);
 
   const { primaryActions, overflowActions } = useMemo(() => {
     const items = actionItems.sort((a, b) => a.priority - b.priority);

@@ -3,28 +3,38 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>UniSat classic multisig — xpub bulletin</title>
+  <title>P2WSH multisig — org bulletin</title>
   <style>
-    body { font-family: ui-sans-serif, system-ui, sans-serif; max-width: 44rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.45; }
-    code, textarea { font-family: ui-monospace, monospace; font-size: 0.85rem; }
-    textarea { width: 100%; min-height: 6rem; }
+    body { font-family: ui-sans-serif, system-ui, sans-serif; max-width: 44rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.45; color: #111; }
+    code, textarea, pre { font-family: ui-monospace, monospace; font-size: 0.85rem; }
+    textarea { width: 100%; min-height: 8rem; }
     .warn { background: #fff3cd; padding: 0.8rem 1rem; border-radius: 6px; }
     label { display: block; margin-top: 1rem; font-weight: 600; }
+    button { margin-top: 0.8rem; margin-right: 0.5rem; padding: 0.45rem 0.9rem; }
+    #err { color: #a40000; white-space: pre-wrap; }
+    #out { white-space: pre-wrap; word-break: break-all; background: #f4f4f4; padding: 0.8rem; border-radius: 6px; min-height: 4rem; }
   </style>
 </head>
 <body>
   <h1>Org xpub bulletin</h1>
   <p class="warn">
-    This page is <strong>not</strong> the source of truth. It only collects
-    <code>[fingerprint/48h/0h/0h/2h]xpub…</code> records.
-    Every signer must re-derive the descriptor in UniSat and confirm address index 0
-    <em>before</em> sending coins. If any address differs, abort.
+    Collect BIP48 <code>[fingerprint/48h/0h/0h/2h]xpub…</code> lines only.
+    This page assembles the checksummed <code>wsh(sortedmulti)</code> descriptors.
+    It is not the source of truth and it does not sign.
+    Every signer must import the receive descriptor in UniSat and match address 0
+    before any coins move.
   </p>
-  <p>Do not paste seeds, xprv, or passwords. Threshold spend is PSBT sign → combine → broadcast in the wallet, not on this page.</p>
-  <label>k (required signatures)</label>
+  <p>Do not paste seeds, xprv, or passwords. Spend is: each person signs a PSBT in UniSat → combine → broadcast.</p>
+  <label for="k">k (required signatures)</label>
   <input id="k" type="number" min="1" max="7" value="2" />
-  <label>Cosigner lines (one per signer)</label>
+  <label for="keys">Cosigner lines (one per signer, including every wallet that will sign)</label>
   <textarea id="keys" placeholder="[deadbeef/48h/0h/0h/2h]xpub6…&#10;[cafebabe/48h/0h/0h/2h]xpub6…"></textarea>
-  <p>Assemble the checksummed descriptor in UniSat (Classic Multisig) from the same lines. This HTML does not compute addresses — that is intentional.</p>
+  <div>
+    <button id="assemble" type="button">Assemble descriptors</button>
+    <button id="copy" type="button">Copy output</button>
+  </div>
+  <p id="err"></p>
+  <pre id="out"></pre>
+  <script src="./build/bulletin.global.js"></script>
 </body>
 </html>

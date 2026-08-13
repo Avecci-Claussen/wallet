@@ -9,6 +9,12 @@ import {
   encodeSortedMultiDescriptor,
   encodeSortedMultiDescriptorPair,
   parseSortedMultiDescriptor,
+  parseCosignerLine,
+  parseCosignerLines,
+  formatCosignerLine,
+  buildSortedMultiSpendPsbt,
+  summarizeSortedMultiPsbt,
+  assertP2wshSpendShape,
   addressesMustMatch,
   assertSafeSighash,
   assertP2wshUtxoMatchesWitnessScript,
@@ -251,5 +257,154 @@ describe('PSBT 2-of-3 sign/combine/finalize', () => {
     expect(() =>
       assertP2wshUtxoMatchesWitnessScript({ script: vault.output }, vault.witnessScript)
     ).not.toThrow()
+  })
+})
+
+describe('cosigner bulletin lines', () => {
+  it('round-trips formatCosignerLine / parseCosignerLine', () => {
+    const line = formatCosignerLine(COSIGNERS[0])
+    expect(parseCosignerLine(line)).toEqual({
+      fingerprint: 'aaaaaaaa',
+      originPath: '48h/0h/0h/2h',
+      xpub: COSIGNERS[0].xpub
+    })
+    const parsed = parseCosignerLines(COSIGNERS.map(formatCosignerLine).join('\n'))
+    const pair = encodeSortedMultiDescriptorPair({ k: 2, cosigners: parsed })
+    expect(pair.receive).toBe(encodeSortedMultiDescriptor({ k: 2, cosigners: COSIGNERS, chain: 0 }))
+  })
+
+  it('rejects a BIP84 origin on a bulletin line', () => {
+    expect(() =>
+      parseCosignerLine(`[aaaaaaaa/84h/0h/0h]${COSIGNERS[0].xpub}`)
+    ).toThrow(/BIP48/)
+  })
+
+  it('refuses an xpub line in the descriptor parser', () => {
+    expect(() => parseSortedMultiDescriptor(formatCosignerLine(COSIGNERS[0]))).toThrow(
+      /xpub line, not a receive descriptor/
+    )
+  })
+})
+
+describe('P2WSH spend PSBT', () => {
+  it('builds SIGHASH_ALL inputs and change to a different address', () => {
+    const a = eccManager.eccPair.makeRandom({ compressed: true })
+    const b = eccManager.eccPair.makeRandom({ compressed: true })
+    const vault = p2wshSortedMulti(2, [a.publicKey, b.publicKey], bitcoin.networks.regtest)
+    const dest = p2wshSortedMulti(
+      2,
+      [a.publicKey, eccManager.eccPair.makeRandom({ compressed: true }).publicKey],
+      bitcoin.networks.regtest
+    )
+    const { psbt, change } = buildSortedMultiSpendPsbt({
+      network: bitcoin.networks.regtest,
+      utxos: [
+        {
+          txid: Buffer.alloc(32, 9).toString('hex'),
+          vout: 0,
+          value: 100000,
+          script: vault.output,
+          witnessScript: vault.witnessScript
+        }
+      ],
+      toAddress: dest.address,
+      send: 50000,
+      changeAddress: vault.address,
+      feeRate: 1,
+      k: 2,
+      n: 2
+    })
+    expect(psbt.data.inputs[0].sighashType).toBe(bitcoin.Transaction.SIGHASH_ALL)
+    expect(change).toBeGreaterThan(0)
+    const summary = summarizeSortedMultiPsbt(psbt, new Set([vault.address]), bitcoin.networks.regtest)
+    expect(summary.sighash).toBe('SIGHASH_ALL')
+    expect(summary.send).toBe(50000)
+    expect(summary.outputs.some((o) => o.isChange)).toBe(true)
+    expect(() => assertP2wshSpendShape(summary)).not.toThrow()
+  })
+
+  it('refuses destination equal to change', () => {
+    const a = eccManager.eccPair.makeRandom({ compressed: true })
+    const b = eccManager.eccPair.makeRandom({ compressed: true })
+    const vault = p2wshSortedMulti(2, [a.publicKey, b.publicKey], bitcoin.networks.regtest)
+    expect(() =>
+      buildSortedMultiSpendPsbt({
+        network: bitcoin.networks.regtest,
+        utxos: [
+          {
+            txid: Buffer.alloc(32, 9).toString('hex'),
+            vout: 0,
+            value: 100000,
+            script: vault.output,
+            witnessScript: vault.witnessScript
+          }
+        ],
+        toAddress: vault.address,
+        send: 50000,
+        changeAddress: vault.address,
+        feeRate: 1,
+        k: 2,
+        n: 2
+      })
+    ).toThrow(/change/)
+  })
+
+  it('refuses a second external output tagged as payment', () => {
+    const a = eccManager.eccPair.makeRandom({ compressed: true })
+    const b = eccManager.eccPair.makeRandom({ compressed: true })
+    const vault = p2wshSortedMulti(2, [a.publicKey, b.publicKey], bitcoin.networks.regtest)
+    const dest = p2wshSortedMulti(
+      2,
+      [a.publicKey, eccManager.eccPair.makeRandom({ compressed: true }).publicKey],
+      bitcoin.networks.regtest
+    )
+    const thief = p2wshSortedMulti(
+      2,
+      [b.publicKey, eccManager.eccPair.makeRandom({ compressed: true }).publicKey],
+      bitcoin.networks.regtest
+    )
+    const { psbt } = buildSortedMultiSpendPsbt({
+      network: bitcoin.networks.regtest,
+      utxos: [
+        {
+          txid: Buffer.alloc(32, 9).toString('hex'),
+          vout: 0,
+          value: 100000,
+          script: vault.output,
+          witnessScript: vault.witnessScript
+        }
+      ],
+      toAddress: dest.address,
+      send: 40000,
+      changeAddress: vault.address,
+      feeRate: 1,
+      k: 2,
+      n: 2
+    })
+    psbt.addOutput({ address: thief.address, value: 1000 })
+    const summary = summarizeSortedMultiPsbt(psbt, new Set([vault.address]), bitcoin.networks.regtest)
+    expect(() => assertP2wshSpendShape(summary)).toThrow(/exactly one payment/)
+  })
+
+  it('refuses an OP_RETURN-only output as the payment', () => {
+    const a = eccManager.eccPair.makeRandom({ compressed: true })
+    const b = eccManager.eccPair.makeRandom({ compressed: true })
+    const vault = p2wshSortedMulti(2, [a.publicKey, b.publicKey], bitcoin.networks.regtest)
+    const psbt = new bitcoin.Psbt({ network: bitcoin.networks.regtest })
+    psbt.setVersion(2)
+    psbt.addInput({
+      hash: Buffer.alloc(32, 9),
+      index: 0,
+      sequence: 0xfffffffd,
+      witnessUtxo: { script: vault.output, value: 100000 },
+      witnessScript: vault.witnessScript,
+      sighashType: bitcoin.Transaction.SIGHASH_ALL
+    })
+    psbt.addOutput({
+      script: bitcoin.script.compile([bitcoin.opcodes.OP_RETURN, Buffer.from('x')]),
+      value: 0
+    })
+    const summary = summarizeSortedMultiPsbt(psbt, new Set([vault.address]), bitcoin.networks.regtest)
+    expect(() => assertP2wshSpendShape(summary)).toThrow(/exactly one payment/)
   })
 })

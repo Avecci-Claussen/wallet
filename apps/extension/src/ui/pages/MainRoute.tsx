@@ -25,6 +25,7 @@ import CreatePasswordScreen from './Account/CreatePasswordScreen';
 import CreateReadonlyWalletScreen from './Account/CreateReadonlyWalletScreen';
 import CreateSimpleWalletScreen from './Account/CreateSimpleWalletScreen';
 import CreateWatchWalletScreen from './Account/CreateWatchWalletScreen';
+import CreateP2wshMultisigScreen from './Account/CreateP2wshMultisigScreen';
 import SwitchAccountScreen from './Account/SwitchAccountScreen';
 import SwitchKeyringScreen from './Account/SwitchKeyringScreen';
 import UnlockScreen from './Account/UnlockScreen';
@@ -75,6 +76,7 @@ import HistoryScreen from './Wallet/HistoryScreen';
 import ReceiveScreen from './Wallet/ReceiveScreen';
 import TxConfirmScreen from './Wallet/TxConfirmScreen';
 import TxCreateScreen from './Wallet/TxCreateScreen';
+import P2wshMultisigSpendScreen from './Wallet/P2wshMultisigSpendScreen';
 import TxFailScreen from './Wallet/TxFailScreen';
 import TxSuccessScreen from './Wallet/TxSuccessScreen';
 import './index.module.less';
@@ -138,6 +140,10 @@ export const routes = {
   TxCreateScreen: {
     path: '/wallet/tx/create',
     element: <TxCreateScreen />
+  },
+  P2wshMultisigSpendScreen: {
+    path: '/wallet/p2wsh-multisig/spend',
+    element: <P2wshMultisigSpendScreen />
   },
   TxConfirmScreen: {
     path: '/wallet/tx/confirm',
@@ -233,6 +239,10 @@ export const routes = {
   CreateReadonlyWalletScreen: {
     path: '/account/create-readonly-wallet',
     element: <CreateReadonlyWalletScreen />
+  },
+  CreateP2wshMultisigScreen: {
+    path: '/account/create-p2wsh-multisig',
+    element: <CreateP2wshMultisigScreen />
   },
 
   UpgradeNoticeScreen: {

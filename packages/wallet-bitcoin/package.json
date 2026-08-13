@@ -19,7 +19,7 @@
     "./browser": "./lib/browser/index.global.js"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && tsup --config tsup.collector.config.ts",
     "build:browser": "tsup --config tsup.browser.config.ts",
     "build:all": "pnpm build && pnpm run build:browser",
     "build:watch": "tsup --watch",
