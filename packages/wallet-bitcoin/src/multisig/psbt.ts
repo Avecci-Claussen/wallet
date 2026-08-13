@@ -8,7 +8,7 @@ export function assertSafeSighash(sighashType: number | undefined): void {
   const t = sighashType ?? SIGHASH_ALL
   if (t !== SIGHASH_ALL) {
     throw new ClassicMultisigError(
-      'Classic multisig allows SIGHASH_ALL only (no NONE/SINGLE/ANYONECANPAY)',
+      'P2WSH multisig allows SIGHASH_ALL only (no NONE/SINGLE/ANYONECANPAY)',
       'SIGHASH'
     )
   }
