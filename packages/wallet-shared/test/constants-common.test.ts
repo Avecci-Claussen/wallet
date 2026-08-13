@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  ADDRESS_TYPES,
   BROWSER_TO_APP_LOCALE_MAP,
   CHAIN_GROUPS,
   CHAINS,
@@ -14,7 +15,7 @@ import {
   getAutoLockTimes,
   getLockTimeInfo,
 } from '../src/constants/common'
-import { ChainType, NetworkType } from '@unisat/wallet-types'
+import { AddressType, ChainType, NetworkType } from '@unisat/wallet-types'
 
 describe('common constants', () => {
   it('getAutoLockTimes builds translated labels', () => {
@@ -52,6 +53,14 @@ describe('common constants', () => {
     expect(BROWSER_TO_APP_LOCALE_MAP['zh-CN']).toBe('zh_TW')
     expect(SUPPORTED_LOCALES.includes('zh_TW')).toBe(true)
     expect(LOCALE_NAMES.zh_TW).toBe('中文(繁體)')
+  })
+
+  it('ADDRESS_TYPES is indexed by AddressType including P2WSH', () => {
+    expect(ADDRESS_TYPES[AddressType.P2WPKH]?.value).toBe(AddressType.P2WPKH)
+    expect(ADDRESS_TYPES[AddressType.P2WSH]?.value).toBe(AddressType.P2WSH)
+    expect(ADDRESS_TYPES[AddressType.P2WSH]?.name).toBe('Native Segwit (P2WSH)')
+    expect(ADDRESS_TYPES[AddressType.P2WSH]?.displayIndex).toBeLessThan(0)
+    expect(ADDRESS_TYPES[AddressType.P2WSH]?.hdPath).toBeDefined()
   })
 
   it('network type descriptors include expected aliases', () => {

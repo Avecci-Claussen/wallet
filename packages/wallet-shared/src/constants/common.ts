@@ -76,6 +76,14 @@ export const ADDRESS_TYPES: {
     displayIndex: 5,
     isUnisatLegacy: true,
   },
+  {
+    value: AddressType.P2WSH,
+    label: 'P2WSH',
+    name: 'Native Segwit (P2WSH)',
+    hdPath: "m/48'/0'/0'/2'",
+    displayIndex: -1,
+    isUnisatLegacy: false,
+  },
 ]
 
 export const KEYRING_CLASS = {

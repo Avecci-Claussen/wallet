@@ -39,6 +39,7 @@ export function useSettingsTabScreenLogic() {
 
   const isCustomHdPath = useMemo(() => {
     const item = ADDRESS_TYPES[currentKeyring.addressType]
+    if (!item) return false
     return currentKeyring.hdPath !== '' && item.hdPath !== currentKeyring.hdPath
   }, [currentKeyring])
 
@@ -79,24 +80,29 @@ export function useSettingsTabScreenLogic() {
   const settings_addressType: SettingsItemType = useMemo(() => {
     let value = ''
     const item = ADDRESS_TYPES[currentKeyring.addressType]
-    const hdPath = currentKeyring.hdPath || item.hdPath
+    const typeName = item?.name || 'Native Segwit (P2WSH)'
+    const hdPath = currentKeyring.hdPath || item?.hdPath || ''
     if (
       currentKeyring.type === KeyringType.SimpleKeyring ||
       currentKeyringCapabilities.signMethod === AccountSignMethod.External ||
       !currentKeyringCapabilities.canChangeAddressType
     ) {
-      value = `${item.name}`
+      value = typeName
     } else {
-      value = `${item.name} (${hdPath}/${currentAccount.index})`
+      value = `${typeName} (${hdPath}/${currentAccount.index})`
     }
     return {
       key: 'settings_addressType',
       label: t('address_type'),
       value,
       desc: '',
-      right: true,
+      right: currentKeyring.type !== KeyringType.ClassicMultisigKeyring,
       icon: 'addressType',
       onClick: () => {
+        if (currentKeyring.type === KeyringType.ClassicMultisigKeyring) {
+          tools.showTip('Native P2WSH (wsh(sortedmulti)). Address type cannot be changed.')
+          return
+        }
         if (isCustomHdPath) {
           tools.showTip(
             t(
@@ -108,7 +114,7 @@ export function useSettingsTabScreenLogic() {
         nav.navigate('AddressTypeScreen')
       },
     }
-  }, [t, isCustomHdPath, currentKeyring, currentAccount.index, currentKeyringCapabilities])
+  }, [t, isCustomHdPath, currentKeyring, currentAccount.index, currentKeyringCapabilities, tools, nav])
 
   const settings_advanced = useMemo(() => {
     return {
