@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UniSat classic multisig — xpub bulletin</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, sans-serif; max-width: 44rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.45; }
+    code, textarea { font-family: ui-monospace, monospace; font-size: 0.85rem; }
+    textarea { width: 100%; min-height: 6rem; }
+    .warn { background: #fff3cd; padding: 0.8rem 1rem; border-radius: 6px; }
+    label { display: block; margin-top: 1rem; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Org xpub bulletin</h1>
+  <p class="warn">
+    This page is <strong>not</strong> the source of truth. It only collects
+    <code>[fingerprint/48h/0h/0h/2h]xpub…</code> records.
+    Every signer must re-derive the descriptor in UniSat and confirm address index 0
+    <em>before</em> sending coins. If any address differs, abort.
+  </p>
+  <p>Do not paste seeds, xprv, or passwords. Threshold spend is PSBT sign → combine → broadcast in the wallet, not on this page.</p>
+  <label>k (required signatures)</label>
+  <input id="k" type="number" min="1" max="7" value="2" />
+  <label>Cosigner lines (one per signer)</label>
+  <textarea id="keys" placeholder="[deadbeef/48h/0h/0h/2h]xpub6…&#10;[cafebabe/48h/0h/0h/2h]xpub6…"></textarea>
+  <p>Assemble the checksummed descriptor in UniSat (Classic Multisig) from the same lines. This HTML does not compute addresses — that is intentional.</p>
+</body>
+</html>
