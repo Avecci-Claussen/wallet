@@ -217,6 +217,9 @@ export class ClassicMultisigKeyring extends EventEmitter {
     }
     for (const input of inputs) {
       const data = psbt.data.inputs[input.index]
+      if (!data) {
+        throw new ClassicMultisigError(`PSBT input ${input.index} is missing`, 'PSBT')
+      }
       assertSafeSighash(data.sighashType)
       if (input.sighashTypes) {
         for (const t of input.sighashTypes) assertSafeSighash(t)

@@ -9,7 +9,7 @@ import {
   DelegationV2StakingState,
   getDelegationsV2,
 } from '@unisat/babylon-service'
-import { ColdWalletKeyring, KeystoneKeyring } from '@unisat/keyring-service'
+import { ClassicMultisigKeyring, ColdWalletKeyring, KeystoneKeyring } from '@unisat/keyring-service'
 import { DisplayedKeyring, Keyring, KeyringType, ToSignInput } from '@unisat/keyring-service/types'
 import * as txHelpers from '@unisat/tx-helpers'
 import { UnspentOutput, signMessageOfBIP322Simple } from '@unisat/tx-helpers'
@@ -21,6 +21,14 @@ import {
   getAddressType,
   getSignatureFromPsbtOfBIP322Simple,
   isValidAddress,
+  parseCosignerLines,
+  formatCosignerLine,
+  parseSortedMultiDescriptor,
+  buildSortedMultiSpendPsbt,
+  summarizeSortedMultiPsbt,
+  assertP2wshSpendShape,
+  combineAndFinalize,
+  CLASSIC_MULTISIG_GAP,
   publicKeyToAddress,
   scriptPkToAddress,
   toPsbtNetwork,
@@ -75,6 +83,7 @@ import {
 import { getChainInfo } from '../shared/utils'
 import { chainTypeToCanonicalNetwork } from '../shared/utils/deriveContextHash'
 import { bgEventBus } from '../utils/eventBus'
+import { addBtcAmountStrings, sumBitcoinBalanceV2 } from '../utils/bitcoin-utils'
 import { getEstimateFee, psbtFromString } from '../utils/psbt-utils'
 
 import { baseUtils, bnUtils, paramsUtils } from '@unisat/base-utils'
@@ -230,15 +239,40 @@ export class WalletController extends BaseController {
   }
 
   getAddressBalance = async (address: string) => {
-    const data = await walletApiService.bitcoin.getAddressBalance(address)
+    const ring = await this.p2wshRingOwning(address)
+    if (!ring) {
+      const data = await walletApiService.bitcoin.getAddressBalance(address)
+      preferenceService.updateAddressBalance(address, data)
+      return data
+    }
+    const parts = await Promise.all(
+      this.p2wshScanAddresses(ring).map(a => walletApiService.bitcoin.getAddressBalance(a))
+    )
+    const data = {
+      confirm_amount: addBtcAmountStrings(parts.map(p => p.confirm_amount)),
+      pending_amount: addBtcAmountStrings(parts.map(p => p.pending_amount)),
+      amount: addBtcAmountStrings(parts.map(p => p.amount)),
+      confirm_btc_amount: addBtcAmountStrings(parts.map(p => p.confirm_btc_amount)),
+      pending_btc_amount: addBtcAmountStrings(parts.map(p => p.pending_btc_amount)),
+      btc_amount: addBtcAmountStrings(parts.map(p => p.btc_amount)),
+      confirm_inscription_amount: addBtcAmountStrings(parts.map(p => p.confirm_inscription_amount)),
+      pending_inscription_amount: addBtcAmountStrings(parts.map(p => p.pending_inscription_amount)),
+      inscription_amount: addBtcAmountStrings(parts.map(p => p.inscription_amount)),
+      usd_value: addBtcAmountStrings(parts.map(p => p.usd_value)),
+    }
     preferenceService.updateAddressBalance(address, data)
     return data
   }
 
   getAddressBalanceV2 = async (address: string) => {
     const chainType = this.getChainType()
-    const data = await walletApiService.bitcoin.getAddressBalanceV2(address)
-    return { ...data, chainType }
+    const ring = await this.p2wshRingOwning(address)
+    const parts = ring
+      ? await Promise.all(
+          this.p2wshScanAddresses(ring).map(a => walletApiService.bitcoin.getAddressBalanceV2(a))
+        )
+      : [await walletApiService.bitcoin.getAddressBalanceV2(address)]
+    return { ...parts[0], ...sumBitcoinBalanceV2(parts), chainType }
   }
 
   getMultiAddressAssets = async (addresses: string) => {
@@ -1760,8 +1794,11 @@ export class WalletController extends BaseController {
           pubkey = account.pubkey || ''
           address = account.address || publicKeyToAddress(pubkey, addressType, networkType)
         }
-      } else if (type === KeyringType.WatchAddressKeyring) {
-        // getAccounts() returns addresses directly for WatchAddressKeyring
+      } else if (
+        type === KeyringType.WatchAddressKeyring ||
+        type === KeyringType.ClassicMultisigKeyring
+      ) {
+        // getAccounts() returns addresses (P2WSH for classic multisig), not pubkeys
         const addressFromKeyring = displayedKeyring.accounts[j]!.pubkey
         pubkey = ''
         address = addressFromKeyring
@@ -2454,9 +2491,25 @@ export class WalletController extends BaseController {
   }
 
   getAddressSummary = async (address: string) => {
-    const data = await walletApiService.bitcoin.getAddressSummary(address)
-    // preferenceService.updateAddressBalance(address, data);
-    return data
+    const ring = await this.p2wshRingOwning(address)
+    if (!ring) {
+      return walletApiService.bitcoin.getAddressSummary(address)
+    }
+    const parts = await Promise.all(
+      this.p2wshScanAddresses(ring).map(a => walletApiService.bitcoin.getAddressSummary(a))
+    )
+    return {
+      address,
+      totalSatoshis: parts.reduce((n, p) => n + (p.totalSatoshis || 0), 0),
+      btcSatoshis: parts.reduce((n, p) => n + (p.btcSatoshis || 0), 0),
+      assetSatoshis: parts.reduce((n, p) => n + (p.assetSatoshis || 0), 0),
+      inscriptionCount: parts.reduce((n, p) => n + (p.inscriptionCount || 0), 0),
+      atomicalsCount: parts.reduce((n, p) => n + (p.atomicalsCount || 0), 0),
+      brc20Count: parts.reduce((n, p) => n + (p.brc20Count || 0), 0),
+      brc20Count5Byte: parts.reduce((n, p) => n + (p.brc20Count5Byte || 0), 0),
+      arc20Count: parts.reduce((n, p) => n + (p.arc20Count || 0), 0),
+      runesCount: parts.reduce((n, p) => n + (p.runesCount || 0), 0),
+    }
   }
 
   setPsbtSignNonSegwitEnable(psbt: bitcoin.Psbt, enabled: boolean) {
@@ -3541,6 +3594,279 @@ export class WalletController extends BaseController {
     await this.changeKeyring(keyring)
 
     preferenceService.setShowSafeNotice(true)
+  }
+
+  private classicMultisigNetwork = (): 'mainnet' | 'testnet' | 'regtest' => {
+    const nt = this.getNetworkType()
+    if (nt === NetworkType.TESTNET) return 'testnet'
+    if (nt === NetworkType.REGTEST) return 'regtest'
+    return 'mainnet'
+  }
+
+  exportClassicMultisigXpub = async (mnemonic: string) => {
+    const ring = new ClassicMultisigKeyring({
+      mnemonic: mnemonic.trim(),
+      k: 2,
+      cosigners: [],
+      network: this.classicMultisigNetwork(),
+    })
+    const x = ring.exportLocalXpub()
+    return formatCosignerLine(x)
+  }
+
+  previewClassicMultisig = async (opts: {
+    mnemonic: string
+    descriptor?: string
+    cosignerText?: string
+    k?: number
+  }) => {
+    const { k, cosigners } = this.resolveClassicMultisigCosigners(opts)
+    const ring = new ClassicMultisigKeyring({
+      mnemonic: opts.mnemonic.trim(),
+      k,
+      cosigners,
+      network: this.classicMultisigNetwork(),
+    })
+    const pair = ring.descriptors()
+    return {
+      address0: ring.addressAt(0, 0),
+      change0: ring.addressAt(1, 0),
+      k,
+      n: cosigners.length,
+      receive: pair.receive,
+      change: pair.change,
+    }
+  }
+
+  createClassicMultisigKeyring = async (opts: {
+    mnemonic: string
+    descriptor?: string
+    cosignerText?: string
+    k?: number
+  }) => {
+    const preview = await this.previewClassicMultisig(opts)
+    const { k, cosigners } = this.resolveClassicMultisigCosigners(opts)
+    const originKeyring = await keyringService.addNewKeyring(
+      KeyringType.ClassicMultisigKeyring,
+      {
+        mnemonic: opts.mnemonic.trim(),
+        k,
+        cosigners,
+        network: this.classicMultisigNetwork(),
+        coordinatorAddress0: preview.address0,
+        verified: true,
+      },
+      AddressType.P2WSH
+    )
+    const displayedKeyring = await keyringService.displayForKeyring(
+      originKeyring,
+      AddressType.P2WSH,
+      keyringService.keyrings.length - 1
+    )
+    const keyring = this.displayedKeyringToWalletKeyring(
+      displayedKeyring,
+      keyringService.keyrings.length - 1
+    )
+    await this.changeKeyring(keyring)
+    preferenceService.setShowSafeNotice(true)
+  }
+
+  private resolveClassicMultisigCosigners(opts: {
+    descriptor?: string
+    cosignerText?: string
+    k?: number
+  }) {
+    const desc = opts.descriptor?.trim()
+    if (desc) {
+      const parsed = parseSortedMultiDescriptor(desc)
+      return { k: parsed.k, cosigners: parsed.cosigners }
+    }
+    const cosigners = parseCosignerLines(opts.cosignerText || '')
+    const k = opts.k ?? 2
+    return { k, cosigners }
+  }
+
+  private requireP2wshMultisigRing = async () => {
+    const keyring = await this.getCurrentKeyring()
+    if (!keyring || keyring.type !== KeyringType.ClassicMultisigKeyring) {
+      throw new Error('Current wallet is not P2WSH multisig')
+    }
+    const ring = keyringService.keyrings[keyring.index]
+    if (!(ring instanceof ClassicMultisigKeyring)) {
+      throw new Error('Current wallet is not P2WSH multisig')
+    }
+    if (!ring.verified) {
+      throw new Error('Address match gate not passed')
+    }
+    return ring
+  }
+
+  /** Receive + change for the same gap Send already scans. */
+  private p2wshScanAddresses(ring: ClassicMultisigKeyring): string[] {
+    const search = Math.max(ring.receiveCount, 1)
+    const out: string[] = []
+    for (const chain of [0, 1] as const) {
+      for (let i = 0; i < search; i++) out.push(ring.addressAt(chain, i))
+    }
+    return out
+  }
+
+  /** Current vault only, and only if `address` is one of its receive/change scripts. */
+  private async p2wshRingOwning(address: string): Promise<ClassicMultisigKeyring | null> {
+    const keyring = await this.getCurrentKeyring()
+    if (!keyring || keyring.type !== KeyringType.ClassicMultisigKeyring) return null
+    const ring = keyringService.keyrings[keyring.index]
+    if (!(ring instanceof ClassicMultisigKeyring)) return null
+    const search = Math.max(ring.receiveCount, CLASSIC_MULTISIG_GAP)
+    for (const chain of [0, 1] as const) {
+      for (let i = 0; i < search; i++) {
+        if (ring.addressAt(chain, i) === address) return ring
+      }
+    }
+    return null
+  }
+
+  private paymentForScriptPk(ring: ClassicMultisigKeyring, scriptPk: string) {
+    const want = scriptPk.replace(/^0x/i, '').toLowerCase()
+    const search = Math.max(ring.receiveCount, CLASSIC_MULTISIG_GAP)
+    for (const chain of [0, 1] as const) {
+      for (let i = 0; i < search; i++) {
+        const pay = ring.paymentAt(chain, i)
+        const hex = pay.output.toString('hex')
+        if (hex === want) return pay
+        if (want.length === 64 && hex === `0020${want}`) return pay
+      }
+    }
+    throw new Error('UTXO script is not this wallet’s P2WSH')
+  }
+
+  private p2wshChangeAddresses(ring: ClassicMultisigKeyring): Set<string> {
+    const change = new Set<string>()
+    const search = Math.max(ring.receiveCount, CLASSIC_MULTISIG_GAP)
+    for (let i = 0; i < search; i++) change.add(ring.addressAt(1, i))
+    return change
+  }
+
+  getP2wshMultisigInfo = async () => {
+    const ring = await this.requireP2wshMultisigRing()
+    const pair = ring.descriptors()
+    return {
+      k: ring.k,
+      n: ring.cosigners.length,
+      address0: ring.addressAt(0, 0),
+      change0: ring.addressAt(1, 0),
+      receive: pair.receive,
+      change: pair.change,
+      xpubLine: ring.mnemonic ? formatCosignerLine(ring.exportLocalXpub()) : '',
+    }
+  }
+
+  buildP2wshMultisigPsbt = async (opts: { to: string; amount: number; feeRate?: number }) => {
+    const ring = await this.requireP2wshMultisigRing()
+    const networkType = this.getNetworkType()
+    if (!isValidAddress(opts.to, networkType)) {
+      throw new Error('Invalid address')
+    }
+    const amount = Math.round(opts.amount)
+    let feeRate = opts.feeRate
+    if (!feeRate) {
+      const feeSummary = await this.getFeeSummary()
+      feeRate = feeSummary.list[1]?.feeRate
+    }
+    if (!feeRate) throw new Error('Missing fee rate')
+    const utxos = await this.collectP2wshBtcUtxos(ring)
+    if (utxos.some(u => u.inscriptions && u.inscriptions.length > 0)) {
+      throw new Error('Refusing to spend inscription UTXOs on this path')
+    }
+    const spendUtxos = utxos.map(u => {
+      const pay = this.paymentForScriptPk(ring, u.scriptPk)
+      return {
+        txid: u.txid,
+        vout: u.vout,
+        value: u.satoshis,
+        script: pay.output,
+        witnessScript: pay.witnessScript,
+      }
+    })
+    const { psbt, fee, change } = buildSortedMultiSpendPsbt({
+      network: toPsbtNetwork(networkType),
+      utxos: spendUtxos,
+      toAddress: opts.to.trim(),
+      send: amount,
+      changeAddress: ring.addressAt(1, 0),
+      feeRate,
+      k: ring.k,
+      n: ring.cosigners.length,
+    })
+    const summary = summarizeSortedMultiPsbt(
+      psbt,
+      this.p2wshChangeAddresses(ring),
+      toPsbtNetwork(networkType)
+    )
+    assertP2wshSpendShape(summary)
+    return { psbtBase64: psbt.toBase64(), fee, change, summary }
+  }
+
+  private collectP2wshBtcUtxos = async (ring: ClassicMultisigKeyring) => {
+    const seen = new Set<string>()
+    const out: {
+      txid: string
+      vout: number
+      satoshis: number
+      scriptPk: string
+      inscriptions: { inscriptionId: string; inscriptionNumber?: number; offset: number }[]
+    }[] = []
+    for (const address of this.p2wshScanAddresses(ring)) {
+      const utxos = await walletApiService.bitcoin.getBTCUtxos(address)
+      for (const v of utxos) {
+        const id = `${v.txid}:${v.vout}`
+        if (seen.has(id)) continue
+        seen.add(id)
+        out.push({
+          txid: v.txid,
+          vout: v.vout,
+          satoshis: v.satoshis,
+          scriptPk: v.scriptPk,
+          inscriptions: v.inscriptions || [],
+        })
+      }
+    }
+    return out
+  }
+
+  summarizeP2wshMultisigPsbt = async (psbtBase64: string) => {
+    const ring = await this.requireP2wshMultisigRing()
+    const network = toPsbtNetwork(this.getNetworkType())
+    const psbt = bitcoin.Psbt.fromBase64(psbtBase64.trim(), { network })
+    const summary = summarizeSortedMultiPsbt(psbt, this.p2wshChangeAddresses(ring), network)
+    assertP2wshSpendShape(summary)
+    return summary
+  }
+
+  signP2wshMultisigPsbt = async (psbtBase64: string) => {
+    const ring = await this.requireP2wshMultisigRing()
+    const network = toPsbtNetwork(this.getNetworkType())
+    const psbt = bitcoin.Psbt.fromBase64(psbtBase64.trim(), { network })
+    assertP2wshSpendShape(summarizeSortedMultiPsbt(psbt, this.p2wshChangeAddresses(ring), network))
+    const inputs = psbt.data.inputs.map((_, index) => ({ index, publicKey: '' }))
+    await ring.signTransaction(psbt, inputs)
+    return { psbtBase64: psbt.toBase64() }
+  }
+
+  combineP2wshMultisigPsbts = async (psbtBase64s: string[]) => {
+    const ring = await this.requireP2wshMultisigRing()
+    const network = toPsbtNetwork(this.getNetworkType())
+    const psbts = psbtBase64s.map(s => bitcoin.Psbt.fromBase64(s.trim(), { network }))
+    const first = psbts[0]
+    if (!first) throw new Error('No PSBTs to combine')
+    assertP2wshSpendShape(summarizeSortedMultiPsbt(first, this.p2wshChangeAddresses(ring), network))
+    const tx = combineAndFinalize(psbts)
+    return { hex: tx.toHex(), txid: tx.getId() }
+  }
+
+  broadcastP2wshMultisigTx = async (hex: string) => {
+    await this.requireP2wshMultisigRing()
+    return this.pushTx(hex.trim())
   }
 
   createDummyPsbt = async ({
