@@ -15,6 +15,8 @@ const BIP48_ORIGIN_RE = /^48h\/([01]h)\/(\d+)h\/2h$/
 /** Origin + chain required. Optional groups would accept checksummed-but-incomplete keys. */
 const KEY_ONE_RE =
   /^\[([0-9a-fA-F]{8})\/([0-9hH'\/]+)\]([xt]pub[A-Za-z0-9]{107})\/([01])\/\*$/
+/** Bulletin / export line: origin + account xpub, no /0/* suffix. */
+const LINE_RE = /^\[([0-9a-fA-F]{8})\/([0-9hH'\/]+)\]([xt]pub[A-Za-z0-9]{107})$/
 
 function networkOfXpub(xpub: string): ClassicMultisigNetwork {
   if (xpub.startsWith('xpub')) return 'mainnet'
@@ -117,10 +119,52 @@ export function encodeSortedMultiDescriptorPair(opts: {
   }
 }
 
+export function formatCosignerLine(c: CosignerXpub): string {
+  return `[${normalizeFingerprint(c.fingerprint)}/${c.originPath.replace(/'/g, 'h')}]${c.xpub}`
+}
+
+export function parseCosignerLine(line: string): CosignerXpub {
+  const trimmed = line.trim()
+  if (PRIV_RE.test(trimmed)) {
+    throw new ClassicMultisigError('Private keys are forbidden in the descriptor', 'PRIVATE_KEY')
+  }
+  const m = LINE_RE.exec(trimmed)
+  if (!m || !m[1] || !m[2] || !m[3]) {
+    throw new ClassicMultisigError('Expected [fingerprint/48h/…h/2h]xpub…', 'BAD_KEY')
+  }
+  assertXpub(m[3])
+  const originPath = m[2].replace(/'/g, 'h').replace(/H/g, 'h')
+  assertBip48Origin(originPath, networkOfXpub(m[3]))
+  return {
+    fingerprint: normalizeFingerprint(m[1]),
+    originPath,
+    xpub: m[3]
+  }
+}
+
+export function parseCosignerLines(text: string): CosignerXpub[] {
+  const lines = text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+  if (lines.length < 2) {
+    throw new ClassicMultisigError('Need at least 2 cosigners', 'BAD_N')
+  }
+  const cosigners = lines.map(parseCosignerLine)
+  assertUniqueXpubs(cosigners)
+  return cosigners
+}
+
 export function parseSortedMultiDescriptor(raw: string): ParsedSortedMulti {
   const trimmed = raw.trim()
   if (PRIV_RE.test(trimmed)) {
     throw new ClassicMultisigError('Private keys are forbidden in the descriptor', 'PRIVATE_KEY')
+  }
+  if (LINE_RE.test(trimmed)) {
+    throw new ClassicMultisigError(
+      'That is a BIP48 xpub line, not a receive descriptor. Put every signer’s line on the bulletin (or in cosigner lines), then import wsh(sortedmulti(…))#checksum',
+      'NOT_DESCRIPTOR'
+    )
   }
   if (trimmed.length < 10 || trimmed[trimmed.length - 9] !== '#') {
     throw new ClassicMultisigError('Descriptor missing #checksum', 'MISSING_CHECKSUM')

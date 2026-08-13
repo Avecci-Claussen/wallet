@@ -7,8 +7,18 @@ export {
   encodeSortedMultiDescriptor,
   encodeSortedMultiDescriptorPair,
   parseSortedMultiDescriptor,
+  parseCosignerLine,
+  parseCosignerLines,
+  formatCosignerLine,
   addressesMustMatch
 } from './descriptor'
+export {
+  buildSortedMultiSpendPsbt,
+  estimateP2wshMofNVbytes,
+  summarizeSortedMultiPsbt,
+  assertP2wshSpendShape
+} from './spend'
+export type { SortedMultiSpendUtxo, SortedMultiPsbtSummary } from './spend'
 export { assertSafeSighash, assertP2wshUtxoMatchesWitnessScript, combineAndFinalize } from './psbt'
 export {
   ClassicMultisigError,
