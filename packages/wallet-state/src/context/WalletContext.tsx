@@ -667,6 +667,7 @@ export interface WalletController {
     descriptor?: string
     cosignerText?: string
     k?: number
+    coordinatorAddress0: string
   }): Promise<void>
 
   getP2wshMultisigInfo(): Promise<{

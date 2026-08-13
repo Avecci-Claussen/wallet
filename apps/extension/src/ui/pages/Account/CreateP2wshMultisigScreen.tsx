@@ -15,6 +15,8 @@ export default function CreateP2wshMultisigScreen() {
   const [cosignerText, setCosignerText] = useState('');
   const [k, setK] = useState(2);
   const [preview, setPreview] = useState('');
+  const [previewAddress0, setPreviewAddress0] = useState('');
+  const [coordinatorAddress0, setCoordinatorAddress0] = useState('');
 
   const onExport = async () => {
     try {
@@ -35,6 +37,7 @@ export default function CreateP2wshMultisigScreen() {
         cosignerText: descriptor.trim() ? undefined : cosignerText,
         k
       });
+      setPreviewAddress0(p.address0);
       setPreview(
         [`${p.k}-of-${p.n}`, `receive 0: ${p.address0}`, `change 0: ${p.change0}`, '', p.receive].join('\n')
       );
@@ -49,7 +52,8 @@ export default function CreateP2wshMultisigScreen() {
         mnemonic,
         descriptor: descriptor.trim() || undefined,
         cosignerText: descriptor.trim() ? undefined : cosignerText,
-        k
+        k,
+        coordinatorAddress0
       });
       nav.navigate('MainScreen');
     } catch (e) {
@@ -71,7 +75,7 @@ export default function CreateP2wshMultisigScreen() {
             size="sm"
             color="textDim"
             wrap
-            text="Native SegWit k-of-n (wsh(sortedmulti)), not MuSig2. Switch chain first — Fractal uses the same bc1q/xpub encoding as Bitcoin mainnet. Export your BIP48 xpub to the org bulletin, then import the receive descriptor. Address 0 must match every signer before anyone funds. Connected sites cannot signPsbt this type."
+            text="Native SegWit k-of-n (wsh(sortedmulti)), not MuSig2. Switch chain first — Fractal uses the same bc1q/xpub encoding as Bitcoin mainnet. Export your BIP48 xpub to the org bulletin, then import the receive descriptor. Every signer previews address 0, then pastes that published address here. Import refuses a mismatch. Connected sites cannot signPsbt this type."
           />
 
           <Text text="This signer’s seed (BIP-39)" preset="regular-bold" />
@@ -102,8 +106,23 @@ export default function CreateP2wshMultisigScreen() {
           <Button text="Preview address 0" onClick={onPreview} />
           {preview ? <Text size="xs" wrap text={preview} /> : null}
 
+          <Text text="Published receive address 0" preset="regular-bold" />
+          <Text
+            size="xs"
+            color="textDim"
+            wrap
+            text="Paste the address every signer showed at Preview. Do not type this wallet’s address from memory — copy the shared published string. Import fails if it does not match."
+          />
+          <Input
+            placeholder="tb1q… / bc1q… from the other signers’ Preview"
+            onChange={(e) => setCoordinatorAddress0(e.target.value)}
+          />
+          {previewAddress0 && coordinatorAddress0.trim() && coordinatorAddress0.trim() !== previewAddress0 ? (
+            <Text size="xs" color="red" wrap text="Does not match this wallet’s Preview address 0." />
+          ) : null}
+
           <FooterButtonContainer>
-            <Button text="Import after address 0 matches" preset="primary" onClick={onCreate} />
+            <Button text="Import after published address 0 matches" preset="primary" onClick={onCreate} />
           </FooterButtonContainer>
         </Column>
       </Content>

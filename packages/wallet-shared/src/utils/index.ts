@@ -6,3 +6,4 @@ export {
   getAccountCapabilities,
   type AccountCapabilities,
 } from './accountCapabilities'
+export { p2wshAmountToSats, type P2wshAmountUnit } from './p2wshAmount'

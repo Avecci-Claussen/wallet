@@ -3643,8 +3643,18 @@ export class WalletController extends BaseController {
     descriptor?: string
     cosignerText?: string
     k?: number
+    coordinatorAddress0: string
   }) => {
+    const published = (opts.coordinatorAddress0 || '').trim()
+    if (!published) {
+      throw new Error(
+        'Paste the published receive address 0 from the other signers. It must match this wallet’s Preview.'
+      )
+    }
     const preview = await this.previewClassicMultisig(opts)
+    if (published !== preview.address0) {
+      throw new Error('Published address 0 does not match this wallet. Do not import or fund.')
+    }
     const { k, cosigners } = this.resolveClassicMultisigCosigners(opts)
     const originKeyring = await keyringService.addNewKeyring(
       KeyringType.ClassicMultisigKeyring,
@@ -3653,7 +3663,7 @@ export class WalletController extends BaseController {
         k,
         cosigners,
         network: this.classicMultisigNetwork(),
-        coordinatorAddress0: preview.address0,
+        coordinatorAddress0: published,
         verified: true,
       },
       AddressType.P2WSH
@@ -3768,6 +3778,9 @@ export class WalletController extends BaseController {
       throw new Error('Invalid address')
     }
     const amount = Math.round(opts.amount)
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error('Amount must be greater than zero sats')
+    }
     let feeRate = opts.feeRate
     if (!feeRate) {
       const feeSummary = await this.getFeeSummary()

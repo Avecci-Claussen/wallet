@@ -1,6 +1,7 @@
-import { useEffect, useState, type CSSProperties } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 
-import { Button, Column, Content, Header, Input, Layout, Text } from '@/ui/components';
+import { Button, Column, Content, Header, Input, Layout, Row, Text } from '@/ui/components';
+import { p2wshAmountToSats, type P2wshAmountUnit } from '@unisat/wallet-shared';
 import { useTools, useWallet } from '@unisat/wallet-state';
 
 export default function P2wshMultisigSpendScreen() {
@@ -9,11 +10,22 @@ export default function P2wshMultisigSpendScreen() {
   const [info, setInfo] = useState('');
   const [to, setTo] = useState('');
   const [amount, setAmount] = useState('');
+  const [unit, setUnit] = useState<P2wshAmountUnit>('btc');
   const [unsigned, setUnsigned] = useState('');
   const [signed, setSigned] = useState('');
   const [partials, setPartials] = useState('');
   const [hex, setHex] = useState('');
   const [summary, setSummary] = useState('');
+
+  const amountHint = useMemo(() => {
+    try {
+      const sats = p2wshAmountToSats(amount, unit);
+      const btc = (sats / 1e8).toFixed(8);
+      return `Will send ${sats} sats (${btc} BTC)`;
+    } catch {
+      return unit === 'btc' ? 'Enter BTC (not sats)' : 'Enter whole sats (not BTC)';
+    }
+  }, [amount, unit]);
 
   useEffect(() => {
     wallet
@@ -37,7 +49,7 @@ export default function P2wshMultisigSpendScreen() {
 
   const onBuild = async () => {
     try {
-      const sats = Math.round(Number(amount) * 1e8);
+      const sats = p2wshAmountToSats(amount, unit);
       const built = await wallet.buildP2wshMultisigPsbt({ to: to.trim(), amount: sats });
       setUnsigned(built.psbtBase64);
       await navigator.clipboard.writeText(built.psbtBase64);
@@ -103,7 +115,23 @@ export default function P2wshMultisigSpendScreen() {
 
           <Text text="1. Build unsigned PSBT (any one signer)" preset="regular-bold" />
           <Input placeholder="destination address" onChange={(e) => setTo(e.target.value)} />
-          <Input placeholder="amount (BTC)" onChange={(e) => setAmount(e.target.value)} />
+          <Row>
+            <Button
+              text="BTC"
+              preset={unit === 'btc' ? 'primary' : 'default'}
+              onClick={() => setUnit('btc')}
+            />
+            <Button
+              text="sats"
+              preset={unit === 'sats' ? 'primary' : 'default'}
+              onClick={() => setUnit('sats')}
+            />
+          </Row>
+          <Input
+            placeholder={unit === 'btc' ? 'amount in BTC (e.g. 0.0001)' : 'amount in sats (e.g. 10000)'}
+            onChange={(e) => setAmount(e.target.value)}
+          />
+          <Text size="xs" color="textDim" wrap text={amountHint} />
           <Button text="Build + copy unsigned PSBT" onClick={onBuild} />
 
           <Text text="2. Sign locally (this seed)" preset="regular-bold" />
