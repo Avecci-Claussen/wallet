@@ -50,6 +50,7 @@ export type RouteParamList = {
   CreateSimpleWalletScreen: undefined
   CreateWatchWalletScreen: undefined
   CreateP2wshMultisigScreen: undefined
+  P2wshMultisigSpendScreen: undefined
   CreateReadonlyWalletScreen: undefined
   CreateColdWalletScreen: {
     fromUnlock?: boolean

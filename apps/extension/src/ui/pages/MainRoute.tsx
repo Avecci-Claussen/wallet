@@ -76,6 +76,7 @@ import HistoryScreen from './Wallet/HistoryScreen';
 import ReceiveScreen from './Wallet/ReceiveScreen';
 import TxConfirmScreen from './Wallet/TxConfirmScreen';
 import TxCreateScreen from './Wallet/TxCreateScreen';
+import P2wshMultisigSpendScreen from './Wallet/P2wshMultisigSpendScreen';
 import TxFailScreen from './Wallet/TxFailScreen';
 import TxSuccessScreen from './Wallet/TxSuccessScreen';
 import './index.module.less';
@@ -139,6 +140,10 @@ export const routes = {
   TxCreateScreen: {
     path: '/wallet/tx/create',
     element: <TxCreateScreen />
+  },
+  P2wshMultisigSpendScreen: {
+    path: '/wallet/p2wsh-multisig/spend',
+    element: <P2wshMultisigSpendScreen />
   },
   TxConfirmScreen: {
     path: '/wallet/tx/confirm',
