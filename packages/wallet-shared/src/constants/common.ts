@@ -90,7 +90,7 @@ export const KEYRING_TYPE_TEXT = {
   [KeyringType.KeystoneKeyring]: 'Import from Keystone',
   [KeyringType.ColdWalletKeyring]: 'Cold Wallet',
   [KeyringType.WatchAddressKeyring]: 'Watch Address',
-  [KeyringType.ClassicMultisigKeyring]: 'Classic Multisig',
+  [KeyringType.ClassicMultisigKeyring]: 'P2WSH Multisig',
 }
 export const BRAND_ALIAN_TYPE_TEXT = {
   [KeyringType.HdKeyring]: 'Account',
@@ -142,7 +142,7 @@ export const KEYRING_TYPES: {
     alianName: 'Watch Wallet',
   },
   'Classic Multisig': {
-    name: 'Classic Multisig',
+    name: 'P2WSH Multisig',
     tag: 'MULTISIG',
     alianName: 'Multisig',
   },

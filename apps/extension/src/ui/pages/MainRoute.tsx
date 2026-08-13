@@ -25,6 +25,7 @@ import CreatePasswordScreen from './Account/CreatePasswordScreen';
 import CreateReadonlyWalletScreen from './Account/CreateReadonlyWalletScreen';
 import CreateSimpleWalletScreen from './Account/CreateSimpleWalletScreen';
 import CreateWatchWalletScreen from './Account/CreateWatchWalletScreen';
+import CreateP2wshMultisigScreen from './Account/CreateP2wshMultisigScreen';
 import SwitchAccountScreen from './Account/SwitchAccountScreen';
 import SwitchKeyringScreen from './Account/SwitchKeyringScreen';
 import UnlockScreen from './Account/UnlockScreen';
@@ -233,6 +234,10 @@ export const routes = {
   CreateReadonlyWalletScreen: {
     path: '/account/create-readonly-wallet',
     element: <CreateReadonlyWalletScreen />
+  },
+  CreateP2wshMultisigScreen: {
+    path: '/account/create-p2wsh-multisig',
+    element: <CreateP2wshMultisigScreen />
   },
 
   UpgradeNoticeScreen: {
