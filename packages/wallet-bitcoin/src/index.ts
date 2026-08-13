@@ -15,3 +15,6 @@ export * from './message'
 
 // constants
 export { UTXO_DUST } from './constants'
+
+// Classic k-of-n P2WSH (OP_CHECKMULTISIG).
+export * from './multisig'
