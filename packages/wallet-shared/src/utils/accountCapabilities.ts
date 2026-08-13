@@ -21,6 +21,7 @@ export function getAccountCapabilities(
   const type = account?.type
   const hasAccountType = Boolean(type)
   const isWatchOnly = type === KeyringType.WatchAddressKeyring
+  const isClassicMultisig = type === KeyringType.ClassicMultisigKeyring
   const isReadonly = type === KeyringType.ReadonlyKeyring
   let signMethod = AccountSignMethod.None
 
@@ -30,14 +31,17 @@ export function getAccountCapabilities(
     signMethod = AccountSignMethod.ColdWallet
   } else if (isReadonly) {
     signMethod = AccountSignMethod.External
-  } else if (hasAccountType && !isWatchOnly) {
+  } else if (hasAccountType && !isWatchOnly && !isClassicMultisig) {
     signMethod = AccountSignMethod.Local
   }
 
   return {
-    canCreateSigningRequest: hasAccountType && !isWatchOnly,
+    canCreateSigningRequest: hasAccountType && !isWatchOnly && !isClassicMultisig,
     signMethod,
     canChangeAddressType:
-      hasAccountType && !isWatchOnly && signMethod !== AccountSignMethod.ColdWallet,
+      hasAccountType &&
+      !isWatchOnly &&
+      !isClassicMultisig &&
+      signMethod !== AccountSignMethod.ColdWallet,
   }
 }

@@ -6,6 +6,7 @@ export enum KeyringType {
   ColdWalletKeyring = 'Cold Wallet',
   ReadonlyKeyring = 'Readonly',
   WatchAddressKeyring = 'Watch Address',
+  ClassicMultisigKeyring = 'Classic Multisig',
   Empty = 'Empty',
 }
 
@@ -89,6 +90,7 @@ export const KEYRING_TYPE_TEXT = {
   [KeyringType.KeystoneKeyring]: 'Import from Keystone',
   [KeyringType.ColdWalletKeyring]: 'Cold Wallet',
   [KeyringType.WatchAddressKeyring]: 'Watch Address',
+  [KeyringType.ClassicMultisigKeyring]: 'Classic Multisig',
 }
 export const BRAND_ALIAN_TYPE_TEXT = {
   [KeyringType.HdKeyring]: 'Account',
@@ -97,6 +99,7 @@ export const BRAND_ALIAN_TYPE_TEXT = {
   [KeyringType.ColdWalletKeyring]: 'Account',
   [KeyringType.ReadonlyKeyring]: 'Readonly',
   [KeyringType.WatchAddressKeyring]: 'Watch',
+  [KeyringType.ClassicMultisigKeyring]: 'Multisig',
 }
 
 export const MAX_ALIAS_NAME_LENGTH = 20
@@ -137,6 +140,11 @@ export const KEYRING_TYPES: {
     name: 'Watch Address',
     tag: 'WATCH',
     alianName: 'Watch Wallet',
+  },
+  'Classic Multisig': {
+    name: 'Classic Multisig',
+    tag: 'MULTISIG',
+    alianName: 'Multisig',
   },
 }
 
